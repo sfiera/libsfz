@@ -31,6 +31,7 @@
                 'src/sfz/NetworkBytes.cpp',
                 'src/sfz/PosixFormatter.cpp',
                 'src/sfz/ReferenceCounted.cpp',
+                'src/sfz/ScopedFd.cpp',
                 'src/sfz/String.cpp',
                 'src/sfz/StringUtilities.cpp',
             ],

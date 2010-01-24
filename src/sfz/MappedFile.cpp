@@ -12,31 +12,9 @@
 #include <sys/stat.h>
 #include "sfz/Exception.hpp"
 #include "sfz/PosixFormatter.hpp"
+#include "sfz/ScopedFd.hpp"
 
 namespace sfz {
-
-namespace {
-
-class ScopedFd {
-  public:
-    ScopedFd(int fd)
-            : _fd(fd) { }
-
-    ~ScopedFd() {
-        close(_fd);
-    }
-
-    int release() {
-        int fd = _fd;
-        _fd = -1;
-        return fd;
-    }
-
-  private:
-    int _fd;
-};
-
-}  // namespace
 
 MappedFile::MappedFile(const StringPiece& path)
         : _path(path),
