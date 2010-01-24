@@ -138,6 +138,7 @@ void Bytes::reserve(size_t capacity) {
         scoped_array<uint8_t> new_data(new uint8_t[new_capacity]);
         memcpy(new_data.get(), _data.get(), _size);
         _data.swap(&new_data);
+        _capacity = new_capacity;
     }
 }
 
@@ -152,6 +153,8 @@ void Bytes::resize(size_t size, uint8_t byte) {
 
 void Bytes::swap(Bytes* bytes) {
     _data.swap(&bytes->_data);
+    std::swap(_size, bytes->_size);
+    std::swap(_capacity, bytes->_capacity);
 }
 
 BytesPiece::BytesPiece()
