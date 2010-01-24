@@ -100,6 +100,8 @@ class FormatItem {
 
 void format(String* out, const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
 
+void print(int fd, const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
+
 class FormatResult {
   public:
     FormatResult(const char* fmt, size_t item_count, const FormatItem** items);
@@ -152,7 +154,7 @@ template <typename T>
 class TemplatedFormatItemPrinter<T*> : public UnsignedIntegerPrinter {
   public:
     TemplatedFormatItemPrinter(const T* pointer)
-        : UnsignedIntegerPrinter(pointer, 16, sizeof(void*) / 4) { }
+        : UnsignedIntegerPrinter(reinterpret_cast<uintptr_t>(pointer), 16, sizeof(void*) / 4) { }
 
     DISALLOW_COPY_AND_ASSIGN(TemplatedFormatItemPrinter);
 };

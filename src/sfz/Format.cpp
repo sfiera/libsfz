@@ -185,6 +185,14 @@ void format(String* out, const char* fmt, SFZ_FORMAT_ITEMS_DEFINITION) {
     result.print_to(out);
 }
 
+void print(int fd, const char* fmt, SFZ_FORMAT_ITEMS_DEFINITION) {
+    const FormatItem* items[SFZ_FORMAT_ITEM_COUNT] = SFZ_FORMAT_ITEMS_ARRAY;
+    String decoded;
+    FormatResult(fmt, SFZ_FORMAT_ITEM_COUNT, items).print_to(&decoded);
+    Bytes encoded(decoded, utf8_encoding());
+    write(fd, encoded.data(), encoded.size());
+}
+
 FormatResult::FormatResult(const char* fmt, size_t item_count, const FormatItem** items)
     : _fmt(fmt),
       _item_count(item_count),
