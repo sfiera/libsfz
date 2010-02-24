@@ -223,6 +223,18 @@ size_t String::find(uint32_t code, size_t index) const {
     return kNone;
 }
 
+size_t String::find(const StringPiece& string, size_t index) const {
+    if (index + string.size() > size()) {
+        return kNone;
+    }
+    foreach (i, range(index, size() - string.size() + 1)) {
+        if (StringPiece(*this).substr(i, string.size()) == string) {
+            return i;
+        }
+    }
+    return kNone;
+}
+
 size_t String::rfind(uint32_t code, size_t index) const {
     if (index == kNone) {
         index = size() - 1;
@@ -296,6 +308,27 @@ uint32_t StringPiece::at(size_t loc) const {
 
 bool StringPiece::empty() const {
     return _encoding->empty(_bytes);
+}
+
+size_t StringPiece::find(uint32_t code, size_t index) const {
+    foreach (i, range(index, size())) {
+        if (at(i) == code) {
+            return i;
+        }
+    }
+    return kNone;
+}
+
+size_t StringPiece::rfind(uint32_t code, size_t index) const {
+    if (index == kNone) {
+        index = size() - 1;
+    }
+    foreach (i, range(index + 1)) {
+        if (at(index - i) == code) {
+            return index - i;
+        }
+    }
+    return kNone;
 }
 
 StringPiece StringPiece::substr(size_t loc) const {

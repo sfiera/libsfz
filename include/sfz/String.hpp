@@ -114,7 +114,9 @@ class String {
     void swap(String* string);
 
     size_t find(uint32_t code, size_t index = 0) const;
-    size_t rfind(uint32_t code, size_t index = -1) const;
+    size_t find(const StringPiece& string, size_t index = 0) const;
+    size_t rfind(uint32_t code, size_t index = kNone) const;
+
     void replace(size_t index, size_t num, const StringPiece& string);
 
     // @returns             STL-like iterators to the beginning and end of the String.
@@ -169,6 +171,8 @@ bool operator<(const StringKey& lhs, const StringKey& rhs);
 // time, whereas access to UTF-8 code points is linear.
 class StringPiece {
   public:
+    static const size_t kNone = -1;
+
     class const_iterator;
 
     // Initializes the StringPiece to the empty string.
@@ -210,6 +214,9 @@ class StringPiece {
 
     // @returns             true iff size() == 0.
     bool empty() const;
+
+    size_t find(uint32_t code, size_t index = 0) const;
+    size_t rfind(uint32_t code, size_t index = kNone) const;
 
     // @param [in] loc      An index into the code point sequence.  Must be at most size().
     // @param [in] size     The desired number of code points in the returned substring.  If
