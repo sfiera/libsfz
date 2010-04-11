@@ -96,6 +96,11 @@ class String {
     // @returns             true iff size() == 0.
     bool empty() const;
 
+    // Ensures that there is enough space for `capacity` code points.
+    //
+    // @param [in] capacity The number of code points to reserve space for.
+    void reserve(size_t capacity);
+
     // Resizes the string to the specified size.
     //
     // If `size` is less than the current size of the String, the String will be truncated.  If it
@@ -126,13 +131,12 @@ class String {
 
   private:
     friend class StringPiece;
-    class InternalEncoding;
 
-    // @returns             The InternalEncoding encoding used to encode `_bytes`.
-    static const InternalEncoding& internal_encoding();
+    void initialize(size_t capacity);
 
-    // The byte content of this String.  Is encoded according to internal_encoding().
-    Bytes _bytes;
+    scoped_array<uint32_t> _data;
+    size_t _size;
+    size_t _capacity;
 
     // Disallow assignment.
     String& operator=(const String&);
@@ -182,18 +186,6 @@ class StringPiece {
     //
     // @param [in] string   The string to reference.
     StringPiece(const String& string);
-
-    // Initializes the StringPiece with the content of an encoded NUL-terminated byte sequence.
-    //
-    // @param [in] data     A NUL-terminated byte sequence with encoded code points.
-    // @param [in] encoding The encoding to use to decode `data`.
-    StringPiece(const char* data, const Encoding& encoding);
-
-    // Initializes the StringPiece with the content of an encoded byte sequence.
-    //
-    // @param [in] bytes    A byte sequence with encoded code points.
-    // @param [in] encoding The encoding to use to decode `bytes`.
-    StringPiece(const BytesPiece& bytes, const Encoding& encoding);
 
     // Accessors.
     //
@@ -245,20 +237,20 @@ class StringPiece {
 
       private:
         friend class StringPiece;
-        const_iterator(const StringPiece* parent, BytesPiece::const_iterator it);
+        explicit const_iterator(const uint32_t* it);
 
-        const StringPiece* _parent;
-        BytesPiece::const_iterator _it;
+        const uint32_t* _it;
 
         // ALLOW_COPY_AND_ASSIGN
     };
 
   private:
-    // A reference to a byte sequence with encoded code points.
-    BytesPiece _bytes;
+    friend class String;
 
-    // The encoding to use to decode `_bytes`.
-    const Encoding* _encoding;
+    StringPiece(const uint32_t* data, size_t size);
+
+    const uint32_t* _data;
+    size_t _size;
 
     // ALLOW_COPY_AND_ASSIGN
 };

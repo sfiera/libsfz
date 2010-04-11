@@ -56,105 +56,6 @@ bool is_valid_code_point(uint32_t code) {
 
 Encoding::~Encoding() { }
 
-bool Encoding::can_decode(const BytesPiece& bytes) const {
-    uint32_t code;
-    for (BytesPiece::const_iterator i = begin(bytes); i != end(bytes); next(bytes, &i)) {
-        if (!dereference(bytes, i, &code)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void Encoding::decode(const BytesPiece& in, String* out) const {
-    for (BytesPiece::const_iterator i = begin(in); i != end(in); next(in, &i)) {
-        uint32_t code;
-        if (dereference(in, i, &code)) {
-            out->append(1, code);
-        } else {
-            out->append(1, kUnknownCodePoint);
-        }
-    }
-}
-
-bool Encoding::at(const BytesPiece& bytes, size_t loc, uint32_t* code) const {
-    for (BytesPiece::const_iterator i = begin(bytes); i != end(bytes); next(bytes, &i)) {
-        if (loc == 0) {
-            return dereference(bytes, i, code);
-        }
-        --loc;
-    }
-    return false;
-}
-
-bool Encoding::empty(const BytesPiece& bytes) const {
-    return begin(bytes) == end(bytes);
-}
-
-size_t Encoding::size(const BytesPiece& bytes) const {
-    size_t size = 0;
-    for (BytesPiece::const_iterator i = begin(bytes); i != end(bytes); next(bytes, &i)) {
-        ++size;
-    }
-    return size;
-}
-
-StringPiece Encoding::substr(const BytesPiece& bytes, size_t loc) const {
-    for (BytesPiece::const_iterator i = begin(bytes); i != end(bytes); next(bytes, &i)) {
-        if (loc == 0) {
-            return StringPiece(BytesPiece(i, bytes.end()), *this);
-        } else {
-            --loc;
-        }
-    }
-    throw Exception(
-            "Encoding::substr(x, {0}) called, but Encoding::size(x) == {1}",
-            loc, this->size(bytes));
-}
-
-StringPiece Encoding::substr(const BytesPiece& bytes, size_t loc, size_t size) const {
-    BytesPiece::const_iterator start = begin(bytes);
-    for ( ; start != end(bytes); next(bytes, &start)) {
-        if (loc == 0) {
-            break;
-        } else {
-            --loc;
-        }
-    }
-    for (BytesPiece::const_iterator i = start; i != end(bytes); next(bytes, &i)) {
-        if (size == 0) {
-            return StringPiece(BytesPiece(start, i), *this);
-        } else {
-            --size;
-        }
-    }
-    throw Exception(
-            "Encoding::substr(x, {0}, {1}) called, but Encoding::size(x) == {2}",
-            loc, size, this->size(bytes));
-}
-
-bool Encoding::can_encode(const StringPiece& string) const {
-    foreach (it, string) {
-        if (!can_encode(*it)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void Encoding::encode(const StringPiece& in, Bytes* out) const {
-    foreach (it, in) {
-        uint32_t code = *it;
-        if (can_encode(code)) {
-            encode(code, out);
-        } else if (can_encode(kUnknownCodePoint)) {
-            encode(kUnknownCodePoint, out);
-        } else {
-            encode(kAsciiUnknownCodePoint, out);
-        }
-    }
-}
-
 namespace {
 
 class AsciiEncoding : public Encoding {
@@ -162,7 +63,8 @@ class AsciiEncoding : public Encoding {
     AsciiEncoding() { }
 
     virtual StringPiece name() const {
-        return StringPiece("ASCII", ascii_encoding());
+        static const String name("ASCII", ascii_encoding());
+        return name;
     }
 
     virtual bool can_decode(const BytesPiece& bytes) const {
@@ -185,61 +87,22 @@ class AsciiEncoding : public Encoding {
         }
     }
 
-    virtual bool at(const BytesPiece& bytes, size_t loc, uint32_t* code) const {
-        *code = static_cast<uint8_t>(bytes.at(loc));
-        return (*code & 0x80) == 0;
-    }
-
-    virtual bool empty(const BytesPiece& bytes) const {
-        return bytes.empty();
-    }
-
-    virtual size_t size(const BytesPiece& bytes) const {
-        return bytes.size();
-    }
-
-    virtual StringPiece substr(const BytesPiece& bytes, size_t loc) const {
-        return StringPiece(bytes.substr(loc), *this);
-    }
-
-    virtual StringPiece substr(const BytesPiece& bytes, size_t loc, size_t size) const {
-        return StringPiece(bytes.substr(loc, size), *this);
-    }
-
-    virtual BytesPiece::const_iterator begin(const BytesPiece& bytes) const {
-        return bytes.begin();
-    }
-
-    virtual BytesPiece::const_iterator end(const BytesPiece& bytes) const {
-        return bytes.end();
-    }
-
-    virtual void next(const BytesPiece& bytes, BytesPiece::const_iterator* it) const {
-        static_cast<void>(bytes);
-        ++(*it);
-    }
-
-    virtual bool dereference(
-            const BytesPiece& bytes, BytesPiece::const_iterator it, uint32_t* code) const {
-        *code = static_cast<uint8_t>(*it);
-        return (*code & 0x80) == 0;
-    }
-
-    virtual bool can_encode(uint32_t code) const {
-        return code < 0x80;
+    virtual bool can_encode(const StringPiece& string) const {
+        foreach (it, string) {
+            if (*it > 0x7f) {
+                return false;
+            }
+        }
+        return true;
     }
 
     virtual void encode(const StringPiece& in, Bytes* out) const {
         foreach (it, in) {
-            encode(*it, out);
-        }
-    }
-
-    virtual void encode(uint32_t code, Bytes* out) const {
-        if (can_encode(code)) {
-            out->append(1, code);
-        } else {
-            out->append(1, kAsciiUnknownCodePoint);
+            if (*it > 0x7f) {
+                out->append(1, kAsciiUnknownCodePoint);
+            } else {
+                out->append(1, *it);
+            }
         }
     }
 
@@ -261,7 +124,8 @@ class Latin1Encoding : public Encoding {
     Latin1Encoding() { }
 
     virtual StringPiece name() const {
-        return StringPiece("ISO-8859-1", ascii_encoding());
+        static const String name("ISO-8859-1", ascii_encoding());
+        return name;
     }
 
     virtual bool can_decode(const BytesPiece& bytes) const {
@@ -274,61 +138,22 @@ class Latin1Encoding : public Encoding {
         }
     }
 
-    virtual bool at(const BytesPiece& bytes, size_t loc, uint32_t* code) const {
-        *code = static_cast<uint8_t>(bytes.at(loc));
+    virtual bool can_encode(const StringPiece& string) const {
+        foreach (it, string) {
+            if (*it > 0xff) {
+                return false;
+            }
+        }
         return true;
-    }
-
-    virtual bool empty(const BytesPiece& bytes) const {
-        return bytes.empty();
-    }
-
-    virtual size_t size(const BytesPiece& bytes) const {
-        return bytes.size();
-    }
-
-    virtual StringPiece substr(const BytesPiece& bytes, size_t loc) const {
-        return StringPiece(bytes.substr(loc), *this);
-    }
-
-    virtual StringPiece substr(const BytesPiece& bytes, size_t loc, size_t size) const {
-        return StringPiece(bytes.substr(loc, size), *this);
-    }
-
-    virtual BytesPiece::const_iterator begin(const BytesPiece& bytes) const {
-        static_cast<void>(bytes);
-        return bytes.begin();
-    }
-
-    virtual BytesPiece::const_iterator end(const BytesPiece& bytes) const {
-        return bytes.end();
-    }
-
-    virtual void next(const BytesPiece& bytes, BytesPiece::const_iterator* it) const {
-        ++(*it);
-    }
-
-    virtual bool dereference(
-            const BytesPiece& bytes, BytesPiece::const_iterator it, uint32_t* code) const {
-        *code = static_cast<uint8_t>(*it);
-        return true;
-    }
-
-    virtual bool can_encode(uint32_t code) const {
-        return code < 0x100;
     }
 
     virtual void encode(const StringPiece& in, Bytes* out) const {
         foreach (it, in) {
-            encode(*it, out);
-        }
-    }
-
-    virtual void encode(uint32_t code, Bytes* out) const {
-        if (can_encode(code)) {
-            out->append(1, code);
-        } else {
-            out->append(1, kAsciiUnknownCodePoint);
+            if (*it > 0xff) {
+                out->append(1, kAsciiUnknownCodePoint);
+            } else {
+                out->append(1, *it);
+            }
         }
     }
 
@@ -350,22 +175,66 @@ class Utf8Encoding : public Encoding {
     Utf8Encoding() { }
 
     virtual StringPiece name() const {
-        return StringPiece("UTF-8", ascii_encoding());
+        static const String name("UTF-8", ascii_encoding());
+        return name;
     }
 
-    virtual bool empty(const BytesPiece& bytes) const {
-        return bytes.empty();
+    virtual bool can_decode(const BytesPiece& bytes) const {
+        uint32_t code;
+        for (BytesPiece::const_iterator i = begin(bytes); i != end(bytes); next(bytes, &i)) {
+            if (!dereference(bytes, i, &code)) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    virtual BytesPiece::const_iterator begin(const BytesPiece& bytes) const {
+    virtual void decode(const BytesPiece& in, String* out) const {
+        for (BytesPiece::const_iterator i = begin(in); i != end(in); next(in, &i)) {
+            uint32_t code;
+            if (dereference(in, i, &code)) {
+                out->append(1, code);
+            } else {
+                out->append(1, kUnknownCodePoint);
+            }
+        }
+    }
+
+    virtual void encode(const StringPiece& in, Bytes* out) const {
+        foreach (it, in) {
+            const uint32_t code = *it;
+            if (code <= 0x7f) {
+                out->append(1, code);
+            } else if (code <= 0x7ff) {
+                out->append(1, 0xc0 | (code >> 6));
+                out->append(1, 0x80 | ((code >> 0) & 0x3f));
+            } else if (code <= 0xffff) {
+                out->append(1, 0xe0 | (code >> 12));
+                out->append(1, 0x80 | ((code >> 6) & 0x3f));
+                out->append(1, 0x80 | ((code >> 0) & 0x3f));
+            } else {
+                out->append(1, 0xf0 | (code >> 18));
+                out->append(1, 0x80 | ((code >> 12) & 0x3f));
+                out->append(1, 0x80 | ((code >> 6) & 0x3f));
+                out->append(1, 0x80 | ((code >> 0) & 0x3f));
+            }
+        }
+    }
+
+    virtual bool can_encode(const StringPiece& string) const {
+        return true;
+    }
+
+  private:
+    BytesPiece::const_iterator begin(const BytesPiece& bytes) const {
         return bytes.begin();
     }
 
-    virtual BytesPiece::const_iterator end(const BytesPiece& bytes) const {
+    BytesPiece::const_iterator end(const BytesPiece& bytes) const {
         return bytes.end();
     }
 
-    virtual void next(const BytesPiece& bytes, BytesPiece::const_iterator* it) const {
+    void next(const BytesPiece& bytes, BytesPiece::const_iterator* it) const {
         uint32_t code;
         if (dereference(bytes, *it, &code)) {
             if (code < 0x80) {
@@ -382,7 +251,7 @@ class Utf8Encoding : public Encoding {
         }
     }
 
-    virtual bool dereference(
+    bool dereference(
             const BytesPiece& bytes, BytesPiece::const_iterator it, uint32_t* code) const {
         *code = static_cast<uint8_t>(*it);
         if ((*code & 0x80) == 0) {
@@ -404,33 +273,6 @@ class Utf8Encoding : public Encoding {
         return (*code >= min_code) && is_valid_code_point(*code);
     }
 
-    virtual bool can_encode(uint32_t code) const {
-        return true;
-    }
-
-    virtual bool can_encode(const StringPiece& string) const {
-        return true;
-    }
-
-    virtual void encode(uint32_t code, Bytes* out) const {
-        if (code <= 0x7f) {
-            out->append(1, code);
-        } else if (code <= 0x7ff) {
-            out->append(1, 0xc0 | (code >> 6));
-            out->append(1, 0x80 | ((code >> 0) & 0x3f));
-        } else if (code <= 0xffff) {
-            out->append(1, 0xe0 | (code >> 12));
-            out->append(1, 0x80 | ((code >> 6) & 0x3f));
-            out->append(1, 0x80 | ((code >> 0) & 0x3f));
-        } else {
-            out->append(1, 0xf0 | (code >> 18));
-            out->append(1, 0x80 | ((code >> 12) & 0x3f));
-            out->append(1, 0x80 | ((code >> 6) & 0x3f));
-            out->append(1, 0x80 | ((code >> 0) & 0x3f));
-        }
-    }
-
-  private:
     // Attempts to start a multi-byte UTF-8 code point.
     //
     // @param [in, out] code The first byte of the potential multi-byte code point.  If it points

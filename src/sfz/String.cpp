@@ -12,159 +12,83 @@
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"
 
+using std::max;
 using std::min;
 
 namespace sfz {
 
-// Internal encoding used by String.
-//
-// This Encoding encodes strings identically to native-endian UTF-32 with no byte-order marker.
-// However, since it is used only internally, it is given special dispensation when decoding byte
-// sequences to make extra assumptions about the content of those sequences.  Specifically, it
-// never checks that the number of bits in the sequence is evenly divisible by 32, or that any
-// individual 32-bit value is a valid code point.
-//
-// All of the virtual methods in Encoding are overridden, even when the defaults would do.  Because
-// it is used in almost every method call on String, it is important that this Encoding be fast.
-class String::InternalEncoding : public Encoding {
-  public:
-    InternalEncoding() { }
+namespace {
 
-    virtual StringPiece name() const {
-        return StringPiece("Internal-32", ascii_encoding());
-    }
+const size_t kDefaultStringSize = 16;
 
-    virtual bool can_decode(const BytesPiece& data) const {
-        return true;
-    }
-
-    virtual void decode(const BytesPiece& in, String* out) const {
-        out->_bytes.append(in);
-    }
-
-    virtual bool at(const BytesPiece& bytes, size_t loc, uint32_t* code) const {
-        *code = *reinterpret_cast<const uint32_t*>(
-                bytes.substr(loc * sizeof(uint32_t), sizeof(uint32_t)).data());
-        return true;
-    }
-
-    virtual bool empty(const BytesPiece& bytes) const {
-        return bytes.empty();
-    }
-
-    virtual size_t size(const BytesPiece& bytes) const {
-        return bytes.size() / sizeof(uint32_t);
-    }
-
-    virtual StringPiece substr(const BytesPiece& bytes, size_t loc) const {
-        return StringPiece(bytes.substr(loc * sizeof(uint32_t)), *this);
-    }
-
-    virtual StringPiece substr(const BytesPiece& bytes, size_t loc, size_t size) const {
-        return StringPiece(bytes.substr(loc * sizeof(uint32_t), size * sizeof(uint32_t)), *this);
-    }
-
-    virtual BytesPiece::const_iterator begin(const BytesPiece& bytes) const {
-        return bytes.begin();
-    }
-
-    virtual BytesPiece::const_iterator end(const BytesPiece& bytes) const {
-        return bytes.end();
-    }
-
-    virtual void next(const BytesPiece& bytes, BytesPiece::const_iterator* loc) const {
-        static_cast<void>(bytes);
-        *loc += 4;
-    }
-
-    virtual bool dereference(
-            const BytesPiece& bytes, BytesPiece::const_iterator loc, uint32_t* code) const {
-        *code = *reinterpret_cast<const uint32_t*>(BytesPiece(loc, loc + 4).data());
-        return true;
-    }
-
-    virtual bool can_encode(uint32_t code) const {
-        return true;
-    }
-
-    virtual bool can_encode(const StringPiece& in) const {
-        return true;
-    }
-
-    virtual void encode(const StringPiece& in, Bytes* out) const {
-        foreach (it, in) {
-            encode(*it, out);
-        }
-    }
-
-    virtual void encode(uint32_t code, Bytes* out) const {
-        out->append(reinterpret_cast<const uint8_t*>(&code), sizeof(uint32_t));
-    }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(InternalEncoding);
-};
+}  // namespace
 
 // String implementation.
 
-const String::InternalEncoding& String::internal_encoding() {
-    static const InternalEncoding instance;
-    return instance;
+String::String() {
+    initialize(0);
 }
 
-String::String() { }
-
-String::String(const String& string)
-    : _bytes(string._bytes.data(), string._bytes.size()) { }
+String::String(const String& string) {
+    initialize(string._capacity);
+    append(StringPiece(string));
+}
 
 String::String(const StringPiece& string) {
-    internal_encoding().encode(string, &_bytes);
+    initialize(string._size);
+    append(string);
 }
 
 void String::append(const String& string) {
-    _bytes.append(string._bytes);
+    append(StringPiece(string));
 }
 
 void String::append(const StringPiece& string) {
-    internal_encoding().encode(string, &_bytes);
+    reserve(_size + string._size);
+    memcpy(_data.get() + _size, string._data, string._size * sizeof(uint32_t));
+    _size += string._size;
 }
 
 void String::assign(const String& string) {
-    _bytes.assign(string._bytes);
+    clear();
+    append(StringPiece(string));
 }
 
 void String::assign(const StringPiece& string) {
-    _bytes.clear();
-    internal_encoding().encode(string, &_bytes);
+    clear();
+    append(string);
 }
 
 String::String(const char* data, const Encoding& encoding) {
-    internal_encoding().encode(StringPiece(data, encoding), &_bytes);
+    initialize(0);
+    append(BytesPiece(reinterpret_cast<const uint8_t*>(data), strlen(data)), encoding);
 }
 
 void String::append(const char* data, const Encoding& encoding) {
-    internal_encoding().encode(StringPiece(data, encoding), &_bytes);
+    append(BytesPiece(reinterpret_cast<const uint8_t*>(data), strlen(data)), encoding);
 }
 
 void String::assign(const char* data, const Encoding& encoding) {
-    _bytes.clear();
-    internal_encoding().encode(StringPiece(data, encoding), &_bytes);
+    clear();
+    append(BytesPiece(reinterpret_cast<const uint8_t*>(data), strlen(data)), encoding);
 }
 
 String::String(const BytesPiece& bytes, const Encoding& encoding) {
-    internal_encoding().encode(StringPiece(bytes, encoding), &_bytes);
+    initialize(0);
+    append(bytes, encoding);
 }
 
 void String::append(const BytesPiece& bytes, const Encoding& encoding) {
-    internal_encoding().encode(StringPiece(bytes, encoding), &_bytes);
+    encoding.decode(bytes, this);
 }
 
 void String::assign(const BytesPiece& bytes, const Encoding& encoding) {
-    _bytes.clear();
-    internal_encoding().encode(StringPiece(bytes, encoding), &_bytes);
+    clear();
+    append(bytes, encoding);
 }
 
 String::String(size_t num, uint32_t code) {
+    initialize(num);
     append(num, code);
 }
 
@@ -172,46 +96,62 @@ void String::append(size_t num, uint32_t code) {
     if (!is_valid_code_point(code)) {
         abort();
     }
-    foreach (i, range(num)) {
-        _bytes.append(reinterpret_cast<const uint8_t*>(&code), sizeof(uint32_t));
-    }
+    resize(_size + num, code);
 }
 
 void String::assign(size_t num, uint32_t code) {
-    _bytes.clear();
+    clear();
     append(num, code);
 }
 
 String::~String() { }
 
 size_t String::size() const {
-    return internal_encoding().size(_bytes);
+    return _size;
 }
 
 uint32_t String::at(size_t loc) const {
-    uint32_t code;
-    internal_encoding().at(_bytes, loc, &code);
-    return code;
+    if (loc >= _size) {
+        abort();
+    }
+    return _data.get()[loc];
 }
 
 void String::clear() {
-    _bytes.clear();
+    _size = 0;
 }
 
 bool String::empty() const {
-    return internal_encoding().empty(_bytes);
+    return _size == 0;
 }
 
-void String::resize(size_t size, uint32_t code) {
-    if (size < this->size()) {
-        _bytes.resize(sizeof(uint32_t) * size);
-    } else if (size > this->size()) {
-        append(size - this->size(), code);
+void String::reserve(size_t capacity) {
+    if (_capacity < capacity) {
+        size_t new_capacity = _capacity * 2;
+        while (new_capacity < capacity) {
+            new_capacity *= 2;
+        }
+        scoped_array<uint32_t> new_data(new uint32_t[new_capacity]);
+        memcpy(new_data.get(), _data.get(), _size * sizeof(uint32_t));
+        _data.swap(&new_data);
+        _capacity = new_capacity;
     }
 }
 
+void String::resize(size_t size, uint32_t code) {
+    if (size > _size) {
+        reserve(size);
+        foreach (i, range(_size, size)) {
+            _data.get()[i] = code;
+        }
+    }
+    _size = size;
+}
+
 void String::swap(String* string) {
-    _bytes.swap(&string->_bytes);
+    _data.swap(&string->_data);
+    std::swap(_size, string->_size);
+    std::swap(_capacity, string->_capacity);
 }
 
 size_t String::find(uint32_t code, size_t index) const {
@@ -264,6 +204,13 @@ StringIterator String::end() const {
 }
 */
 
+void String::initialize(size_t capacity) {
+    capacity = max(capacity, kDefaultStringSize);
+    _data.reset(new uint32_t[capacity]);
+    _size = 0;
+    _capacity = capacity;
+}
+
 // StringKey implementation.
 
 bool operator<(const StringKey& lhs, const StringKey& rhs) {
@@ -280,34 +227,26 @@ bool operator<(const StringKey& lhs, const StringKey& rhs) {
 // StringPiece implementation.
 
 StringPiece::StringPiece()
-    : _encoding(&String::internal_encoding()) { }
+    : _data(NULL),
+      _size(0) { }
 
 StringPiece::StringPiece(const String& string)
-    : _bytes(string._bytes),
-      _encoding(&String::internal_encoding()) { }
-
-StringPiece::StringPiece(const char* data, const Encoding& encoding)
-    : _bytes(reinterpret_cast<const uint8_t*>(data), strlen(data)),
-      _encoding(&encoding) { }
-
-StringPiece::StringPiece(const BytesPiece& bytes, const Encoding& encoding)
-    : _bytes(bytes),
-      _encoding(&encoding) { }
+    : _data(string._data.get()),
+      _size(string._size) { }
 
 size_t StringPiece::size() const {
-    return _encoding->size(_bytes);
+    return _size;
 }
 
 uint32_t StringPiece::at(size_t loc) const {
-    uint32_t code;
-    if (_encoding->at(_bytes, loc, &code)) {
-        return code;
+    if (loc >= _size) {
+        abort();
     }
-    return kUnknownCodePoint;
+    return _data[loc];
 }
 
 bool StringPiece::empty() const {
-    return _encoding->empty(_bytes);
+    return _size == 0;
 }
 
 size_t StringPiece::find(uint32_t code, size_t index) const {
@@ -332,46 +271,49 @@ size_t StringPiece::rfind(uint32_t code, size_t index) const {
 }
 
 StringPiece StringPiece::substr(size_t loc) const {
-    return _encoding->substr(_bytes, loc);
+    if (loc > _size) {
+        abort();
+    }
+    return StringPiece(_data + loc, _size - loc);
 }
 
 StringPiece StringPiece::substr(size_t loc, size_t size) const {
-    return _encoding->substr(_bytes, loc, size);
+    if (loc + size > _size) {
+        abort();
+    }
+    return StringPiece(_data + loc, size);
 }
 
 StringPiece::const_iterator StringPiece::begin() const {
-    return const_iterator(this, _encoding->begin(_bytes));
+    return const_iterator(_data);
 }
 
 StringPiece::const_iterator StringPiece::end() const {
-    return const_iterator(this, _encoding->end(_bytes));
+    return const_iterator(_data + _size);
 }
+
+StringPiece::StringPiece(const uint32_t* data, size_t size)
+    : _data(data),
+      _size(size) { }
 
 // StringPiece::const_iterator implementation.
 
-StringPiece::const_iterator::const_iterator(
-        const StringPiece* parent, BytesPiece::const_iterator it)
-    : _parent(parent),
-      _it(it) { }
+StringPiece::const_iterator::const_iterator(const uint32_t* it)
+    : _it(it) { }
 
 StringPiece::const_iterator::value_type StringPiece::const_iterator::operator*() const {
-    uint32_t code;
-    if (_parent->_encoding->dereference(_parent->_bytes, _it, &code)) {
-        return code;
-    } else {
-        return kUnknownCodePoint;
-    }
+    return *_it;
 }
 
 StringPiece::const_iterator& StringPiece::const_iterator::operator++() {
-    _parent->_encoding->next(_parent->_bytes, &_it);
+    ++_it;
     return *this;
 }
 
 StringPiece::const_iterator StringPiece::const_iterator::operator++(int) {
-    BytesPiece::const_iterator old = _it;
-    _parent->_encoding->next(_parent->_bytes, &_it);
-    return const_iterator(_parent, old);
+    const uint32_t* const old = _it;
+    ++_it;
+    return const_iterator(old);
 }
 
 bool StringPiece::const_iterator::operator==(const StringPiece::const_iterator& it) {

@@ -13,6 +13,23 @@ namespace sfz {
 
 namespace {
 
+class EncodedStringPrinter : public FormatItemPrinter {
+  public:
+    EncodedStringPrinter(const char* string, const Encoding& encoding)
+        : _string(string),
+          _encoding(encoding) { }
+
+    virtual void print_to(String* out) const {
+        out->append(_string, _encoding);
+    }
+
+  private:
+    const char* const _string;
+    const Encoding& _encoding;
+
+    DISALLOW_COPY_AND_ASSIGN(EncodedStringPrinter);
+};
+
 class StringPiecePrinter : public FormatItemPrinter {
   public:
     StringPiecePrinter(const StringPiece& string)
@@ -123,7 +140,7 @@ class FloatingPointPrinter : public PrintfPrinter {
 FormatItem::FormatItem() { }
 
 FormatItem::FormatItem(const char* string)
-    : _printer(new StringPiecePrinter(StringPiece(string, ascii_encoding()))) { }
+    : _printer(new EncodedStringPrinter(string, ascii_encoding())) { }
 FormatItem::FormatItem(const String& string)
     : _printer(new StringPiecePrinter(string)) { }
 FormatItem::FormatItem(const StringKey& string)
@@ -226,9 +243,11 @@ void span_complement(
 }  // namespace
 
 void FormatResult::print_to(String* out) const {
-    StringPiece f(_fmt, ascii_encoding());
-    const StringPiece kBraces("{}", ascii_encoding());
-    const StringPiece kCloseBrace("}", ascii_encoding());
+    static const String kBraces("{}", ascii_encoding());
+    static const String kCloseBrace("}", ascii_encoding());
+
+    String decoded(_fmt, ascii_encoding());
+    StringPiece f = decoded;
 
     while (f.size() > 0) {
         StringPiece span;
