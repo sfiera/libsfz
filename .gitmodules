@@ -1,0 +1,6 @@
+[submodule "ext/googletest"]
+	path = ext/googletest
+	url = git://git.sfiera.net/googletest
+[submodule "ext/googlemock"]
+	path = ext/googlemock
+	url = git://git.sfiera.net/googlemock

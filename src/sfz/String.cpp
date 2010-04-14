@@ -9,6 +9,7 @@
 #include <algorithm>
 #include "sfz/Bytes.hpp"
 #include "sfz/Encoding.hpp"
+#include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"
 
@@ -94,7 +95,7 @@ String::String(size_t num, uint32_t code) {
 
 void String::append(size_t num, uint32_t code) {
     if (!is_valid_code_point(code)) {
-        abort();
+        throw Exception("invalid code point");
     }
     resize(_size + num, code);
 }
@@ -106,23 +107,8 @@ void String::assign(size_t num, uint32_t code) {
 
 String::~String() { }
 
-size_t String::size() const {
-    return _size;
-}
-
-uint32_t String::at(size_t loc) const {
-    if (loc >= _size) {
-        abort();
-    }
-    return _data.get()[loc];
-}
-
 void String::clear() {
     _size = 0;
-}
-
-bool String::empty() const {
-    return _size == 0;
 }
 
 void String::reserve(size_t capacity) {
@@ -154,44 +140,47 @@ void String::swap(String* string) {
     std::swap(_capacity, string->_capacity);
 }
 
-size_t String::find(uint32_t code, size_t index) const {
-    foreach (i, range(index, size())) {
-        if (at(i) == code) {
-            return i;
-        }
-    }
-    return kNone;
-}
-
-size_t String::find(const StringPiece& string, size_t index) const {
-    if (index + string.size() > size()) {
-        return kNone;
-    }
-    foreach (i, range(index, size() - string.size() + 1)) {
-        if (StringPiece(*this).substr(i, string.size()) == string) {
-            return i;
-        }
-    }
-    return kNone;
-}
-
-size_t String::rfind(uint32_t code, size_t index) const {
-    if (index == kNone) {
-        index = size() - 1;
-    }
-    foreach (i, range(index + 1)) {
-        if (at(index - i) == code) {
-            return index - i;
-        }
-    }
-    return kNone;
-}
-
 void String::replace(size_t index, size_t num, const StringPiece& string) {
     String tail(StringPiece(*this).substr(index + num));
     resize(index);
     append(string);
     append(tail);
+}
+
+size_t String::size() const {
+    return StringPiece(*this).size();
+}
+
+uint32_t String::at(size_t loc) const {
+    return StringPiece(*this).at(loc);
+}
+
+bool String::empty() const {
+    return StringPiece(*this).empty();
+}
+
+size_t String::find(uint32_t code, size_t index) const {
+    return StringPiece(*this).find(code, index);
+}
+
+size_t String::find(const StringPiece& string, size_t index) const {
+    return StringPiece(*this).find(string, index);
+}
+
+size_t String::rfind(uint32_t code, size_t index) const {
+    return StringPiece(*this).rfind(code, index);
+}
+
+size_t String::rfind(const StringPiece& string, size_t index) const {
+    return StringPiece(*this).rfind(string, index);
+}
+
+StringPiece String::substr(size_t loc) const {
+    return StringPiece(*this).substr(loc);
+}
+
+StringPiece String::substr(size_t loc, size_t size) const {
+    return StringPiece(*this).substr(loc, size);
 }
 
 /*
@@ -240,7 +229,7 @@ size_t StringPiece::size() const {
 
 uint32_t StringPiece::at(size_t loc) const {
     if (loc >= _size) {
-        abort();
+        throw Exception("out-of-bounds");
     }
     return _data[loc];
 }
@@ -250,8 +239,20 @@ bool StringPiece::empty() const {
 }
 
 size_t StringPiece::find(uint32_t code, size_t index) const {
-    foreach (i, range(index, size())) {
+    foreach (i, range(index, _size)) {
         if (at(i) == code) {
+            return i;
+        }
+    }
+    return kNone;
+}
+
+size_t StringPiece::find(const StringPiece& string, size_t index) const {
+    if (index + string.size() > _size) {
+        return kNone;
+    }
+    foreach (i, range(index, _size - string.size() + 1)) {
+        if (StringPiece(*this).substr(i, string.size()) == string) {
             return i;
         }
     }
@@ -260,7 +261,7 @@ size_t StringPiece::find(uint32_t code, size_t index) const {
 
 size_t StringPiece::rfind(uint32_t code, size_t index) const {
     if (index == kNone) {
-        index = size() - 1;
+        index = _size - 1;
     }
     foreach (i, range(index + 1)) {
         if (at(index - i) == code) {
@@ -270,16 +271,34 @@ size_t StringPiece::rfind(uint32_t code, size_t index) const {
     return kNone;
 }
 
+size_t StringPiece::rfind(const StringPiece& string, size_t index) const {
+    if (string.size() > _size) {
+        return kNone;
+    }
+    if (index == kNone) {
+        index = _size;
+    }
+    if (index + string.size() > _size) {
+        index = _size - string.size();
+    }
+    foreach (i, range(index - string.size() + 1)) {
+        if (StringPiece(*this).substr(index - i, string.size()) == string) {
+            return index - i;
+        }
+    }
+    return kNone;
+}
+
 StringPiece StringPiece::substr(size_t loc) const {
     if (loc > _size) {
-        abort();
+        throw Exception("substr out of range");
     }
     return StringPiece(_data + loc, _size - loc);
 }
 
 StringPiece StringPiece::substr(size_t loc, size_t size) const {
     if (loc + size > _size) {
-        abort();
+        throw Exception("substr out of range");
     }
     return StringPiece(_data + loc, size);
 }
@@ -322,6 +341,14 @@ bool StringPiece::const_iterator::operator==(const StringPiece::const_iterator& 
 
 bool StringPiece::const_iterator::operator!=(const StringPiece::const_iterator& it) {
     return _it != it._it;
+}
+
+bool operator==(const String& lhs, const String& rhs) {
+    return StringPiece(lhs) == StringPiece(rhs);
+}
+
+bool operator!=(const String& lhs, const String& rhs) {
+    return StringPiece(lhs) != StringPiece(rhs);
 }
 
 bool operator==(const StringPiece& lhs, const StringPiece& rhs) {

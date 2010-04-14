@@ -83,18 +83,8 @@ class String {
     // Destroys the String.
     ~String();
 
-    // @returns             The number of code points.
-    size_t size() const;
-
-    // @param [in] loc      An index into the code point sequence.  Must be less than size().
-    // @returns             The code point at index `loc`.
-    uint32_t at(size_t loc) const;
-
     // Clears the content of this object.
     void clear();
-
-    // @returns             true iff size() == 0.
-    bool empty() const;
 
     // Ensures that there is enough space for `capacity` code points.
     //
@@ -118,14 +108,18 @@ class String {
     // @param [in, out] string The string to swap with.
     void swap(String* string);
 
+    void replace(size_t index, size_t num, const StringPiece& string);
+
+    size_t size() const;
+    bool empty() const;
+    uint32_t at(size_t loc) const;
     size_t find(uint32_t code, size_t index = 0) const;
     size_t find(const StringPiece& string, size_t index = 0) const;
     size_t rfind(uint32_t code, size_t index = kNone) const;
+    size_t rfind(const StringPiece& string, size_t index = kNone) const;
+    StringPiece substr(size_t loc) const;
+    StringPiece substr(size_t loc, size_t size) const;
 
-    void replace(size_t index, size_t num, const StringPiece& string);
-
-    // @returns             STL-like iterators to the beginning and end of the String.
-    // typedef StringIterator const_iterator;
     // const_iterator begin() const;
     // const_iterator end() const;
 
@@ -200,15 +194,17 @@ class StringPiece {
     // @returns             The number of code points.
     size_t size() const;
 
+    // @returns             true iff size() == 0.
+    bool empty() const;
+
     // @param [in] loc      An index into the code point sequence.  Must be less than size().
     // @returns             The code point at index `loc`.
     uint32_t at(size_t loc) const;
 
-    // @returns             true iff size() == 0.
-    bool empty() const;
-
     size_t find(uint32_t code, size_t index = 0) const;
+    size_t find(const StringPiece& string, size_t index = 0) const;
     size_t rfind(uint32_t code, size_t index = kNone) const;
+    size_t rfind(const StringPiece& string, size_t index = kNone) const;
 
     // @param [in] loc      An index into the code point sequence.  Must be at most size().
     // @param [in] size     The desired number of code points in the returned substring.  If
@@ -255,6 +251,8 @@ class StringPiece {
     // ALLOW_COPY_AND_ASSIGN
 };
 
+bool operator==(const String& lhs, const String& rhs);
+bool operator!=(const String& lhs, const String& rhs);
 bool operator==(const StringPiece& lhs, const StringPiece& rhs);
 bool operator!=(const StringPiece& lhs, const StringPiece& rhs);
 

@@ -2,6 +2,8 @@
     'target_defaults': {
         'include_dirs': [
             'include',
+            '<(DEPTH)/ext/googlemock/include',
+            '<(DEPTH)/ext/googletest/include',
         ],
         'xcode_settings': {
             'GCC_TREAT_WARNINGS_AS_ERRORS': 'YES',
@@ -16,6 +18,21 @@
         },
     },
     'targets': [
+        {
+            'target_name': 'check-deps',
+            'type': 'none',
+            'actions': [
+                {
+                    'action_name': 'check-deps',
+                    'inputs': [ ],
+                    'outputs': [ ],
+                    'action': [
+                        './scripts/check-deps.sh',
+                        '<(DEPTH)',
+                    ],
+                },
+            ],
+        },
         {
             'target_name': 'libsfz',
             'type': '<(library)',
@@ -34,6 +51,18 @@
                 'src/sfz/ScopedFd.cpp',
                 'src/sfz/String.cpp',
                 'src/sfz/StringUtilities.cpp',
+            ],
+        },
+        {
+            'target_name': 'libsfz-tests',
+            'type': 'executable',
+            'sources': [
+                'src/sfz/String.test.cpp',
+            ],
+            'dependencies': [
+                ':check-deps',
+                ':libsfz',
+                '<(DEPTH)/ext/googlemock/googlemock.gyp:gmock_main',
             ],
         },
     ],
