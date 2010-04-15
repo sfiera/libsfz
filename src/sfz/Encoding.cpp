@@ -20,30 +20,18 @@ namespace sfz {
 
 namespace {
 
-// Identifies the code plane of the code point `code`.
-//      
-// Unicode partitions code points into 16 contiguous ranges of 65536 code points, known as planes.
-// Plane 0, the basic multilingual plane, contains code points that are likely to be used.  Planes
-// 1-16 are also defined, but anything else should be identified as invalid.
-//
-// @param [in] code     A code point to test.
-// @returns             The code plane corresponding to `code`.
-inline int unicode_plane(uint32_t code) {
-    return code >> 16;
-}   
-    
 // Identifies surrogate code points.
 //
 // UTF-16 represents code points outside the basic multilingual plane (plane 0) with a pair of
 // plane 0 code points, the first of which is in the range U+D800 to U+DBFF, and the second of which
 // is in the range U+DC00 to U+DFFF.  These are not valid code points within a String, so we need
 // to identify them as invalid.
-//  
+//
 // @param [in] code     A code point to test.
 // @returns             true iff `code` is a surrogate code.
 inline bool is_surrogate(uint32_t code) {
-    return (unicode_plane(code) == 0) && ((code & 0xD800) == 0xD800);
-}   
+    return (code & 0xfffff800) == 0x00d800;
+}
 
 }  // namespace
 
@@ -51,8 +39,8 @@ const uint32_t kUnknownCodePoint = 0x00fffd;  // REPLACEMENT CHARACTER.
 const uint32_t kAsciiUnknownCodePoint = 0x00003f;  // QUESTION MARK.
 
 bool is_valid_code_point(uint32_t code) {
-    return (unicode_plane(code) <= 16) && (!is_surrogate(code));
-}   
+    return (code <= 0x10ffff) && (!is_surrogate(code));
+}
 
 Encoding::~Encoding() { }
 
