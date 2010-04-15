@@ -11,14 +11,16 @@
 
 namespace sfz {
 
-class Exception {
+class Exception : public std::exception {
   public:
     Exception(const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
     virtual ~Exception() throw();
     virtual void print_to(String* out) const throw();
+    virtual const char* what() const throw();
 
   private:
     String _explanation;
+    Bytes _utf8_string;
 };
 
 }  // namespace sfz
