@@ -181,6 +181,8 @@ class StringPiece {
     // @param [in] string   The string to reference.
     StringPiece(const String& string);
 
+    StringPiece(const char* ascii_string);
+
     // Accessors.
     //
     // Typically, size(), at(), and substr() will run in constant time when the StringPiece is
@@ -233,9 +235,10 @@ class StringPiece {
 
       private:
         friend class StringPiece;
-        explicit const_iterator(const uint32_t* it);
+        const_iterator(const uint8_t* it, int encoding);
 
-        const uint32_t* _it;
+        const uint8_t* _it;
+        int _encoding;
 
         // ALLOW_COPY_AND_ASSIGN
     };
@@ -243,9 +246,10 @@ class StringPiece {
   private:
     friend class String;
 
-    StringPiece(const uint32_t* data, size_t size);
+    StringPiece(const uint8_t* data, size_t size, int encoding);
 
-    const uint32_t* _data;
+    const uint8_t* _data;
+    int _encoding;
     size_t _size;
 
     // ALLOW_COPY_AND_ASSIGN

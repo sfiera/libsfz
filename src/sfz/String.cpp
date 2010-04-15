@@ -46,8 +46,9 @@ void String::append(const String& string) {
 
 void String::append(const StringPiece& string) {
     reserve(_size + string._size);
-    memcpy(_data.get() + _size, string._data, string._size * sizeof(uint32_t));
-    _size += string._size;
+    foreach (it, string) {
+        append(1, *it);
+    }
 }
 
 void String::assign(const String& string) {
@@ -95,7 +96,7 @@ String::String(size_t num, uint32_t code) {
 
 void String::append(size_t num, uint32_t code) {
     if (!is_valid_code_point(code)) {
-        throw Exception("invalid code point");
+        throw Exception("invalid code point {0}", code);
     }
     resize(_size + num, code);
 }
@@ -216,12 +217,24 @@ bool operator<(const StringKey& lhs, const StringKey& rhs) {
 // StringPiece implementation.
 
 StringPiece::StringPiece()
-    : _data(NULL),
-      _size(0) { }
+        : _data(NULL),
+          _encoding(sizeof(uint8_t)),
+          _size(0) { }
 
 StringPiece::StringPiece(const String& string)
-    : _data(string._data.get()),
-      _size(string._size) { }
+        : _data(reinterpret_cast<uint8_t*>(string._data.get())),
+          _encoding(sizeof(uint32_t)),
+          _size(string._size) { }
+
+StringPiece::StringPiece(const char* ascii_string) {
+    BytesPiece bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
+    if (!ascii_encoding().can_decode(bytes)) {
+        throw Exception("string is not ASCII");
+    }
+    _data = bytes.data();
+    _encoding = sizeof(uint8_t);
+    _size = bytes.size();
+}
 
 size_t StringPiece::size() const {
     return _size;
@@ -231,7 +244,15 @@ uint32_t StringPiece::at(size_t loc) const {
     if (loc >= _size) {
         throw Exception("out-of-bounds");
     }
-    return _data[loc];
+    switch (_encoding) {
+      case sizeof(uint8_t):
+        return _data[loc];
+      case sizeof(uint16_t):
+        return reinterpret_cast<const uint16_t*>(_data)[loc];
+      case sizeof(uint32_t):
+        return reinterpret_cast<const uint32_t*>(_data)[loc];
+    }
+    return '\0';
 }
 
 bool StringPiece::empty() const {
@@ -248,11 +269,11 @@ size_t StringPiece::find(uint32_t code, size_t index) const {
 }
 
 size_t StringPiece::find(const StringPiece& string, size_t index) const {
-    if (index + string.size() > _size) {
+    if (index + string._size > _size) {
         return kNone;
     }
-    foreach (i, range(index, _size - string.size() + 1)) {
-        if (StringPiece(*this).substr(i, string.size()) == string) {
+    foreach (i, range(index, _size - string._size + 1)) {
+        if (StringPiece(*this).substr(i, string._size) == string) {
             return i;
         }
     }
@@ -272,17 +293,17 @@ size_t StringPiece::rfind(uint32_t code, size_t index) const {
 }
 
 size_t StringPiece::rfind(const StringPiece& string, size_t index) const {
-    if (string.size() > _size) {
+    if (string._size > _size) {
         return kNone;
     }
     if (index == kNone) {
         index = _size;
     }
-    if (index + string.size() > _size) {
-        index = _size - string.size();
+    if (index + string._size > _size) {
+        index = _size - string._size;
     }
-    foreach (i, range(index - string.size() + 1)) {
-        if (StringPiece(*this).substr(index - i, string.size()) == string) {
+    foreach (i, range(index - string._size + 1)) {
+        if (StringPiece(*this).substr(index - i, string._size) == string) {
             return index - i;
         }
     }
@@ -293,46 +314,56 @@ StringPiece StringPiece::substr(size_t loc) const {
     if (loc > _size) {
         throw Exception("substr out of range");
     }
-    return StringPiece(_data + loc, _size - loc);
+    return substr(loc, _size - loc);
 }
 
 StringPiece StringPiece::substr(size_t loc, size_t size) const {
     if (loc + size > _size) {
         throw Exception("substr out of range");
     }
-    return StringPiece(_data + loc, size);
+    return StringPiece(_data + (loc * _encoding), size, _encoding);
 }
 
 StringPiece::const_iterator StringPiece::begin() const {
-    return const_iterator(_data);
+    return const_iterator(_data, _encoding);
 }
 
 StringPiece::const_iterator StringPiece::end() const {
-    return const_iterator(_data + _size);
+    return const_iterator(_data + (_size * _encoding), _encoding);
 }
 
-StringPiece::StringPiece(const uint32_t* data, size_t size)
-    : _data(data),
-      _size(size) { }
+StringPiece::StringPiece(const uint8_t* data, size_t size, int encoding)
+        : _data(data),
+          _encoding(encoding),
+          _size(size) { }
 
 // StringPiece::const_iterator implementation.
 
-StringPiece::const_iterator::const_iterator(const uint32_t* it)
-    : _it(it) { }
+StringPiece::const_iterator::const_iterator(const uint8_t* it, int encoding)
+        : _it(it),
+          _encoding(encoding) { }
 
 StringPiece::const_iterator::value_type StringPiece::const_iterator::operator*() const {
-    return *_it;
+    switch (_encoding) {
+      case sizeof(uint8_t):
+        return *_it;
+      case sizeof(uint16_t):
+        return *reinterpret_cast<const uint16_t*>(_it);
+      case sizeof(uint32_t):
+        return *reinterpret_cast<const uint32_t*>(_it);
+    }
+    return 0;
 }
 
 StringPiece::const_iterator& StringPiece::const_iterator::operator++() {
-    ++_it;
+    _it += _encoding;
     return *this;
 }
 
 StringPiece::const_iterator StringPiece::const_iterator::operator++(int) {
-    const uint32_t* const old = _it;
-    ++_it;
-    return const_iterator(old);
+    const uint8_t* const old = _it;
+    _it += _encoding;
+    return const_iterator(old, _encoding);
 }
 
 bool StringPiece::const_iterator::operator==(const StringPiece::const_iterator& it) {

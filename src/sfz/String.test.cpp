@@ -32,11 +32,10 @@ TEST_F(StringTest, EmptyConst) {
     EXPECT_THAT(string.find('\0'), Eq(String::kNone));
     EXPECT_THAT(string.rfind('\0'), Eq(String::kNone));
 
-    String socks("socks", ascii_encoding());
     EXPECT_THAT(string.find(StringPiece()), Eq<size_t>(0));
-    EXPECT_THAT(string.find(socks), Eq<size_t>(String::kNone));
+    EXPECT_THAT(string.find("socks"), Eq<size_t>(String::kNone));
     EXPECT_THAT(string.rfind(StringPiece()), Eq<size_t>(0));
-    EXPECT_THAT(string.rfind(socks), Eq<size_t>(String::kNone));
+    EXPECT_THAT(string.rfind("socks"), Eq<size_t>(String::kNone));
 
     EXPECT_THAT(string, Eq(ByRef(string)));
     EXPECT_THAT(string, Eq<StringPiece>(string));
@@ -69,26 +68,22 @@ TEST_F(StringTest, HelloWorldConst) {
     EXPECT_THAT(string.rfind('o'), Eq<size_t>(8));
     EXPECT_THAT(string.rfind('!'), Eq<size_t>(12));
 
-    const String o("o", ascii_encoding());
-    const String orl("orl", ascii_encoding());
-    EXPECT_THAT(string.find(StringPiece()), Eq<size_t>(0));
-    EXPECT_THAT(string.find(o), Eq<size_t>(4));
-    EXPECT_THAT(string.find(orl), Eq<size_t>(8));
-    EXPECT_THAT(string.rfind(StringPiece()), Eq<size_t>(13));
-    EXPECT_THAT(string.rfind(o), Eq<size_t>(8));
-    EXPECT_THAT(string.rfind(orl), Eq<size_t>(8));
+    EXPECT_THAT(string.find(""), Eq<size_t>(0));
+    EXPECT_THAT(string.find("o"), Eq<size_t>(4));
+    EXPECT_THAT(string.find("orl"), Eq<size_t>(8));
+    EXPECT_THAT(string.rfind(""), Eq<size_t>(13));
+    EXPECT_THAT(string.rfind("o"), Eq<size_t>(8));
+    EXPECT_THAT(string.rfind("orl"), Eq<size_t>(8));
 
     EXPECT_THAT(string, Eq(ByRef(string)));
     EXPECT_THAT(string, Eq<StringPiece>(string));
     EXPECT_THAT(string, Ne(StringPiece()));
 
-    const String hello("Hello", ascii_encoding());
-    const String world("world!", ascii_encoding());
     EXPECT_THAT(string.substr(0), Eq<StringPiece>(string));
-    EXPECT_THAT(string.substr(0, 5), Eq<StringPiece>(hello));
-    EXPECT_THAT(string.substr(7), Eq<StringPiece>(world));
-    EXPECT_THAT(string.substr(13), Eq(StringPiece()));
-    EXPECT_THAT(string.substr(13, 0), Eq(StringPiece()));
+    EXPECT_THAT(string.substr(0, 5), Eq<StringPiece>("Hello"));
+    EXPECT_THAT(string.substr(7), Eq<StringPiece>("world!"));
+    EXPECT_THAT(string.substr(13), Eq(StringPiece("")));
+    EXPECT_THAT(string.substr(13, 0), Eq(StringPiece("")));
     EXPECT_THROW(string.substr(14), Exception);
     EXPECT_THROW(string.substr(13, 1), Exception);
     EXPECT_THROW(string.substr(14, 0), Exception);
@@ -102,8 +97,7 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
         EXPECT_THAT(string, Eq<StringPiece>(expected));
     }
     {
-        const StringPiece piece(expected);
-        const String string(piece);
+        const String string("Hello, world!");
         EXPECT_THAT(string, Eq<StringPiece>(expected));
     }
     {
@@ -116,9 +110,8 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
         EXPECT_THAT(string, Eq<StringPiece>(expected));
     }
     {
-        const String chkchkchk("!!!", ascii_encoding());
         const String string(3, '!');
-        EXPECT_THAT(string, Eq<StringPiece>(chkchkchk));
+        EXPECT_THAT(string, Eq<StringPiece>("!!!"));
     }
 }
 
@@ -131,9 +124,8 @@ TEST_F(StringTest, AllAssignOverloads) {
         EXPECT_THAT(string, Eq<StringPiece>(expected));
     }
     {
-        const StringPiece piece(expected);
         String string("Hello, ", ascii_encoding());
-        string.assign(piece);
+        string.assign("Hello, world!");
         EXPECT_THAT(string, Eq<StringPiece>(expected));
     }
     {
@@ -148,10 +140,9 @@ TEST_F(StringTest, AllAssignOverloads) {
         EXPECT_THAT(string, Eq<StringPiece>(expected));
     }
     {
-        const String chkchkchk("!!!", ascii_encoding());
         String string("Hello, ", ascii_encoding());
         string.assign(3, '!');
-        EXPECT_THAT(string, Eq<StringPiece>(chkchkchk));
+        EXPECT_THAT(string, Eq<StringPiece>("!!!"));
     }
 }
 
@@ -162,29 +153,28 @@ TEST_F(StringTest, AllAppendOverloads) {
     {
         String string("Hello, ", ascii_encoding());
         string.append(append);
-        EXPECT_THAT(string, Eq<StringPiece>(expected));
+        EXPECT_THAT(string, Eq<StringPiece>("Hello, world!"));
     }
     {
-        const StringPiece piece(append);
         String string("Hello, ", ascii_encoding());
-        string.append(piece);
-        EXPECT_THAT(string, Eq<StringPiece>(expected));
+        string.append("world!");
+        EXPECT_THAT(string, Eq<StringPiece>("Hello, world!"));
     }
     {
         String string("Hello, ", ascii_encoding());
         string.append("world!", ascii_encoding());
-        EXPECT_THAT(string, Eq<StringPiece>(expected));
+        EXPECT_THAT(string, Eq<StringPiece>("Hello, world!"));
     }
     {
         BytesPiece bytes(reinterpret_cast<const uint8_t*>("world!"), 6);
         String string("Hello, ", ascii_encoding());
         string.append(bytes, ascii_encoding());
-        EXPECT_THAT(string, Eq<StringPiece>(expected));
+        EXPECT_THAT(string, Eq<StringPiece>("Hello, world!"));
     }
     {
         String string("Hello, world", ascii_encoding());
         string.append(1, '!');
-        EXPECT_THAT(string, Eq<StringPiece>(expected));
+        EXPECT_THAT(string, Eq<StringPiece>("Hello, world!"));
     }
 }
 
@@ -217,23 +207,63 @@ TEST_F(StringTest, ExtensionByPowersOfTwo) {
 TEST_F(StringTest, Replace) {
     String string("Hello, world!", ascii_encoding());
 
-    String goodbye("Goodbye", ascii_encoding());
-    string.replace(0, 5, goodbye);
-    const String goodbye_world("Goodbye, world!", ascii_encoding());
-    EXPECT_THAT(string, Eq<StringPiece>(goodbye_world));
+    string.replace(0, 5, "Goodbye");
+    EXPECT_THAT(string, Eq<StringPiece>("Goodbye, world!"));
 
-    String cruel("cruel ", ascii_encoding());
-    string.replace(9, 0, cruel);
-    const String goodbye_cruel_world("Goodbye, cruel world!", ascii_encoding());
-    EXPECT_THAT(string, Eq<StringPiece>(goodbye_cruel_world));
+    string.replace(9, 0, "cruel ");
+    EXPECT_THAT(string, Eq<StringPiece>("Goodbye, cruel world!"));
 
-    string.replace(20, 1, StringPiece());
-    const String clipped("Goodbye, cruel world", ascii_encoding());
-    EXPECT_THAT(string, Eq<StringPiece>(clipped));
+    string.replace(20, 1, "");
+    EXPECT_THAT(string, Eq<StringPiece>("Goodbye, cruel world"));
 
-    String im_leaving_you_today("I'm leaving you today", ascii_encoding());
-    string.replace(0, 20, im_leaving_you_today);
-    EXPECT_THAT(string, Eq<StringPiece>(im_leaving_you_today));
+    string.replace(0, 20, "I'm leaving you today");
+    EXPECT_THAT(string, Eq<StringPiece>("I'm leaving you today"));
+}
+
+TEST_F(StringTest, ReplaceGreek) {
+    const String kalimera_kosme_bang("Καλημέρα, κόσμε!", utf8_encoding());
+    String string(kalimera_kosme_bang);
+
+    const String antio("Αντίο", utf8_encoding());
+    const String antio_kosme_bang("Αντίο, κόσμε!", utf8_encoding());
+    string.replace(0, 8, antio);
+    EXPECT_THAT(string, Eq<StringPiece>(antio_kosme_bang));
+
+    const String sklere("σκλερέ ", utf8_encoding());
+    const String antio_sklere_kosme_bang("Αντίο, σκλερέ κόσμε!", utf8_encoding());
+    string.replace(7, 0, sklere);
+    EXPECT_THAT(string, Eq<StringPiece>(antio_sklere_kosme_bang));
+
+    const String antio_sklere_kosme("Αντίο, σκλερέ κόσμε", utf8_encoding());
+    string.replace(19, 1, "");
+    EXPECT_THAT(string, Eq<StringPiece>(antio_sklere_kosme));
+
+    const String sas_afino_simera("Σας αφήνω σήμερα", utf8_encoding());
+    string.replace(0, 19, sas_afino_simera);
+    EXPECT_THAT(string, Eq<StringPiece>(sas_afino_simera));
+}
+
+TEST_F(StringTest, ReplaceJapanese) {
+    const String konnitiha_sekai_bang("こんにちは世界！", utf8_encoding());
+    String string(konnitiha_sekai_bang);
+
+    const String sayonara("さよなら", utf8_encoding());
+    const String sayonara_sekai_bang("さよなら世界！", utf8_encoding());
+    string.replace(0, 5, sayonara);
+    EXPECT_THAT(string, Eq<StringPiece>(sayonara_sekai_bang));
+
+    const String hidoi("ひどい", utf8_encoding());
+    const String sayonara_hidoi_sekai_bang("さよならひどい世界！", utf8_encoding());
+    string.replace(4, 0, hidoi);
+    EXPECT_THAT(string, Eq<StringPiece>(sayonara_hidoi_sekai_bang));
+
+    const String sayonara_hidoi_sekai("さよならひどい世界", utf8_encoding());
+    string.replace(9, 1, "");
+    EXPECT_THAT(string, Eq<StringPiece>(sayonara_hidoi_sekai));
+
+    const String kyouha_anatawo_nokoshiteimasu("今日あなたを残しています", utf8_encoding());
+    string.replace(0, 9, kyouha_anatawo_nokoshiteimasu);
+    EXPECT_THAT(string, Eq<StringPiece>(kyouha_anatawo_nokoshiteimasu));
 }
 
 }  // namespace
