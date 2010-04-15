@@ -261,9 +261,9 @@ TEST_F(StringTest, ReplaceJapanese) {
     string.replace(9, 1, "");
     EXPECT_THAT(string, Eq<StringPiece>(sayonara_hidoi_sekai));
 
-    const String kyouha_anatawo_nokoshiteimasu("今日あなたを残しています", utf8_encoding());
-    string.replace(0, 9, kyouha_anatawo_nokoshiteimasu);
-    EXPECT_THAT(string, Eq<StringPiece>(kyouha_anatawo_nokoshiteimasu));
+    const String kyouha_anatawo_nokositeimasu("今日あなたを残しています", utf8_encoding());
+    string.replace(0, 9, kyouha_anatawo_nokositeimasu);
+    EXPECT_THAT(string, Eq<StringPiece>(kyouha_anatawo_nokositeimasu));
 }
 
 }  // namespace
