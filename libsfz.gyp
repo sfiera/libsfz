@@ -49,6 +49,7 @@
                 'src/sfz/PosixFormatter.cpp',
                 'src/sfz/ReferenceCounted.cpp',
                 'src/sfz/ScopedFd.cpp',
+                'src/sfz/Sha1.cpp',
                 'src/sfz/String.cpp',
                 'src/sfz/StringUtilities.cpp',
             ],
@@ -57,6 +58,7 @@
             'target_name': 'libsfz-tests',
             'type': 'executable',
             'sources': [
+                'src/sfz/Sha1.test.cpp',
                 'src/sfz/String.test.cpp',
             ],
             'dependencies': [

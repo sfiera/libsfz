@@ -124,6 +124,12 @@ class BytesPiece {
     // ALLOW_COPY_AND_ASSIGN
 };
 
+bool operator==(const Bytes& lhs, const Bytes& rhs);
+bool operator!=(const Bytes& lhs, const Bytes& rhs);
+
+bool operator==(const BytesPiece& lhs, const BytesPiece& rhs);
+bool operator!=(const BytesPiece& lhs, const BytesPiece& rhs);
+
 }  // namespace sfz
 
 #endif  // SFZ_BYTES_HPP_

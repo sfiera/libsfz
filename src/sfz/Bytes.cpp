@@ -272,4 +272,21 @@ bool BytesPiece::const_iterator::operator!=(const BytesPiece::const_iterator& it
     return _it != it._it;
 }
 
+bool operator==(const Bytes& lhs, const Bytes& rhs) {
+    return BytesPiece(lhs) == BytesPiece(rhs);
+}
+
+bool operator!=(const Bytes& lhs, const Bytes& rhs) {
+    return BytesPiece(lhs) != BytesPiece(rhs);
+}
+
+bool operator==(const BytesPiece& lhs, const BytesPiece& rhs) {
+    return (lhs.size() == rhs.size())
+        && (memcmp(lhs.data(), rhs.data(), lhs.size()) == 0);
+}
+
+bool operator!=(const BytesPiece& lhs, const BytesPiece& rhs) {
+    return !(lhs == rhs);
+}
+
 }  // namespace sfz
