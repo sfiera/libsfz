@@ -19,6 +19,9 @@ const size_t kDefaultBytesSize = 16;
 
 }  // namespace
 
+const size_t Bytes::npos = -1;
+const size_t BytesPiece::npos = -1;
+
 Bytes::Bytes()
     : _data(new uint8_t[kDefaultBytesSize]),
       _size(0),
@@ -169,10 +172,6 @@ BytesPiece::BytesPiece(const uint8_t* data, size_t size)
     : _data(data),
       _size(size) { }
 
-BytesPiece::BytesPiece(const_iterator begin, const_iterator end)
-    : _data(begin._it),
-      _size(end._it - begin._it) { }
-
 const uint8_t* BytesPiece::data() const {
     return _data;
 }
@@ -206,71 +205,7 @@ BytesPiece BytesPiece::substr(size_t index, size_t size) const {
     return BytesPiece(_data + index, size);
 }
 
-BytesPiece::const_iterator BytesPiece::begin() const {
-    return const_iterator(this, _data);
-}
-
-BytesPiece::const_iterator BytesPiece::end() const {
-    return const_iterator(this, _data + _size);
-}
-
-// BytesPiece::const_iterator implementation.
-
-BytesPiece::const_iterator::const_iterator(const BytesPiece* parent, const uint8_t* it)
-    : _parent(parent),
-      _it(it) { }
-
-BytesPiece::const_iterator::value_type BytesPiece::const_iterator::operator*() const {
-    return *_it;
-}
-
-BytesPiece::const_iterator::value_type BytesPiece::const_iterator::operator[](int n) const {
-    return _it[n];
-}
-
-BytesPiece::const_iterator& BytesPiece::const_iterator::operator++() {
-    ++_it;
-    return *this;
-}
-
-BytesPiece::const_iterator BytesPiece::const_iterator::operator++(int) {
-    return const_iterator(_parent, _it++);
-}
-
-BytesPiece::const_iterator& BytesPiece::const_iterator::operator--() {
-    --_it;
-    return *this;
-}
-
-BytesPiece::const_iterator BytesPiece::const_iterator::operator--(int) {
-    return const_iterator(_parent, _it++);
-}
-
-BytesPiece::const_iterator BytesPiece::const_iterator::operator+(int n) {
-    return const_iterator(_parent, _it + n);
-}
-
-BytesPiece::const_iterator& BytesPiece::const_iterator::operator+=(int n) {
-    _it += n;
-    return *this;
-}
-
-BytesPiece::const_iterator BytesPiece::const_iterator::operator-(int n) {
-    return const_iterator(_parent, _it - n);
-}
-
-BytesPiece::const_iterator& BytesPiece::const_iterator::operator-=(int n) {
-    _it -= n;
-    return *this;
-}
-
-bool BytesPiece::const_iterator::operator==(const BytesPiece::const_iterator& it) {
-    return _it == it._it;
-}
-
-bool BytesPiece::const_iterator::operator!=(const BytesPiece::const_iterator& it) {
-    return _it != it._it;
-}
+// Equality operators.
 
 bool operator==(const Bytes& lhs, const Bytes& rhs) {
     return BytesPiece(lhs) == BytesPiece(rhs);

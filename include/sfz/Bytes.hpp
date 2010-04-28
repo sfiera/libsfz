@@ -6,6 +6,7 @@
 #ifndef SFZ_BYTES_HPP_
 #define SFZ_BYTES_HPP_
 
+#include <iterator>
 #include <stdint.h>
 #include <stdlib.h>
 #include "sfz/Macros.hpp"
@@ -19,6 +20,20 @@ class StringPiece;
 
 class Bytes {
   public:
+    // STL container types and constants.
+    typedef uint8_t value_type;
+    typedef uint8_t* pointer;
+    typedef uint8_t& reference;
+    typedef const uint8_t& const_reference;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    static const size_type npos;
+
+    typedef uint8_t* iterator;
+    typedef const uint8_t* const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
     Bytes();
     explicit Bytes(const Bytes& bytes);
     explicit Bytes(const BytesPiece& bytes);
@@ -53,6 +68,16 @@ class Bytes {
 
     void swap(Bytes* bytes);
 
+    // Iterator support.
+    iterator begin() { return iterator(_data.get()); }
+    iterator end() { return iterator(_data.get() + _size); }
+    const_iterator begin() const { return const_iterator(_data.get()); }
+    const_iterator end() const { return const_iterator(_data.get() + _size); }
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+
   private:
     scoped_array<uint8_t> _data;
     size_t _size;
@@ -64,12 +89,24 @@ class Bytes {
 
 class BytesPiece {
   public:
-    class const_iterator;
+    // STL container types and constants.
+    typedef uint8_t value_type;
+    typedef const uint8_t* pointer;
+    typedef const uint8_t& reference;
+    typedef const uint8_t& const_reference;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    static const size_type npos;
 
+    typedef const uint8_t* iterator;
+    typedef const uint8_t* const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+    // Constructors.
     BytesPiece();
     BytesPiece(const Bytes& bytes);
     BytesPiece(const uint8_t* data, size_t size);
-    BytesPiece(const_iterator begin, const_iterator end);
 
     const uint8_t* data() const;
     size_t size() const;
@@ -81,41 +118,10 @@ class BytesPiece {
     BytesPiece substr(size_t index) const;
     BytesPiece substr(size_t index, size_t size) const;
 
-    // @returns             STL-like iterators to the beginning and end of the BytesPiece.
-    const_iterator begin() const;
-    const_iterator end() const;
-
-    // BytesPiece iterator class.
-    class const_iterator {
-      public:
-        typedef BytesPiece container_type;
-        typedef uint32_t value_type;
-
-        value_type operator*() const;
-        value_type operator[](int n) const;
-
-        const_iterator& operator++();
-        const_iterator operator++(int);
-        const_iterator& operator--();
-        const_iterator operator--(int);
-
-        const_iterator operator+(int n);
-        const_iterator& operator+=(int n);
-        const_iterator operator-(int n);
-        const_iterator& operator-=(int n);
-
-        bool operator==(const const_iterator& it);
-        bool operator!=(const const_iterator& it);
-
-      private:
-        friend class BytesPiece;
-        const_iterator(const BytesPiece* parent, const uint8_t* at);
-
-        const BytesPiece* _parent;
-        const uint8_t* _it;
-
-        // ALLOW_COPY_AND_ASSIGN
-    };
+    const_iterator begin() const { return const_iterator(_data); }
+    const_iterator end() const { return const_iterator(_data + _size); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
   private:
     const uint8_t* _data;

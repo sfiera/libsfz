@@ -24,6 +24,9 @@ const size_t kDefaultStringSize = 16;
 
 }  // namespace
 
+const size_t String::npos = -1;
+const size_t StringPiece::npos = -1;
+
 // String implementation.
 
 String::String() {
@@ -184,16 +187,6 @@ StringPiece String::substr(size_t loc, size_t size) const {
     return StringPiece(*this).substr(loc, size);
 }
 
-/*
-StringIterator String::begin() const {
-    return StringPiece(*this).begin();
-}
-
-StringIterator String::end() const {
-    return StringPiece(*this).end();
-}
-*/
-
 void String::initialize(size_t capacity) {
     capacity = max(capacity, kDefaultStringSize);
     _data.reset(new Rune[capacity]);
@@ -265,23 +258,23 @@ size_t StringPiece::find(Rune rune, size_t index) const {
             return i;
         }
     }
-    return kNone;
+    return npos;
 }
 
 size_t StringPiece::find(const StringPiece& string, size_t index) const {
     if (index + string._size > _size) {
-        return kNone;
+        return npos;
     }
     foreach (i, range(index, _size - string._size + 1)) {
         if (StringPiece(*this).substr(i, string._size) == string) {
             return i;
         }
     }
-    return kNone;
+    return npos;
 }
 
 size_t StringPiece::rfind(Rune rune, size_t index) const {
-    if (index == kNone) {
+    if (index == npos) {
         index = _size - 1;
     }
     foreach (i, range(index + 1)) {
@@ -289,14 +282,14 @@ size_t StringPiece::rfind(Rune rune, size_t index) const {
             return index - i;
         }
     }
-    return kNone;
+    return npos;
 }
 
 size_t StringPiece::rfind(const StringPiece& string, size_t index) const {
     if (string._size > _size) {
-        return kNone;
+        return npos;
     }
-    if (index == kNone) {
+    if (index == npos) {
         index = _size;
     }
     if (index + string._size > _size) {
@@ -307,7 +300,7 @@ size_t StringPiece::rfind(const StringPiece& string, size_t index) const {
             return index - i;
         }
     }
-    return kNone;
+    return npos;
 }
 
 StringPiece StringPiece::substr(size_t loc) const {
@@ -339,11 +332,13 @@ StringPiece::StringPiece(const uint8_t* data, size_t size, int encoding)
 
 // StringPiece::const_iterator implementation.
 
-StringPiece::const_iterator::const_iterator(const uint8_t* it, int encoding)
+StringPiece::iterator::iterator() { }
+
+StringPiece::iterator::iterator(const uint8_t* it, int encoding)
         : _it(it),
           _encoding(encoding) { }
 
-StringPiece::const_iterator::value_type StringPiece::const_iterator::operator*() const {
+StringPiece::iterator::value_type StringPiece::iterator::operator*() const {
     switch (_encoding) {
       case sizeof(uint8_t):
         return *_it;
@@ -355,23 +350,48 @@ StringPiece::const_iterator::value_type StringPiece::const_iterator::operator*()
     return 0;
 }
 
-StringPiece::const_iterator& StringPiece::const_iterator::operator++() {
+StringPiece::iterator& StringPiece::iterator::operator++() {
     _it += _encoding;
     return *this;
 }
 
-StringPiece::const_iterator StringPiece::const_iterator::operator++(int) {
+StringPiece::iterator StringPiece::iterator::operator++(int) {
     const uint8_t* const old = _it;
     _it += _encoding;
-    return const_iterator(old, _encoding);
+    return iterator(old, _encoding);
 }
 
-bool StringPiece::const_iterator::operator==(const StringPiece::const_iterator& it) {
-    return _it == it._it;
+StringPiece::iterator& StringPiece::iterator::operator--() {
+    _it -= _encoding;
+    return *this;
 }
 
-bool StringPiece::const_iterator::operator!=(const StringPiece::const_iterator& it) {
-    return _it != it._it;
+StringPiece::iterator StringPiece::iterator::operator--(int) {
+    const uint8_t* const old = _it;
+    _it -= _encoding;
+    return iterator(old, _encoding);
+}
+
+StringPiece::iterator& StringPiece::iterator::operator+=(int n) {
+    _it += _encoding * n;
+    return *this;
+}
+
+StringPiece::iterator StringPiece::iterator::operator+(int n) const {
+    return iterator(_it + (_encoding * n), _encoding);
+}
+
+StringPiece::iterator& StringPiece::iterator::operator-=(int n) {
+    _it -= _encoding * n;
+    return *this;
+}
+
+StringPiece::iterator StringPiece::iterator::operator-(int n) const {
+    return iterator(_it - (_encoding * n), _encoding);
+}
+
+StringPiece::difference_type StringPiece::iterator::operator-(const iterator& it) const {
+    return (_it - it._it) / _encoding;
 }
 
 bool operator==(const String& lhs, const String& rhs) {

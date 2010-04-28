@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <iterator>
 #include "sfz/Macros.hpp"
 #include "sfz/Bytes.hpp"
 #include "sfz/Encoding.hpp"
@@ -26,7 +27,19 @@ class StringPiece;
 // Bytes class for that.
 class String {
   public:
-    static const size_t kNone = -1;
+    // STL container types and constants.
+    typedef uint32_t value_type;
+    typedef uint32_t* pointer;
+    typedef uint32_t& reference;
+    typedef const uint32_t& const_reference;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    static const size_type npos;
+
+    typedef uint32_t* iterator;
+    typedef const uint32_t* const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Initializes the String to the empty string.
     String();
@@ -116,13 +129,20 @@ class String {
     Rune at(size_t loc) const;
     size_t find(Rune rune, size_t index = 0) const;
     size_t find(const StringPiece& string, size_t index = 0) const;
-    size_t rfind(Rune rune, size_t index = kNone) const;
-    size_t rfind(const StringPiece& string, size_t index = kNone) const;
+    size_t rfind(Rune rune, size_t index = npos) const;
+    size_t rfind(const StringPiece& string, size_t index = npos) const;
     StringPiece substr(size_t loc) const;
     StringPiece substr(size_t loc, size_t size) const;
 
-    // const_iterator begin() const;
-    // const_iterator end() const;
+    // @returns             STL-like iterators over the StringPiece.
+    iterator begin() { return _data.get(); }
+    iterator end() { return _data.get() + _size; }
+    const_iterator begin() const { return _data.get(); }
+    const_iterator end() const { return _data.get() + _size; }
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
   private:
     friend class StringPiece;
@@ -170,9 +190,19 @@ bool operator<(const StringKey& lhs, const StringKey& rhs);
 // time, whereas access to UTF-8 code points is linear.
 class StringPiece {
   public:
-    static const size_t kNone = -1;
+    // STL container types and constants.
+    typedef uint32_t value_type;
+    typedef uint32_t* pointer;
+    typedef uint32_t& reference;
+    typedef const uint32_t& const_reference;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    static const size_type npos;
 
-    class const_iterator;
+    class iterator;
+    typedef iterator const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Initializes the StringPiece to the empty string.
     StringPiece();
@@ -206,8 +236,8 @@ class StringPiece {
 
     size_t find(Rune rune, size_t index = 0) const;
     size_t find(const StringPiece& string, size_t index = 0) const;
-    size_t rfind(Rune rune, size_t index = kNone) const;
-    size_t rfind(const StringPiece& string, size_t index = kNone) const;
+    size_t rfind(Rune rune, size_t index = npos) const;
+    size_t rfind(const StringPiece& string, size_t index = npos) const;
 
     // @param [in] loc      An index into the code point sequence.  Must be at most size().
     // @param [in] size     The desired number of code points in the returned substring.  If
@@ -218,25 +248,50 @@ class StringPiece {
     StringPiece substr(size_t loc) const;
     StringPiece substr(size_t loc, size_t size) const;
 
-    // @returns             STL-like iterators to the beginning and end of the StringPiece.
+    // @returns             STL-like iterators over the StringPiece.
     const_iterator begin() const;
     const_iterator end() const;
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
     // StringPiece iterator class.
-    class const_iterator {
+    class iterator {
       public:
+        typedef std::random_access_iterator_tag iterator_category;
         typedef StringPiece container_type;
         typedef Rune value_type;
+        typedef const Rune* pointer;
+        typedef const Rune& reference;
+        typedef ptrdiff_t difference_type;
+
+        iterator();
 
         value_type operator*() const;
-        const_iterator& operator++();
-        const_iterator operator++(int);
-        bool operator==(const const_iterator& it);
-        bool operator!=(const const_iterator& it);
+
+        iterator& operator++();
+        iterator operator++(int);
+        iterator& operator--();
+        iterator operator--(int);
+
+        iterator& operator+=(int n);
+        iterator operator+(int n) const;
+        iterator& operator-=(int n);
+        iterator operator-(int n) const;
+
+        difference_type operator-(const iterator& other) const;
+
+        value_type operator[](int n) const { return *(*this + n); }
+
+        bool operator==(const iterator& other) const { return _it == other._it; }
+        bool operator!=(const iterator& other) const { return _it != other._it; }
+        bool operator<(const iterator& other) const { return _it < other._it; }
+        bool operator<=(const iterator& other) const { return _it <= other._it; }
+        bool operator>(const iterator& other) const { return _it > other._it; }
+        bool operator>=(const iterator& other) const { return _it >= other._it; }
 
       private:
         friend class StringPiece;
-        const_iterator(const uint8_t* it, int encoding);
+        iterator(const uint8_t* it, int encoding);
 
         const uint8_t* _it;
         int _encoding;

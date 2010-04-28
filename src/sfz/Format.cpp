@@ -221,7 +221,7 @@ void span_complement(
         const StringPiece& input, const StringPiece& chars,
         StringPiece* span, StringPiece* remainder) {
     foreach (i, range(input.size())) {
-        if (chars.find(input.at(i)) != String::kNone) {
+        if (chars.find(input.at(i)) != String::npos) {
             *span = input.substr(0, i);
             *remainder = input.substr(i);
             return;

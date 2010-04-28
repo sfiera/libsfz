@@ -29,13 +29,13 @@ TEST_F(StringTest, EmptyConst) {
 
     EXPECT_THROW(string.at(0), Exception);
 
-    EXPECT_THAT(string.find('\0'), Eq(String::kNone));
-    EXPECT_THAT(string.rfind('\0'), Eq(String::kNone));
+    EXPECT_THAT(string.find('\0'), Eq(String::npos));
+    EXPECT_THAT(string.rfind('\0'), Eq(String::npos));
 
     EXPECT_THAT(string.find(StringPiece()), Eq<size_t>(0));
-    EXPECT_THAT(string.find("socks"), Eq<size_t>(String::kNone));
+    EXPECT_THAT(string.find("socks"), Eq<size_t>(String::npos));
     EXPECT_THAT(string.rfind(StringPiece()), Eq<size_t>(0));
-    EXPECT_THAT(string.rfind("socks"), Eq<size_t>(String::kNone));
+    EXPECT_THAT(string.rfind("socks"), Eq<size_t>(String::npos));
 
     EXPECT_THAT(string, Eq(ByRef(string)));
     EXPECT_THAT(string, Eq<StringPiece>(string));
