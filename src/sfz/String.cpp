@@ -89,21 +89,21 @@ void String::assign(const BytesPiece& bytes, const Encoding& encoding) {
     append(bytes, encoding);
 }
 
-String::String(size_t num, uint32_t code) {
+String::String(size_t num, Rune rune) {
     initialize(num);
-    append(num, code);
+    append(num, rune);
 }
 
-void String::append(size_t num, uint32_t code) {
-    if (!is_valid_code_point(code)) {
-        throw Exception("invalid code point {0}", code);
+void String::append(size_t num, Rune rune) {
+    if (!is_valid_code_point(rune)) {
+        throw Exception("invalid code point {0}", rune);
     }
-    resize(_size + num, code);
+    resize(_size + num, rune);
 }
 
-void String::assign(size_t num, uint32_t code) {
+void String::assign(size_t num, Rune rune) {
     clear();
-    append(num, code);
+    append(num, rune);
 }
 
 String::~String() { }
@@ -118,18 +118,18 @@ void String::reserve(size_t capacity) {
         while (new_capacity < capacity) {
             new_capacity *= 2;
         }
-        scoped_array<uint32_t> new_data(new uint32_t[new_capacity]);
-        memcpy(new_data.get(), _data.get(), _size * sizeof(uint32_t));
+        scoped_array<Rune> new_data(new Rune[new_capacity]);
+        memcpy(new_data.get(), _data.get(), _size * sizeof(Rune));
         _data.swap(&new_data);
         _capacity = new_capacity;
     }
 }
 
-void String::resize(size_t size, uint32_t code) {
+void String::resize(size_t size, Rune rune) {
     if (size > _size) {
         reserve(size);
         foreach (i, range(_size, size)) {
-            _data.get()[i] = code;
+            _data.get()[i] = rune;
         }
     }
     _size = size;
@@ -152,7 +152,7 @@ size_t String::size() const {
     return StringPiece(*this).size();
 }
 
-uint32_t String::at(size_t loc) const {
+Rune String::at(size_t loc) const {
     return StringPiece(*this).at(loc);
 }
 
@@ -160,16 +160,16 @@ bool String::empty() const {
     return StringPiece(*this).empty();
 }
 
-size_t String::find(uint32_t code, size_t index) const {
-    return StringPiece(*this).find(code, index);
+size_t String::find(Rune rune, size_t index) const {
+    return StringPiece(*this).find(rune, index);
 }
 
 size_t String::find(const StringPiece& string, size_t index) const {
     return StringPiece(*this).find(string, index);
 }
 
-size_t String::rfind(uint32_t code, size_t index) const {
-    return StringPiece(*this).rfind(code, index);
+size_t String::rfind(Rune rune, size_t index) const {
+    return StringPiece(*this).rfind(rune, index);
 }
 
 size_t String::rfind(const StringPiece& string, size_t index) const {
@@ -196,7 +196,7 @@ StringIterator String::end() const {
 
 void String::initialize(size_t capacity) {
     capacity = max(capacity, kDefaultStringSize);
-    _data.reset(new uint32_t[capacity]);
+    _data.reset(new Rune[capacity]);
     _size = 0;
     _capacity = capacity;
 }
@@ -223,7 +223,7 @@ StringPiece::StringPiece()
 
 StringPiece::StringPiece(const String& string)
         : _data(reinterpret_cast<uint8_t*>(string._data.get())),
-          _encoding(sizeof(uint32_t)),
+          _encoding(sizeof(Rune)),
           _size(string._size) { }
 
 StringPiece::StringPiece(const char* ascii_string) {
@@ -240,7 +240,7 @@ size_t StringPiece::size() const {
     return _size;
 }
 
-uint32_t StringPiece::at(size_t loc) const {
+Rune StringPiece::at(size_t loc) const {
     if (loc >= _size) {
         throw Exception("out-of-bounds");
     }
@@ -259,9 +259,9 @@ bool StringPiece::empty() const {
     return _size == 0;
 }
 
-size_t StringPiece::find(uint32_t code, size_t index) const {
+size_t StringPiece::find(Rune rune, size_t index) const {
     foreach (i, range(index, _size)) {
-        if (at(i) == code) {
+        if (at(i) == rune) {
             return i;
         }
     }
@@ -280,12 +280,12 @@ size_t StringPiece::find(const StringPiece& string, size_t index) const {
     return kNone;
 }
 
-size_t StringPiece::rfind(uint32_t code, size_t index) const {
+size_t StringPiece::rfind(Rune rune, size_t index) const {
     if (index == kNone) {
         index = _size - 1;
     }
     foreach (i, range(index + 1)) {
-        if (at(index - i) == code) {
+        if (at(index - i) == rune) {
             return index - i;
         }
     }

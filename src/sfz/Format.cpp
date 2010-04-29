@@ -217,20 +217,11 @@ FormatResult::FormatResult(const char* fmt, size_t item_count, const FormatItem*
 
 namespace {
 
-size_t find(const StringPiece& string, uint32_t ch) {
-    foreach (i, range(string.size())) {
-        if (string.at(i) == ch) {
-            return i;
-        }
-    }
-    return String::kNone;
-}
-
 void span_complement(
         const StringPiece& input, const StringPiece& chars,
         StringPiece* span, StringPiece* remainder) {
     foreach (i, range(input.size())) {
-        if (find(chars, input.at(i)) != String::kNone) {
+        if (chars.find(input.at(i)) != String::kNone) {
             *span = input.substr(0, i);
             *remainder = input.substr(i);
             return;

@@ -55,10 +55,10 @@ TEST_F(StringTest, HelloWorldConst) {
     EXPECT_THAT(string.size(), Eq<size_t>(13));
     EXPECT_THAT(string.empty(), Eq(false));
 
-    EXPECT_THAT(string.at(0), Eq<uint32_t>('H'));
-    EXPECT_THAT(string.at(4), Eq<uint32_t>('o'));
-    EXPECT_THAT(string.at(8), Eq<uint32_t>('o'));
-    EXPECT_THAT(string.at(12), Eq<uint32_t>('!'));
+    EXPECT_THAT(string.at(0), Eq<Rune>('H'));
+    EXPECT_THAT(string.at(4), Eq<Rune>('o'));
+    EXPECT_THAT(string.at(8), Eq<Rune>('o'));
+    EXPECT_THAT(string.at(12), Eq<Rune>('!'));
     EXPECT_THROW(string.at(13), Exception);
 
     EXPECT_THAT(string.find('H'), Eq<size_t>(0));

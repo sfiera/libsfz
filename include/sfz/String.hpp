@@ -11,6 +11,7 @@
 #include "sfz/Macros.hpp"
 #include "sfz/Bytes.hpp"
 #include "sfz/Encoding.hpp"
+#include "sfz/Rune.hpp"
 
 namespace sfz {
 
@@ -70,15 +71,15 @@ class String {
 
     // Copies a repeated code point.
     //
-    // The repeated code point `code` either is used to initialize the String, is appended to the
+    // The repeated code point `rune` either is used to initialize the String, is appended to the
     // String, or replaces the current content of the String, depending on the method which is
     // used.  The time complexity of these methods is linear in `num`.
     //
     // @param [in] num      The number of repetitions.
-    // @param [in] code     The code point to repeat.  Must be a valid code point.
-    String(size_t num, uint32_t code);
-    void append(size_t num, uint32_t code);
-    void assign(size_t num, uint32_t code);
+    // @param [in] rune     The code point to repeat.  Must be a valid code point.
+    String(size_t num, Rune rune);
+    void append(size_t num, Rune rune);
+    void assign(size_t num, Rune rune);
 
     // Destroys the String.
     ~String();
@@ -95,11 +96,11 @@ class String {
     //
     // If `size` is less than the current size of the String, the String will be truncated.  If it
     // is greater, then the String will be extended to the specified size, and the new positions
-    // created by this extension will be filled with `code`.
+    // created by this extension will be filled with `rune`.
     //
     // @param [in] size     The desired size of the String.
-    // @param [in] code     If the String is extended, the code point to fill new positions with.
-    void resize(size_t size, uint32_t code = 0);
+    // @param [in] rune     If the String is extended, the code point to fill new positions with.
+    void resize(size_t size, Rune rune = 0);
 
     // Swaps the contents of two String objects.
     //
@@ -112,10 +113,10 @@ class String {
 
     size_t size() const;
     bool empty() const;
-    uint32_t at(size_t loc) const;
-    size_t find(uint32_t code, size_t index = 0) const;
+    Rune at(size_t loc) const;
+    size_t find(Rune rune, size_t index = 0) const;
     size_t find(const StringPiece& string, size_t index = 0) const;
-    size_t rfind(uint32_t code, size_t index = kNone) const;
+    size_t rfind(Rune rune, size_t index = kNone) const;
     size_t rfind(const StringPiece& string, size_t index = kNone) const;
     StringPiece substr(size_t loc) const;
     StringPiece substr(size_t loc, size_t size) const;
@@ -128,7 +129,7 @@ class String {
 
     void initialize(size_t capacity);
 
-    scoped_array<uint32_t> _data;
+    scoped_array<Rune> _data;
     size_t _size;
     size_t _capacity;
 
@@ -148,7 +149,7 @@ class StringKey : public String {
     StringKey(const StringPiece& string) : String(string) { }
     StringKey(const char* data, const Encoding& encoding) : String(data, encoding) { }
     StringKey(const BytesPiece& bytes, const Encoding& encoding) : String(bytes, encoding) { }
-    StringKey(size_t num, uint32_t code) : String(num, code) { }
+    StringKey(size_t num, Rune rune) : String(num, rune) { }
 
     StringKey& operator=(const String& string) { assign(string); return *this; }
     StringKey& operator=(const StringKey& string) { assign(string); return *this; }
@@ -201,11 +202,11 @@ class StringPiece {
 
     // @param [in] loc      An index into the code point sequence.  Must be less than size().
     // @returns             The code point at index `loc`.
-    uint32_t at(size_t loc) const;
+    Rune at(size_t loc) const;
 
-    size_t find(uint32_t code, size_t index = 0) const;
+    size_t find(Rune rune, size_t index = 0) const;
     size_t find(const StringPiece& string, size_t index = 0) const;
-    size_t rfind(uint32_t code, size_t index = kNone) const;
+    size_t rfind(Rune rune, size_t index = kNone) const;
     size_t rfind(const StringPiece& string, size_t index = kNone) const;
 
     // @param [in] loc      An index into the code point sequence.  Must be at most size().
@@ -225,7 +226,7 @@ class StringPiece {
     class const_iterator {
       public:
         typedef StringPiece container_type;
-        typedef uint32_t value_type;
+        typedef Rune value_type;
 
         value_type operator*() const;
         const_iterator& operator++();

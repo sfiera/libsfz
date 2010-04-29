@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "sfz/Bytes.hpp"
 #include "sfz/Macros.hpp"
+#include "sfz/Rune.hpp"
 #include "sfz/SmartPtr.hpp"
 
 namespace sfz {
@@ -67,19 +68,19 @@ const Encoding& utf8_encoding();
 // should be used.  If encoding a string into a byte sequence using an encoding that cannot
 // represent kUnknownCodePoint, such as ASCII or Latin-1, then kAsciiUnknownCodePoint should be
 // used instead.
-extern const uint32_t kUnknownCodePoint;
-extern const uint32_t kAsciiUnknownCodePoint;
+extern const Rune kUnknownCodePoint;
+extern const Rune kAsciiUnknownCodePoint;
 
 // Identifies valid code points.
 //
 // Unicode specifies that only code points in the range [U+000000, U+10FFFF] are valid.  In
 // addition, it guarantees that surrogate code points, which exist in the range [U+D800, U+DFFF],
-// will never be assigned values.  This method returns false for any value of `code` which is
+// will never be assigned values.  This method returns false for any value of `rune` which is
 // outside the former, or inside the latter.
 //
-// @param [in] code     A code point to test.
-// @returns             true iff `code` is valid.
-bool is_valid_code_point(uint32_t code);
+// @param [in] rune     A potential code point to test.
+// @returns             true iff `rune` is a valid code point.
+bool is_valid_code_point(Rune rune);
 
 // A mapping between sequences of code points and sequences of bytes.
 class Encoding {
