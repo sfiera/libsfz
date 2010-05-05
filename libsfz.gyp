@@ -59,6 +59,7 @@
             'target_name': 'libsfz-tests',
             'type': 'executable',
             'sources': [
+                'src/sfz/Formatter.test.cpp',
                 'src/sfz/PrintItem.test.cpp',
                 'src/sfz/Sha1.test.cpp',
                 'src/sfz/String.test.cpp',
