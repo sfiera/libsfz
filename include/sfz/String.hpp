@@ -311,6 +311,10 @@ class StringPiece {
     // ALLOW_COPY_AND_ASSIGN
 };
 
+inline void print_to(String* out, const String& s) { out->append(s); }
+inline void print_to(String* out, const StringPiece& s) { out->append(s); }
+inline void print_to(String* out, const StringKey& s) { out->append(s); }
+
 bool operator==(const String& lhs, const String& rhs);
 bool operator!=(const String& lhs, const String& rhs);
 bool operator==(const StringPiece& lhs, const StringPiece& rhs);

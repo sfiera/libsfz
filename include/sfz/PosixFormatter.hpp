@@ -6,12 +6,12 @@
 #ifndef SFZ_POSIX_FORMATTER_HPP_
 #define SFZ_POSIX_FORMATTER_HPP_
 
-#include "Format.hpp"
+#include "PrintItem.hpp"
 
 namespace sfz {
 
-FormatItem posix_errno();
-FormatItem posix_strerror(int error = 0);
+PrintItem posix_errno();
+PrintItem posix_strerror(int error = 0);
 
 }  // namespace sfz
 

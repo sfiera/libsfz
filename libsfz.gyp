@@ -47,6 +47,7 @@
                 'src/sfz/MappedFile.cpp',
                 'src/sfz/NetworkBytes.cpp',
                 'src/sfz/PosixFormatter.cpp',
+                'src/sfz/PrintItem.cpp',
                 'src/sfz/ReferenceCounted.cpp',
                 'src/sfz/ScopedFd.cpp',
                 'src/sfz/Sha1.cpp',
@@ -58,6 +59,7 @@
             'target_name': 'libsfz-tests',
             'type': 'executable',
             'sources': [
+                'src/sfz/PrintItem.test.cpp',
                 'src/sfz/Sha1.test.cpp',
                 'src/sfz/String.test.cpp',
             ],

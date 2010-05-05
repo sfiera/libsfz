@@ -24,7 +24,7 @@ const char kEscaped[' '][5] = {
     "\\030", "\\031", "\\032", "\\033", "\\034", "\\035", "\\036", "\\037",
 };
 
-class EscapedStringPrinter : public FormatItemPrinter {
+class EscapedStringPrinter : public PrintItem::Impl {
   public:
     EscapedStringPrinter(const StringPiece& string)
         : _string(string) { }
@@ -61,12 +61,12 @@ class QuotedStringPrinter : public EscapedStringPrinter {
 
 }  // namespace
 
-FormatItem escape(const StringPiece& string) {
-    return FormatItem::make(new EscapedStringPrinter(string));
+PrintItem escape(const StringPiece& string) {
+    return PrintItem::make(new EscapedStringPrinter(string));
 }
 
-FormatItem quote(const StringPiece& string) {
-    return FormatItem::make(new QuotedStringPrinter(string));
+PrintItem quote(const StringPiece& string) {
+    return PrintItem::make(new QuotedStringPrinter(string));
 }
 
 }  // namespace sfz

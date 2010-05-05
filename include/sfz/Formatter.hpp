@@ -6,34 +6,34 @@
 #ifndef SFZ_FORMATTER_HPP_
 #define SFZ_FORMATTER_HPP_
 
-#include "sfz/Format.hpp"
+#include "sfz/PrintItem.hpp"
 
 #include "sfz/String.hpp"
 
 namespace sfz {
 
 template <typename T>
-FormatItem dec(T value, size_t min_width = 1) {
-    return FormatItem(value, 10, min_width);
+PrintItem dec(T value, size_t min_width = 1) {
+    return PrintItem(value, 10, min_width);
 }
 
 template <typename T>
-FormatItem hex(T value, size_t min_width = 1) {
-    return FormatItem(value, 16, min_width);
+PrintItem hex(T value, size_t min_width = 1) {
+    return PrintItem(value, 16, min_width);
 }
 
 template <typename T>
-FormatItem oct(T value, size_t min_width = 1) {
-    return FormatItem(value, 8, min_width);
+PrintItem oct(T value, size_t min_width = 1) {
+    return PrintItem(value, 8, min_width);
 }
 
 template <typename T>
-FormatItem bin(T value, size_t min_width = 1) {
-    return FormatItem(value, 2, min_width);
+PrintItem bin(T value, size_t min_width = 1) {
+    return PrintItem(value, 2, min_width);
 }
 
-FormatItem escape(const StringPiece& string);
-FormatItem quote(const StringPiece& string);
+PrintItem escape(const StringPiece& string);
+PrintItem quote(const StringPiece& string);
 
 }  // namespace sfz
 

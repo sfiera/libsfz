@@ -10,13 +10,13 @@
 
 namespace sfz {
 
-FormatItem posix_errno() {
-    return FormatItem(errno);
+PrintItem posix_errno() {
+    return PrintItem(errno);
 }
 
 namespace {
 
-class PosixStrerrorPrinter : public FormatItemPrinter {
+class PosixStrerrorPrinter : public PrintItem::Impl {
   public:
     PosixStrerrorPrinter(int error)
         : _errno(error) { }
@@ -37,11 +37,11 @@ class PosixStrerrorPrinter : public FormatItemPrinter {
 
 }  // namespace
 
-FormatItem posix_strerror(int error) {
+PrintItem posix_strerror(int error) {
     if (error == 0) {
-        return FormatItem::make(new PosixStrerrorPrinter(errno));
+        return PrintItem::make(new PosixStrerrorPrinter(errno));
     } else {
-        return FormatItem::make(new PosixStrerrorPrinter(error));
+        return PrintItem::make(new PosixStrerrorPrinter(error));
     }
 }
 

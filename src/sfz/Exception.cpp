@@ -10,7 +10,7 @@
 namespace sfz {
 
 Exception::Exception(const char* fmt, SFZ_FORMAT_ITEMS_DEFINITION) {
-    const FormatItem* items[SFZ_FORMAT_ITEM_COUNT] = SFZ_FORMAT_ITEMS_ARRAY;
+    const PrintItem* items[SFZ_FORMAT_ITEM_COUNT] = SFZ_FORMAT_ITEMS_ARRAY;
     FormatResult(fmt, SFZ_FORMAT_ITEM_COUNT, items).print_to(&_explanation);
     _utf8_string.assign(_explanation, utf8_encoding());
     _utf8_string.resize(_utf8_string.size() + 1);
