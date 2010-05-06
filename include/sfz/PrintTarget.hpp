@@ -18,48 +18,74 @@ class StringPiece;
 
 class PrintTarget {
   public:
-    template <typename T>
-    PrintTarget(T* target) {
-        new (impl_) Derived<T>(target);
-    }
+    template <typename T> PrintTarget(T* t);
 
-    inline void append(const String& string) { base()->append(string); }
-    inline void append(const StringPiece& string) { base()->append(string); }
-    inline void append(const BytesPiece& bytes, const Encoding& encoding) {
-        base()->append(bytes, encoding); }
-    inline void append(size_t num, Rune rune) { base()->append(num, rune); }
+    inline void append(const String& string);
+    inline void append(const StringPiece& string);
+    inline void append(const BytesPiece& bytes, const Encoding& encoding);
+    inline void append(size_t num, Rune rune);
 
   private:
-    struct Base {
-        virtual ~Base() { }
-        virtual void append(const String& string) = 0;
-        virtual void append(const StringPiece& string) = 0;
-        virtual void append(const BytesPiece& bytes, const Encoding& encoding) = 0;
-        virtual void append(size_t num, Rune rune) = 0;
+    struct DispatchTable {
+        void (*append_string)(void* target, const String& string);
+        void (*append_string_piece)(void* target, const StringPiece& string);
+        void (*append_bytes)(void* target, const BytesPiece& bytes, const Encoding& encoding);
+        void (*append_runes)(void* target, size_t num, Rune rune);
     };
 
-    template <typename T>
-    struct Derived : public Base {
-        Derived(T* target)
-            : target_(target) { }
+    template <typename T> struct Dispatch;
 
-        virtual void append(const String& string) { target_->append(string); }
-        virtual void append(const StringPiece& string) { target_->append(string); }
-        virtual void append(const BytesPiece& bytes, const Encoding& encoding) {
-            target_->append(bytes, encoding); }
-        virtual void append(size_t num, Rune rune) { target_->append(num, rune); }
-
-        T* const target_;
-    };
-
-    inline Base* base() {
-        return reinterpret_cast<Base*>(&impl_);
-    };
-
-    intptr_t impl_[2];
+    void* const _target;
+    const DispatchTable* const _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
 };
+
+template <typename T>
+struct PrintTarget::Dispatch {
+    static void append_string(void* target, const String& string) {
+        reinterpret_cast<T*>(target)->append(string);
+    }
+    static void append_string_piece(void* target, const StringPiece& string) {
+        reinterpret_cast<T*>(target)->append(string);
+    }
+    static void append_bytes(void* target, const BytesPiece& bytes, const Encoding& encoding) {
+        reinterpret_cast<T*>(target)->append(bytes, encoding);
+    }
+    static void append_runes(void* target, size_t num, Rune rune) {
+        reinterpret_cast<T*>(target)->append(num, rune);
+    }
+    static const DispatchTable table;
+};
+
+template <typename T>
+const PrintTarget::DispatchTable PrintTarget::Dispatch<T>::table = {
+    append_string,
+    append_string_piece,
+    append_bytes,
+    append_runes,
+};
+
+template <typename T>
+PrintTarget::PrintTarget(T* t)
+    : _target(t),
+      _dispatch_table(&Dispatch<T>::table) { }
+
+inline void PrintTarget::append(const String& string) {
+    _dispatch_table->append_string(_target, string);
+}
+
+inline void PrintTarget::append(const StringPiece& string) {
+    _dispatch_table->append_string_piece(_target, string);
+}
+
+inline void PrintTarget::append(const BytesPiece& bytes, const Encoding& encoding) {
+    _dispatch_table->append_bytes(_target, bytes, encoding);
+}
+
+inline void PrintTarget::append(size_t num, Rune rune) {
+    _dispatch_table->append_runes(_target, num, rune);
+}
 
 }  // namespace sfz
 
