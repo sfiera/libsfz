@@ -10,6 +10,7 @@
 #include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
+#include "sfz/Formatter.hpp"
 #include "sfz/Range.hpp"
 
 using testing::Eq;
@@ -45,7 +46,7 @@ void print_to(sfz::PrintTarget out, Grapheme grapheme) {
 void print_to(sfz::PrintTarget out, const Mapping& mapping) {
     print_to(out, mapping.grapheme);
     out.append(" U+");
-    sfz::PrintItem(mapping.code_point, 16, 4).print_to(out);
+    sfz::PrintItem(sfz::hex(mapping.code_point, 4)).print_to(out);
 }
 
 };
@@ -89,15 +90,6 @@ class PrintItemTest : public Test {
         }
     }
 
-    template <typename T, int i>
-    void RunBase(const StringPiece& prefix, const T (&data)[i]) {
-        foreach (it, range(data, data + i)) {
-            typename T::TestType value(it->value);
-            String s(prefix);
-            PrintItem(value, it->base).print_to(&s);
-            EXPECT_THAT(s, Eq(it->expected));
-        }
-    }
 };
 
 TEST_F(PrintItemTest, EmptyItem) {
@@ -206,32 +198,6 @@ TEST_F(PrintItemTest, Uint64Item) {
         { 0xffffffffffffffffull, "uint64_t: 18446744073709551615" },
     };
     Run("uint64_t: ", data);
-}
-
-TEST_F(PrintItemTest, BaseBinaryItem) {
-    const BaseTestData<uint64_t> data[] = {
-        // Binary.
-        { 0ull, 2,                   "base: 0" },
-        { 5ull, 2,                   "base: 101" },
-        { 0xffffffffffffffffull, 2,  "base: 11111111111111111111111111111111"
-                                           "11111111111111111111111111111111" },
-        // Ternary.
-        { 0ull, 3,                   "base: 0" },
-        { 15ull, 3,                  "base: 120" },
-        { 0xffffffffffffffffull, 3,  "base: 11112220022122120101211020120210210211220" },
-        // Octal.
-        { 00ull, 8,                  "base: 0" },
-        { 012345670ull, 8,           "base: 12345670" },
-        { 0xffffffffffffffffull, 8,  "base: 1777777777777777777777" },
-        // Hexadecimal.
-        { 0x0ull, 16,                "base: 0" },
-        { 0x123456789abcdef0ull, 16, "base: 123456789abcdef0" },
-        { 0xffffffffffffffffull, 16, "base: ffffffffffffffff" },
-        // Hexatridecimal.
-        { 0ull, 36,                  "base: 0" },
-        { 0xffffffffffffffffull, 36, "base: 3w5e11264sgsf" },
-    };
-    RunBase("base: ", data);
 }
 
 TEST_F(PrintItemTest, FloatItem) {

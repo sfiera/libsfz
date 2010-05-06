@@ -66,20 +66,20 @@ struct WriteItem::Dispatch {
     static const DispatchTable table;
 };
 
-#define SFZ_PRINT_ITEM_SPECIALIZE(TYPE) \
+#define SFZ_WRITE_ITEM_SPECIALIZE(TYPE) \
     template <> void WriteItem::Dispatch<TYPE>::write_to( \
             const void* target, WriteTarget out, size_t count);
-SFZ_PRINT_ITEM_SPECIALIZE(bool);
-SFZ_PRINT_ITEM_SPECIALIZE(char);
-SFZ_PRINT_ITEM_SPECIALIZE(int8_t);
-SFZ_PRINT_ITEM_SPECIALIZE(int16_t);
-SFZ_PRINT_ITEM_SPECIALIZE(int32_t);
-SFZ_PRINT_ITEM_SPECIALIZE(int64_t);
-SFZ_PRINT_ITEM_SPECIALIZE(uint8_t);
-SFZ_PRINT_ITEM_SPECIALIZE(uint16_t);
-SFZ_PRINT_ITEM_SPECIALIZE(uint32_t);
-SFZ_PRINT_ITEM_SPECIALIZE(uint64_t);
-#undef SFZ_PRINT_ITEM_SPECIALIZE
+SFZ_WRITE_ITEM_SPECIALIZE(bool);
+SFZ_WRITE_ITEM_SPECIALIZE(char);
+SFZ_WRITE_ITEM_SPECIALIZE(int8_t);
+SFZ_WRITE_ITEM_SPECIALIZE(int16_t);
+SFZ_WRITE_ITEM_SPECIALIZE(int32_t);
+SFZ_WRITE_ITEM_SPECIALIZE(int64_t);
+SFZ_WRITE_ITEM_SPECIALIZE(uint8_t);
+SFZ_WRITE_ITEM_SPECIALIZE(uint16_t);
+SFZ_WRITE_ITEM_SPECIALIZE(uint32_t);
+SFZ_WRITE_ITEM_SPECIALIZE(uint64_t);
+#undef SFZ_WRITE_ITEM_SPECIALIZE
 
 template <typename T>
 const WriteItem::DispatchTable WriteItem::Dispatch<T>::table = {

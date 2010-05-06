@@ -9,6 +9,39 @@
 
 namespace sfz {
 
+EscapedString escape(const StringPiece& string) { return EscapedString(string); }
+QuotedString quote(const StringPiece& string) { return QuotedString(string); }
+
+void print_to(PrintTarget out, const FormattedSint& value) {
+    if (value.value < 0) {
+        out.append(1, '-');
+        print_to(out, FormattedUint(-value.value, value.base, value.min_width));
+    } else {
+        print_to(out, FormattedUint(value.value, value.base, value.min_width));
+    }
+}
+
+void print_to(PrintTarget out, const FormattedUint& value) {
+    static const char kDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+    uint8_t buffer[64];
+    size_t size = 0;
+    uint8_t* data = buffer + 64;
+    uint64_t v = value.value;
+
+    while (v > 0) {
+        --data;
+        ++size;
+        *data = kDigits[v % value.base];
+        v /= value.base;
+    }
+
+    if (size < value.min_width) {
+        out.append(value.min_width - size, '0');
+    }
+    out.append(BytesPiece(data, size), ascii_encoding());
+}
+
 namespace {
 
 // Maps control characters to their octal-escaped equivalents.  There are two things of note here:
@@ -24,49 +57,26 @@ const char kEscaped[' '][5] = {
     "\\030", "\\031", "\\032", "\\033", "\\034", "\\035", "\\036", "\\037",
 };
 
-class EscapedStringPrinter : public PrintItem::Impl {
-  public:
-    EscapedStringPrinter(const StringPiece& string)
-        : _string(string) { }
-
-    virtual void print_to(PrintTarget out) const {
-        foreach (it, _string) {
-            Rune rune = *it;
-            if (rune < ' ') {
-                out.append(kEscaped[rune]);
-            } else if (rune == '\'' || rune == '\"' || rune == '\\') {
-                out.append(1, '\\');
-                out.append(1, rune);
-            } else {
-                out.append(1, rune);
-            }
-        }
-    }
-
-  private:
-    StringPiece _string;
-};
-
-class QuotedStringPrinter : public EscapedStringPrinter {
-  public:
-    QuotedStringPrinter(const StringPiece& string)
-        : EscapedStringPrinter(string) { }
-
-    virtual void print_to(PrintTarget out) const {
-        out.append(1, '"');
-        EscapedStringPrinter::print_to(out);
-        out.append(1, '"');
-    }
-};
-
 }  // namespace
 
-PrintItem escape(const StringPiece& string) {
-    return PrintItem::make(new EscapedStringPrinter(string));
+void print_to(PrintTarget out, const EscapedString& value) {
+    foreach (it, value.string) {
+        Rune rune = *it;
+        if (rune < ' ') {
+            out.append(kEscaped[rune]);
+        } else if (rune == '\'' || rune == '\"' || rune == '\\') {
+            out.append(1, '\\');
+            out.append(1, rune);
+        } else {
+            out.append(1, rune);
+        }
+    }
 }
 
-PrintItem quote(const StringPiece& string) {
-    return PrintItem::make(new QuotedStringPrinter(string));
+void print_to(PrintTarget out, const QuotedString& value) {
+    out.append(1, '"');
+    print_to(out, EscapedString(value.string));
+    out.append(1, '"');
 }
 
 }  // namespace sfz

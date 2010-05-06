@@ -36,9 +36,26 @@ class FormatterTest : public Test {
     }
 };
 
-// Formatters are just syntactic sugar for the 3-arg integral constructors of PrintItem.  They're
-// exercised more fully in that test, so we don't bother with an exhaustive test suite here.
-TEST_F(FormatterTest, BaseFormatters) {
+TEST_F(FormatterTest, IntFormatterBase) {
+    const TestData data[] = {
+        // Binary.
+        { bin(0),                     "base: 0" },
+        { bin(5),                     "base: 101" },
+        { bin(0xffffffffffffffffull), "base: 11111111111111111111111111111111"
+                                               "11111111111111111111111111111111" },
+        // Octal.
+        { oct(00),                    "base: 0" },
+        { oct(012345670),             "base: 12345670" },
+        { oct(0xffffffffffffffffull), "base: 1777777777777777777777" },
+        // Hexadecimal.
+        { hex(0x0),                   "base: 0" },
+        { hex(0x123456789abcdef0ull), "base: 123456789abcdef0" },
+        { hex(0xffffffffffffffffull), "base: ffffffffffffffff" },
+    };
+    Run("base: ", data);
+}
+
+TEST_F(FormatterTest, IntFormatterWidth) {
     const TestData data[] = {
         { bin(21, 3), "base: 10101" },
         { oct(21, 3), "base: 025" },

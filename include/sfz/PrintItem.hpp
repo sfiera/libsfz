@@ -1,4 +1,4 @@
-// Copyright (c) 2009 Chris Pickel <sfiera@gmail.com>
+// Copyright (c) 2010 Chris Pickel <sfiera@gmail.com>
 //
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
@@ -6,10 +6,7 @@
 #ifndef SFZ_PRINT_ITEM_HPP_
 #define SFZ_PRINT_ITEM_HPP_
 
-#include "sfz/Macros.hpp"
 #include "sfz/PrintTarget.hpp"
-#include "sfz/String.hpp"
-#include "sfz/ReferenceCounted.hpp"
 
 namespace sfz {
 
@@ -17,54 +14,20 @@ class PrintItem;
 
 class PrintItem {
   public:
-    // Empty formatter.  Prints an empty string.
     PrintItem();
-
-    // String formatter.  Prints an ASCII string.
-    PrintItem(const char* string);
-
-    // Boolean formatter.  Prints either "true" or "false".
-    PrintItem(bool b);
-
-    // Character formatter.  Prints the character, raw.
-    PrintItem(char ch);
-
-    // Integer formatters.  Prints the number in digits.
-    PrintItem(signed char i, int base = 10, int min_width = 1);
-    PrintItem(signed short i, int base = 10, int min_width = 1);
-    PrintItem(signed int i, int base = 10, int min_width = 1);
-    PrintItem(signed long i, int base = 10, int min_width = 1);
-    PrintItem(signed long long i, int base = 10, int min_width = 1);
-
-    PrintItem(unsigned char i, int base = 10, int min_width = 1);
-    PrintItem(unsigned short i, int base = 10, int min_width = 1);
-    PrintItem(unsigned int i, int base = 10, int min_width = 1);
-    PrintItem(unsigned long i, int base = 10, int min_width = 1);
-    PrintItem(unsigned long long i, int base = 10, int min_width = 1);
-
-    // Floating-point formatters.  Prints using the "%f" printf() code family.
-    PrintItem(float f);
-    PrintItem(double d);
-
-    // Pointer formatter.  Prints the integral value of the pointer in hexadecimal, padded to an
-    // architecture-dependent width.  The templated form of the constructor will forwards non-void
-    // pointers to this call.
-    PrintItem(const void* pointer);
-
-    // Templated formatter.
     template <typename T> PrintItem(const T& object);
-
-    class Impl : public ReferenceCounted {
-      public:
-        virtual ~Impl();
-        virtual void print_to(PrintTarget out) const = 0;
-    };
-    static PrintItem make(Impl* printer);
 
     void print_to(PrintTarget out) const;
 
   private:
-    RefPtr<const Impl> _printer;
+    struct DispatchTable {
+        void (*print_to)(const void* target, PrintTarget out);
+    };
+
+    template <typename T> struct Dispatch;
+
+    const void* const _target;
+    const DispatchTable* const _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
 };
@@ -85,39 +48,54 @@ inline void adl_print_to(::sfz::PrintTarget out, const T& object) {
 namespace sfz {
 
 template <typename T>
-class TemplatedItemPrinter : public PrintItem::Impl {
-  public:
-    TemplatedItemPrinter(const T& object)
-        : _object(object) { }
-
-    virtual void print_to(PrintTarget out) const {
-        ::sfz_adl::adl_print_to(out, _object);
+struct PrintItem::Dispatch {
+    static void print_to(const void* target, PrintTarget out) {
+        ::sfz_adl::adl_print_to(out, *reinterpret_cast<const T*>(target));
     }
-
-    static PrintItem make(const T& object) {
-        return PrintItem::make(new TemplatedItemPrinter(object));
-    }
-
-  private:
-    const T& _object;
-
-    DISALLOW_COPY_AND_ASSIGN(TemplatedItemPrinter);
+    static const DispatchTable table;
 };
 
-template <typename T>
-class TemplatedItemPrinter<T*> {
-  public:
-    static PrintItem make(const T* object) {
-        const void* pointer = object;
-        return PrintItem(pointer);
-    }
+#define SFZ_PRINT_ITEM_SPECIALIZE(TYPE) \
+    template <> void PrintItem::Dispatch<TYPE>::print_to( \
+            const void* target, PrintTarget out);
+SFZ_PRINT_ITEM_SPECIALIZE(void);
+SFZ_PRINT_ITEM_SPECIALIZE(bool);
+SFZ_PRINT_ITEM_SPECIALIZE(char);
+SFZ_PRINT_ITEM_SPECIALIZE(signed char);
+SFZ_PRINT_ITEM_SPECIALIZE(signed short);
+SFZ_PRINT_ITEM_SPECIALIZE(signed int);
+SFZ_PRINT_ITEM_SPECIALIZE(signed long);
+SFZ_PRINT_ITEM_SPECIALIZE(signed long long);
+SFZ_PRINT_ITEM_SPECIALIZE(unsigned char);
+SFZ_PRINT_ITEM_SPECIALIZE(unsigned short);
+SFZ_PRINT_ITEM_SPECIALIZE(unsigned int);
+SFZ_PRINT_ITEM_SPECIALIZE(unsigned long);
+SFZ_PRINT_ITEM_SPECIALIZE(unsigned long long);
+SFZ_PRINT_ITEM_SPECIALIZE(float);
+SFZ_PRINT_ITEM_SPECIALIZE(double);
+SFZ_PRINT_ITEM_SPECIALIZE(const char*);
+SFZ_PRINT_ITEM_SPECIALIZE(const void*);
+#undef SFZ_PRINT_ITEM_SPECIALIZE
 
-    DISALLOW_COPY_AND_ASSIGN(TemplatedItemPrinter);
+template <typename T>
+struct PrintItem::Dispatch<T*> : public Dispatch<const void*> { };
+
+template <typename T>
+const PrintItem::DispatchTable PrintItem::Dispatch<T>::table = {
+    print_to,
 };
 
+inline PrintItem::PrintItem()
+    : _target(NULL),
+      _dispatch_table(&Dispatch<void>::table) { }
+
 template <typename T>
-PrintItem::PrintItem(const T& object) {
-    *this = TemplatedItemPrinter<T>::make(object);
+PrintItem::PrintItem(const T& t)
+    : _target(&t),
+      _dispatch_table(&Dispatch<T>::table) { }
+
+inline void PrintItem::print_to(PrintTarget out) const {
+    _dispatch_table->print_to(_target, out);
 }
 
 }  // namespace sfz
