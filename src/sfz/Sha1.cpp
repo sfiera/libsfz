@@ -34,7 +34,7 @@ void Sha1::reset() {
     _intermediate[4] = 0xc3d2e1f0;
 }
 
-void Sha1::update(const BytesPiece& input) {
+void Sha1::append(const BytesPiece& input) {
     if (input.empty()) {
         return;
     }
@@ -51,6 +51,16 @@ void Sha1::update(const BytesPiece& input) {
     memcpy(_message_block + _message_block_index, remainder.data(), remainder.size());
     _message_block_index += remainder.size();
     _size += 8 * input.size();
+}
+
+void Sha1::append(const StringPiece& input, const Encoding& encoding) {
+    Bytes bytes(input, encoding);
+    append(bytes);
+}
+
+void Sha1::append(size_t num, uint8_t byte) {
+    Bytes bytes(num, byte);
+    append(bytes);
 }
 
 void Sha1::get_digest(Bytes* digest) const {

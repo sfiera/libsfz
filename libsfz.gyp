@@ -53,6 +53,7 @@
                 'src/sfz/Sha1.cpp',
                 'src/sfz/String.cpp',
                 'src/sfz/StringUtilities.cpp',
+                'src/sfz/WriteItem.cpp',
             ],
         },
         {
@@ -63,6 +64,7 @@
                 'src/sfz/PrintItem.test.cpp',
                 'src/sfz/Sha1.test.cpp',
                 'src/sfz/String.test.cpp',
+                'src/sfz/WriteItem.test.cpp',
             ],
             'dependencies': [
                 ':check-deps',

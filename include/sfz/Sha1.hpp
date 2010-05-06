@@ -7,11 +7,14 @@
 #define SFZ_SHA1_HPP_
 
 #include <stdint.h>
+#include <stdlib.h>
 
 namespace sfz {
 
 class Bytes;
 class BytesPiece;
+class Encoding;
+class StringPiece;
 
 // Computes the SHA-1 digest of some sequence of bytes.
 //
@@ -33,7 +36,11 @@ class Sha1 {
     // Adds data in `input` to the current content.  It is more efficient, though semantically
     // identical, to add data in larger chunks.
     // @param [in] input    The data to add to the digest.
-    void update(const BytesPiece& input);
+    void append(const BytesPiece& input);
+
+    void append(const StringPiece& input, const Encoding& encoding);
+
+    void append(size_t num, uint8_t byte);
 
     // Appends the digest computed from the current content to `digest`.  This method does
     // non-trivial work, so if the digest is to be used multiple times, it should be called once,

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "sfz/Macros.hpp"
 #include "sfz/SmartPtr.hpp"
+#include "sfz/WriteTarget.hpp"
 
 namespace sfz {
 
@@ -129,6 +130,9 @@ class BytesPiece {
 
     // ALLOW_COPY_AND_ASSIGN
 };
+
+inline void write_to(WriteTarget out, const Bytes& bytes) { out.append(bytes); }
+inline void write_to(WriteTarget out, const BytesPiece& bytes) { out.append(bytes); }
 
 bool operator==(const Bytes& lhs, const Bytes& rhs);
 bool operator!=(const Bytes& lhs, const Bytes& rhs);

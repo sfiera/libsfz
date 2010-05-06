@@ -12,6 +12,8 @@
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"
+#include "sfz/WriteItem.hpp"
+#include "sfz/WriteTarget.hpp"
 
 using testing::Eq;
 using testing::ExplainMatchResult;
@@ -47,7 +49,7 @@ TEST_F(Sha1Test, Empty) {
 // about the Sha1 implementation.
 TEST_F(Sha1Test, Short) {
     Sha1 sha;
-    sha.update(string_bytes("abc"));
+    write(&sha, "abc", 3);
     const char expected[21] =
         "\xa9\x99\x3e\x36\x47\x06\x81\x6a\xba\x3e\x25\x71\x78\x50\xc2\x6c\x9c\xd0\xd8\x9d";
     EXPECT_THAT(sha, HasDigest(expected));
@@ -57,7 +59,7 @@ TEST_F(Sha1Test, Short) {
 // input size to the end.
 TEST_F(Sha1Test, ForceSecondBlock) {
     Sha1 sha;
-    sha.update(string_bytes("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"));
+    sha.append("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", ascii_encoding());
     const char expected[21] =
         "\x84\x98\x3e\x44\x1c\x3b\xd2\x6e\xba\xae\x4a\xa1\xf9\x51\x29\xe5\xe5\x46\x70\xf1";
     EXPECT_THAT(sha, HasDigest(expected));
@@ -67,13 +69,13 @@ TEST_F(Sha1Test, ForceSecondBlock) {
 TEST_F(Sha1Test, Long) {
     Bytes input;
     foreach (i, range(77)) {
-        input.append(string_bytes("abcdefghijklm"));
+        write(&input, "abcdefghijklm", 13);
     }
     input.resize(1000);
 
     Sha1 sha;
     foreach (i, range(1000)) {
-        sha.update(input);
+        sha.append(input);
     }
 
     const char expected[21] =
@@ -85,13 +87,13 @@ TEST_F(Sha1Test, Long) {
 TEST_F(Sha1Test, EvenMultipleOf512Bits) {
     Bytes bytes;
     foreach (i, range(8)) {
-        bytes.append(string_bytes("01234567"));
+        write(&bytes, "01234567", 8);
     }
     ASSERT_THAT(bytes.size(), Eq<size_t>(64));
 
     Sha1 sha;
     foreach (i, range(10)) {
-        sha.update(bytes);
+        write(&sha, bytes);
     }
 
     const char expected[21] =
@@ -202,7 +204,7 @@ TEST_F(Sha1Test, IncrementalDigest) {
 
     Sha1 sha;
     foreach (byte, range<uint8_t>(' ', '\x80')) {
-        sha.update(BytesPiece(&byte, 1));
+        write(&sha, byte);
         EXPECT_THAT(sha, HasDigest(expected[byte - ' ']));
     }
 
