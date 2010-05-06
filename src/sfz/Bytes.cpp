@@ -205,6 +205,19 @@ BytesPiece BytesPiece::substr(size_t index, size_t size) const {
     return BytesPiece(_data + index, size);
 }
 
+void BytesPiece::shift(size_t size) {
+    if (size > _size) {
+        abort();
+    }
+    _data += size;
+    _size -= size;
+}
+
+void BytesPiece::shift(uint8_t* data, size_t size) {
+    shift(size);
+    memcpy(data, _data - size, size);
+}
+
 // Equality operators.
 
 bool operator==(const Bytes& lhs, const Bytes& rhs) {

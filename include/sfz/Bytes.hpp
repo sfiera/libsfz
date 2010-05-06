@@ -119,6 +119,9 @@ class BytesPiece {
     BytesPiece substr(size_t index) const;
     BytesPiece substr(size_t index, size_t size) const;
 
+    void shift(size_t size);
+    void shift(uint8_t* data, size_t size);
+
     const_iterator begin() const { return const_iterator(_data); }
     const_iterator end() const { return const_iterator(_data + _size); }
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
