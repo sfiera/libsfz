@@ -11,7 +11,7 @@
 
 namespace sfz {
 
-void format(String* out, const char* fmt, SFZ_FORMAT_ITEMS_DEFINITION) {
+void format(PrintTarget out, const char* fmt, SFZ_FORMAT_ITEMS_DEFINITION) {
     const PrintItem* items[16] = SFZ_FORMAT_ITEMS_ARRAY;
     FormatResult result(fmt, SFZ_FORMAT_ITEM_COUNT, items);
     result.print_to(out);
@@ -48,7 +48,7 @@ void span_complement(
 
 }  // namespace
 
-void FormatResult::print_to(String* out) const {
+void FormatResult::print_to(PrintTarget out) const {
     static const String kBraces("{}", ascii_encoding());
     static const String kCloseBrace("}", ascii_encoding());
 
@@ -63,14 +63,14 @@ void FormatResult::print_to(String* out) const {
             span = f;
             remainder = StringPiece();
         }
-        out->append(span);
+        out.append(span);
         f = remainder;
         if (f.size() > 0) {
             if (f.at(0) == f.at(1)) {
-                out->append(1, f.at(0));
+                out.append(1, f.at(0));
                 f = f.substr(2);
             } else if (f.at(0) == '}') {
-                out->append(1, '}');
+                out.append(1, '}');
                 f = f.substr(1);
             } else {
                 f = f.substr(1);

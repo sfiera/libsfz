@@ -7,6 +7,7 @@
 #define SFZ_PRINT_ITEM_HPP_
 
 #include "sfz/Macros.hpp"
+#include "sfz/PrintTarget.hpp"
 #include "sfz/String.hpp"
 #include "sfz/ReferenceCounted.hpp"
 
@@ -56,11 +57,11 @@ class PrintItem {
     class Impl : public ReferenceCounted {
       public:
         virtual ~Impl();
-        virtual void print_to(String* out) const = 0;
+        virtual void print_to(PrintTarget out) const = 0;
     };
     static PrintItem make(Impl* printer);
 
-    void print_to(String* out) const;
+    void print_to(PrintTarget out) const;
 
   private:
     RefPtr<const Impl> _printer;
@@ -75,7 +76,7 @@ class PrintItem {
 namespace sfz_adl {
 
 template <typename T>
-inline void adl_print_to(::sfz::String* out, const T& object) {
+inline void adl_print_to(::sfz::PrintTarget out, const T& object) {
     print_to(out, object);
 }
 
@@ -89,7 +90,7 @@ class TemplatedItemPrinter : public PrintItem::Impl {
     TemplatedItemPrinter(const T& object)
         : _object(object) { }
 
-    virtual void print_to(String* out) const {
+    virtual void print_to(PrintTarget out) const {
         ::sfz_adl::adl_print_to(out, _object);
     }
 

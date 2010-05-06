@@ -45,7 +45,7 @@ namespace sfz {
     &item8, &item9, &item10, &item11, &item12, &item13, &item14, &item15 \
 }
 
-void format(String* out, const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
+void format(PrintTarget out, const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
 
 void print(int fd, const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
 
@@ -53,7 +53,7 @@ class FormatResult {
   public:
     FormatResult(const char* fmt, size_t item_count, const PrintItem** items);
 
-    void print_to(String* out) const;
+    void print_to(PrintTarget out) const;
 
   private:
     const char* _fmt;

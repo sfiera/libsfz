@@ -29,16 +29,16 @@ class EscapedStringPrinter : public PrintItem::Impl {
     EscapedStringPrinter(const StringPiece& string)
         : _string(string) { }
 
-    virtual void print_to(String* out) const {
+    virtual void print_to(PrintTarget out) const {
         foreach (it, _string) {
             Rune rune = *it;
             if (rune < ' ') {
-                out->append(kEscaped[rune]);
+                out.append(kEscaped[rune]);
             } else if (rune == '\'' || rune == '\"' || rune == '\\') {
-                out->append(1, '\\');
-                out->append(1, rune);
+                out.append(1, '\\');
+                out.append(1, rune);
             } else {
-                out->append(1, rune);
+                out.append(1, rune);
             }
         }
     }
@@ -52,10 +52,10 @@ class QuotedStringPrinter : public EscapedStringPrinter {
     QuotedStringPrinter(const StringPiece& string)
         : EscapedStringPrinter(string) { }
 
-    virtual void print_to(String* out) const {
-        out->append(1, '"');
+    virtual void print_to(PrintTarget out) const {
+        out.append(1, '"');
         EscapedStringPrinter::print_to(out);
-        out->append(1, '"');
+        out.append(1, '"');
     }
 };
 

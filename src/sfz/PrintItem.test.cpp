@@ -31,20 +31,20 @@ struct Mapping {
     sfz::Rune code_point;
 };
 
-void print_to(sfz::String* out, Grapheme grapheme) {
+void print_to(sfz::PrintTarget out, Grapheme grapheme) {
     switch (grapheme) {
-      case AESC: out->append("AESC"); break;
-      case ETH: out->append("ETH"); break;
-      case THORN: out->append("THORN"); break;
-      case WYNN: out->append("WYNN"); break;
-      case YOGH: out->append("YOGH"); break;
-      default: out->append("UNKNOWN"); break;
+      case AESC: out.append("AESC"); break;
+      case ETH: out.append("ETH"); break;
+      case THORN: out.append("THORN"); break;
+      case WYNN: out.append("WYNN"); break;
+      case YOGH: out.append("YOGH"); break;
+      default: out.append("UNKNOWN"); break;
     }
 }
 
-void print_to(sfz::String* out, const Mapping& mapping) {
+void print_to(sfz::PrintTarget out, const Mapping& mapping) {
     print_to(out, mapping.grapheme);
-    out->append(" U+");
+    out.append(" U+");
     sfz::PrintItem(mapping.code_point, 16, 4).print_to(out);
 }
 

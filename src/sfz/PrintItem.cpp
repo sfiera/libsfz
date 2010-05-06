@@ -15,8 +15,9 @@ class EncodedStringPrinter : public PrintItem::Impl {
         : _string(string),
           _encoding(encoding) { }
 
-    virtual void print_to(String* out) const {
-        out->append(_string, _encoding);
+    virtual void print_to(PrintTarget out) const {
+        out.append(
+                BytesPiece(reinterpret_cast<const uint8_t*>(_string), strlen(_string)), _encoding);
     }
 
   private:
@@ -31,11 +32,11 @@ class BooleanPrinter : public PrintItem::Impl {
     BooleanPrinter(bool b)
         : _value(b) { }
 
-    virtual void print_to(String* out) const {
+    virtual void print_to(PrintTarget out) const {
         if (_value) {
-            out->append("true", ascii_encoding());
+            out.append("true");
         } else {
-            out->append("false", ascii_encoding());
+            out.append("false");
         }
     }
 
@@ -50,8 +51,8 @@ class CharacterPrinter : public PrintItem::Impl {
     CharacterPrinter(char ch)
         : _value(ch) { }
 
-    virtual void print_to(String* out) const {
-        out->append(1, _value);
+    virtual void print_to(PrintTarget out) const {
+        out.append(1, _value);
     }
 
   private:
@@ -68,8 +69,8 @@ class PrintfPrinter : public PrintItem::Impl {
         }
     }
 
-    virtual void print_to(String* out) const {
-        out->append(_value, ascii_encoding());
+    virtual void print_to(PrintTarget out) const {
+        out.append(_value);
     }
 
   protected:
@@ -89,7 +90,7 @@ class PrintfPrinter : public PrintItem::Impl {
 class UnsignedIntegerPrinter : public PrintItem::Impl {
   public:
     UnsignedIntegerPrinter(uint64_t value, int base, size_t min_width);
-    virtual void print_to(String* out) const;
+    virtual void print_to(PrintTarget out) const;
 
   private:
     uint64_t _value;
@@ -105,9 +106,9 @@ class SignedIntegerPrinter : public UnsignedIntegerPrinter {
         : UnsignedIntegerPrinter(((value >= 0) ? value : (-value)), base, min_width),
           _negative(value < 0) { }
 
-    virtual void print_to(String* out) const {
+    virtual void print_to(PrintTarget out) const {
         if (_negative) {
-            out->append(1, '-');
+            out.append(1, '-');
         }
         UnsignedIntegerPrinter::print_to(out);
     }
@@ -177,7 +178,7 @@ PrintItem PrintItem::make(Impl* printer) {
     return result;
 }
 
-void PrintItem::print_to(String* out) const {
+void PrintItem::print_to(PrintTarget out) const {
     if (_printer.get()) {
         _printer->print_to(out);
     }
@@ -188,7 +189,7 @@ UnsignedIntegerPrinter::UnsignedIntegerPrinter(uint64_t value, int base, size_t 
       _base(base),
       _min_width(min_width) { }
 
-void UnsignedIntegerPrinter::print_to(String* out) const {
+void UnsignedIntegerPrinter::print_to(PrintTarget out) const {
     static const char kDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
     uint8_t buffer[64];
@@ -204,9 +205,9 @@ void UnsignedIntegerPrinter::print_to(String* out) const {
     }
 
     if (size < _min_width) {
-        out->append(_min_width - size, '0');
+        out.append(_min_width - size, '0');
     }
-    out->append(BytesPiece(data, size), ascii_encoding());
+    out.append(BytesPiece(data, size), ascii_encoding());
 }
 
 }  // namespace sfz

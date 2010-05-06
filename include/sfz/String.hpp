@@ -12,6 +12,7 @@
 #include "sfz/Macros.hpp"
 #include "sfz/Bytes.hpp"
 #include "sfz/Encoding.hpp"
+#include "sfz/PrintTarget.hpp"
 #include "sfz/Rune.hpp"
 
 namespace sfz {
@@ -311,9 +312,9 @@ class StringPiece {
     // ALLOW_COPY_AND_ASSIGN
 };
 
-inline void print_to(String* out, const String& s) { out->append(s); }
-inline void print_to(String* out, const StringPiece& s) { out->append(s); }
-inline void print_to(String* out, const StringKey& s) { out->append(s); }
+inline void print_to(PrintTarget out, const String& s) { out.append(s); }
+inline void print_to(PrintTarget out, const StringPiece& s) { out.append(s); }
+inline void print_to(PrintTarget out, const StringKey& s) { out.append(s); }
 
 bool operator==(const String& lhs, const String& rhs);
 bool operator!=(const String& lhs, const String& rhs);
