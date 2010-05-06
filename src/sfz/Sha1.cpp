@@ -6,11 +6,11 @@
 #include "sfz/Sha1.hpp"
 
 #include <limits>
-#include "sfz/BinaryReader.hpp"
-#include "sfz/BinaryWriter.hpp"
 #include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/NetworkBytes.hpp"
+#include "sfz/ReadItem.hpp"
+#include "sfz/WriteItem.hpp"
 
 using std::numeric_limits;
 
@@ -66,8 +66,7 @@ void Sha1::append(size_t num, uint8_t byte) {
 void Sha1::get_digest(Bytes* digest) const {
     Sha1 copy(*this);
     copy.finish();
-    BytesBinaryWriter bin(digest);
-    bin.write(copy._intermediate, 5);
+    write(digest, copy._intermediate, 5);
 }
 
 void Sha1::finish() {
@@ -106,8 +105,8 @@ void Sha1::process_message_block() {
     static const uint32_t k[] = { 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6, };
 
     uint32_t w[80];
-    BytesBinaryReader bin(BytesPiece(_message_block, 64));
-    bin.read(w, 16);
+    BytesPiece block(_message_block, 64);
+    read(&block, w, 16);
     for (int i = 16; i < 80; ++i) {
         w[i] = left_rotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
     }

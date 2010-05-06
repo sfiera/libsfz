@@ -37,8 +37,6 @@
             'target_name': 'libsfz',
             'type': '<(library)',
             'sources': [
-                'src/sfz/BinaryReader.cpp',
-                'src/sfz/BinaryWriter.cpp',
                 'src/sfz/Bytes.cpp',
                 'src/sfz/Encoding.cpp',
                 'src/sfz/Exception.cpp',
