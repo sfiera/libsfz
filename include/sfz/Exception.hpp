@@ -15,11 +15,11 @@ class Exception : public std::exception {
   public:
     Exception(const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
     virtual ~Exception() throw();
-    virtual void print_to(String* out) const throw();
+    virtual const String& message() const throw();
     virtual const char* what() const throw();
 
   private:
-    String _explanation;
+    String _message;
     Bytes _utf8_string;
 };
 
