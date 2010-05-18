@@ -6,6 +6,8 @@
 #ifndef SFZ_SCOPED_FD_HPP_
 #define SFZ_SCOPED_FD_HPP_
 
+#include "sfz/Macros.hpp"
+
 namespace sfz {
 
 class ScopedFd {
@@ -18,6 +20,8 @@ class ScopedFd {
 
   private:
     int _fd;
+
+    DISALLOW_COPY_AND_ASSIGN(ScopedFd);
 };
 
 }  // namespace sfz
