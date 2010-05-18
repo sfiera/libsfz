@@ -53,11 +53,6 @@ void Sha1::append(const BytesPiece& input) {
     _size += 8 * input.size();
 }
 
-void Sha1::append(const StringPiece& input, const Encoding& encoding) {
-    Bytes bytes(input, encoding);
-    append(bytes);
-}
-
 void Sha1::append(size_t num, uint8_t byte) {
     Bytes bytes(num, byte);
     append(bytes);

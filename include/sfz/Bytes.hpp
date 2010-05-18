@@ -6,18 +6,16 @@
 #ifndef SFZ_BYTES_HPP_
 #define SFZ_BYTES_HPP_
 
-#include <iterator>
 #include <stdint.h>
 #include <stdlib.h>
-#include "sfz/Macros.hpp"
+#include <iterator>
 #include "sfz/SmartPtr.hpp"
+#include "sfz/WriteItem.hpp"
 #include "sfz/WriteTarget.hpp"
 
 namespace sfz {
 
 class BytesPiece;
-class Encoding;
-class StringPiece;
 
 class Bytes {
   public:
@@ -39,7 +37,7 @@ class Bytes {
     explicit Bytes(const Bytes& bytes);
     explicit Bytes(const BytesPiece& bytes);
     Bytes(const uint8_t* data, size_t size);
-    Bytes(const StringPiece& string, const Encoding& encoding);
+    Bytes(WriteItem item);
     Bytes(size_t num, uint8_t byte);
     ~Bytes();
 
@@ -49,12 +47,12 @@ class Bytes {
 
     void append(const BytesPiece& bytes);
     void append(const uint8_t* data, size_t size);
-    void append(const StringPiece& string, const Encoding& encoding);
+    void append(WriteItem item);
     void append(size_t num, uint8_t byte);
 
     void assign(const BytesPiece& bytes);
     void assign(const uint8_t* data, size_t size);
-    void assign(const StringPiece& string, const Encoding& encoding);
+    void assign(WriteItem item);
     void assign(size_t num, uint8_t byte);
 
     uint8_t at(size_t loc) const;
@@ -107,6 +105,7 @@ class BytesPiece {
     // Constructors.
     BytesPiece();
     BytesPiece(const Bytes& bytes);
+    BytesPiece(const char* data);
     BytesPiece(const uint8_t* data, size_t size);
 
     const uint8_t* data() const;

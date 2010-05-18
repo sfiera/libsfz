@@ -9,9 +9,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <iterator>
-#include "sfz/Macros.hpp"
-#include "sfz/Bytes.hpp"
-#include "sfz/Encoding.hpp"
+#include "sfz/SmartPtr.hpp"
+#include "sfz/PrintItem.hpp"
 #include "sfz/PrintTarget.hpp"
 #include "sfz/Rune.hpp"
 
@@ -59,29 +58,26 @@ class String {
     void assign(const String& string);
     void assign(const StringPiece& string);
 
-    // Copies the content of an encoded NUL-terminated byte sequence.
+    // Copies the content of an ASCII-encoded, NUL-terminated byte sequence.
     //
     // The decoded content of `data` either is used to initialize the String, is appended to the
     // String, or replaces the current content of the String, depending on the method which is
-    // used.  The time complexity of these methods is dependent on `encoding`.
+    // used.
     //
-    // @param [in] data     A NUL-terminated byte sequence with encoded code points.
-    // @param [in] encoding The encoding to use to decode `data`.
-    String(const char* data, const Encoding& encoding);
-    void append(const char* data, const Encoding& encoding);
-    void assign(const char* data, const Encoding& encoding);
+    // @param [in] data     A NUL-terminated byte sequence with ASCII-encoded code points.
+    explicit String(const char* data);
+    void append(const char* data);
+    void assign(const char* data);
 
-    // Copies the content of an encoded byte sequence.
+    // Copies the content of a printable object.
     //
-    // The decoded content of `bytes` either is used to initialize the String, is appended to the
-    // String, or replaces the current content of the String, depending on the method which is
-    // used.  The time complexity of these methods is dependent on `encoding`.
+    // The content of `object` either is used to initialize the String, is appended to the String,
+    // or replaces the current content of the string, depending on the method which is used.
     //
-    // @param [in] bytes    A byte sequence with encoded code points.
-    // @param [in] encoding The encoding to use to decode `bytes`.
-    String(const BytesPiece& bytes, const Encoding& encoding);
-    void append(const BytesPiece& bytes, const Encoding& encoding);
-    void assign(const BytesPiece& bytes, const Encoding& encoding);
+    // @param [in] item     A printable object.
+    explicit String(const PrintItem& item);
+    void append(const PrintItem& item);
+    void assign(const PrintItem& item);
 
     // Copies a repeated code point.
     //
@@ -168,8 +164,6 @@ class StringKey : public String {
     StringKey(const String& string) : String(string) { }
     StringKey(const StringKey& string) : String(string) { }
     StringKey(const StringPiece& string) : String(string) { }
-    StringKey(const char* data, const Encoding& encoding) : String(data, encoding) { }
-    StringKey(const BytesPiece& bytes, const Encoding& encoding) : String(bytes, encoding) { }
     StringKey(size_t num, Rune rune) : String(num, rune) { }
 
     StringKey& operator=(const String& string) { assign(string); return *this; }

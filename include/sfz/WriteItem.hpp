@@ -10,13 +10,12 @@
 
 namespace sfz {
 
-class WriteItem;
-
 class WriteItem {
   public:
-    template <typename T> WriteItem(const T* t);
+    template <typename T> WriteItem(const T& t);
+    template <typename T> WriteItem(const T* t, size_t size);
 
-    inline void write_to(WriteTarget out, size_t count) const;
+    inline void write_to(WriteTarget out) const;
 
   private:
     struct DispatchTable {
@@ -26,6 +25,7 @@ class WriteItem {
     template <typename T> struct Dispatch;
 
     const void* _target;
+    const size_t _size;
     const DispatchTable* _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
@@ -33,12 +33,12 @@ class WriteItem {
 
 template <typename T>
 void write(WriteTarget out, const T& item) {
-    WriteItem(&item).write_to(out, 1);
+    WriteItem(item).write_to(out);
 }
 
 template <typename T>
 void write(WriteTarget out, const T* items, size_t count) {
-    WriteItem(items).write_to(out, count);
+    WriteItem(items, count).write_to(out);
 }
 
 // Implementation details follow.
@@ -87,12 +87,19 @@ const WriteItem::DispatchTable WriteItem::Dispatch<T>::table = {
 };
 
 template <typename T>
-WriteItem::WriteItem(const T* t)
-    : _target(t),
+WriteItem::WriteItem(const T& t)
+    : _target(&t),
+      _size(1),
       _dispatch_table(&Dispatch<T>::table) { }
 
-inline void WriteItem::write_to(WriteTarget out, size_t count) const {
-    _dispatch_table->write_to(_target, out, count);
+template <typename T>
+WriteItem::WriteItem(const T* t, size_t size)
+    : _target(t),
+      _size(size),
+      _dispatch_table(&Dispatch<T>::table) { }
+
+inline void WriteItem::write_to(WriteTarget out) const {
+    _dispatch_table->write_to(_target, out, _size);
 }
 
 }  // namespace sfz

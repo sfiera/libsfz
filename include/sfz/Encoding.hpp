@@ -6,56 +6,25 @@
 #ifndef SFZ_ENCODING_HPP_
 #define SFZ_ENCODING_HPP_
 
-#include <stdint.h>
-#include <stdlib.h>
-#include "sfz/Bytes.hpp"
-#include "sfz/Macros.hpp"
-#include "sfz/Rune.hpp"
-#include "sfz/SmartPtr.hpp"
+#include "sfz/PrintItem.hpp"
+#include "sfz/WriteItem.hpp"
 
 namespace sfz {
 
-class Bytes;
 class BytesPiece;
-class Encoding;
-class String;
 class StringPiece;
+template <typename T> struct EncodedString;
+template <typename T> struct DecodedBytes;
 
-// ASCII text encoding.
-//
-// This encoding can represent code points in the range [U+00, U+7F].  It does so by representing
-// each code point as a 1-byte value with the corresponding integer; the most-significant bit of
-// the binary representation is never set.
-//
-// @returns             An Encoding object for ASCII.
-const Encoding& ascii_encoding();
+template <typename T> struct EncodedString {
+    const BytesPiece& bytes;
+    EncodedString(const BytesPiece& b) : bytes(b) { }
+};
 
-// Latin-1 text encoding.
-//
-// This encoding can represent code points in the range [U+00, U+FF].  It does so by representing
-// each code point as a 1-byte value with the corresponding integer.
-//
-// All ASCII code points are encoded equivalently in Latin-1; as a consequence, all valid
-// ASCII-encoded strings are also Latin-1-encoded strings with equal values.  Code points in the
-// Latin-1 supplement make up the other half of valid values.  All byte sequences are valid
-// Latin-1-encoded strings.
-//
-// @returns             An Encoding object for Latin-1.
-const Encoding& latin1_encoding();
-
-// UTF-8 text encoding.
-//
-// This encoding can represent any valid code point.  It is a variable-width encoding, taking up
-// between 1 and 4 bytes for every code point.  As such, random access to UTF-8-encoded code points
-// is linear time, making it a relatively inefficient in-memory format for strings.
-//
-// All ASCII code points are encoded equivalently in UTF-8; as a consequence, all valid
-// ASCII-encoded strings are also UTF-8-encoded strings with equal values.  Other code points in
-// the basic multilingual plane are encoded with 2 or 3 bytes, and code poins outside of it are
-// encoded with 4 bytes.
-//
-// @returns             An Encoding object for UTF-8.
-const Encoding& utf8_encoding();
+template <typename T> struct DecodedBytes {
+    const StringPiece& string;
+    DecodedBytes(const StringPiece& s) : string(s) { }
+};
 
 // Constants for replacing code points which cannot be encoded.
 //
@@ -64,10 +33,9 @@ const Encoding& utf8_encoding();
 // byte sequence not decodable.  In such cases, these code points are provided as replacements.
 //
 // If decoding a byte sequence to a string, or encoding a string into a byte sequence using an
-// encoding that is capable of representing it, such as UTF-8 or UTF-32, then kUnknownCodePoint
-// should be used.  If encoding a string into a byte sequence using an encoding that cannot
-// represent kUnknownCodePoint, such as ASCII or Latin-1, then kAsciiUnknownCodePoint should be
-// used instead.
+// encoding that is capable of representing it, such as UCS-2, then kUnknownCodePoint should be
+// used.  If encoding a string into a byte sequence using an encoding that cannot represent
+// kUnknownCodePoint, such as ASCII or Latin-1, then kAsciiUnknownCodePoint should be used instead.
 extern const Rune kUnknownCodePoint;
 extern const Rune kAsciiUnknownCodePoint;
 
@@ -82,53 +50,73 @@ extern const Rune kAsciiUnknownCodePoint;
 // @returns             true iff `rune` is a valid code point.
 bool is_valid_code_point(Rune rune);
 
-// A mapping between sequences of code points and sequences of bytes.
-class Encoding {
-  public:
-    virtual ~Encoding();
+// ASCII text encoding.
+//
+// This encoding can represent code points in the range [U+00, U+7F].  It does so by representing
+// each code point as a 1-byte value with the corresponding integer; the most-significant bit of
+// the binary representation is never set.
+namespace ascii {
 
-    // @returns             The name of the encoding, in ASCII encoding.
-    virtual StringPiece name() const = 0;
-
-    // Determines whether `bytes` represents well-formed encoded data.
-    //
-    // The default implementation of this method loops over the string using the iterator methods.
-    // If any code point could not be successfully dereferenced, then it returns false; otherwise,
-    // it returns true.  Time complexity is linear in the size of `bytes`.
-    //
-    // @param [in] bytes    A sequence of arbitrary bytes.
-    // @returns             true iff `bytes` can be decoded.
-    virtual bool can_decode(const BytesPiece& bytes) const = 0;
-
-    // Appends the decoded contents of `in` to `out`.
-    //
-    // The default implementation of this method loops over the string using the iterator methods.
-    // Any code point that could be successfully dereferenced is appended to `out`, with
-    // kUnknownCodePoint replacing any code point that could not.  Time complexity is linear in the
-    // size of `in`.
-    //
-    // @param [in] in       The byte sequence to decode from.
-    // @param [out] out     The code point sequence to append to.
-    virtual void decode(const BytesPiece& in, String* out) const = 0;
-
-    // Identifies whether `string` contains data which can be encoded in this encoding.
-    //
-    // Time complexity is linear in the size of `string`.
-    //
-    // @param [in] string   A sequence of code points.
-    // @returns             true iff `string` can be encoded.
-    virtual bool can_encode(const StringPiece& string) const = 0;
-
-    // Appends the decoded contents of `in` to `out`.
-    //
-    // Any code point that can be encoded is appended to `out`.  For each code point that could not
-    // be encoded, kUnknownCodePoint is appended, or, if that could not be encoded either,
-    // kAsciiUnknownCodePoint.  Time complexity is linear in the size of `in`.
-    //
-    // @param [in] in       The code point sequence to encode from.
-    // @param [out] out     The byte sequence to append to.
-    virtual void encode(const StringPiece& in, Bytes* out) const = 0;
+struct Ascii {
+    static void encode_to(WriteTarget out, const StringPiece& string);
+    static void decode_to(PrintTarget out, const BytesPiece& bytes);
 };
+
+inline DecodedBytes<Ascii> encode(const StringPiece& string) { return string; }
+inline EncodedString<Ascii> decode(const BytesPiece& bytes) { return bytes; }
+
+}  // namespace ascii
+
+// Latin-1 text encoding.
+//
+// This encoding can represent code points in the range [U+00, U+FF].  It does so by representing
+// each code point as a 1-byte value with the corresponding integer.
+//
+// All ASCII code points are encoded equivalently in Latin-1; as a consequence, all valid
+// ASCII-encoded strings are also Latin-1-encoded strings with equal values.  Code points in the
+// Latin-1 supplement make up the other half of valid values.  All byte sequences are valid
+// Latin-1-encoded strings.
+namespace latin1 {
+
+struct Latin1 {
+    static void encode_to(WriteTarget out, const StringPiece& string);
+    static void decode_to(PrintTarget out, const BytesPiece& bytes);
+};
+
+inline DecodedBytes<Latin1> encode(const StringPiece& string) { return string; }
+inline EncodedString<Latin1> decode(const BytesPiece& bytes) { return bytes; }
+
+}  // namespace latin1
+
+// UTF-8 text encoding.
+//
+// This encoding can represent any valid code point.  It is a variable-width encoding, taking up
+// between 1 and 4 bytes for every code point.  As such, random access to UTF-8-encoded code points
+// is linear time, making it a relatively inefficient in-memory format for strings.
+//
+// All ASCII code points are encoded equivalently in UTF-8; as a consequence, all valid
+// ASCII-encoded strings are also UTF-8-encoded strings with equal values.  Other code points in
+// the basic multilingual plane are encoded with 2 or 3 bytes, and code poins outside of it are
+// encoded with 4 bytes.
+namespace utf8 {
+
+struct Utf8 {
+    static void encode_to(WriteTarget out, const StringPiece& string);
+    static void decode_to(PrintTarget out, const BytesPiece& bytes);
+};
+
+inline DecodedBytes<Utf8> encode(const StringPiece& string) { return string; }
+inline EncodedString<Utf8> decode(const BytesPiece& bytes) { return bytes; }
+
+}  // namespace latin1
+
+template <typename T> void print_to(PrintTarget out, const EncodedString<T>& string) {
+    T::decode_to(out, string.bytes);
+}
+
+template <typename T> void write_to(WriteTarget out, const DecodedBytes<T>& bytes) {
+    T::encode_to(out, bytes.string);
+}
 
 }  // namespace sfz
 

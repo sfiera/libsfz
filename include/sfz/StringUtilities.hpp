@@ -6,9 +6,7 @@
 #ifndef SFZ_STRING_UTILITIES_HPP_
 #define SFZ_STRING_UTILITIES_HPP_
 
-#include <exception>
-#include <stdlib.h>
-#include "sfz/Exception.hpp"
+#include <stdint.h>
 #include "sfz/String.hpp"
 
 namespace sfz {

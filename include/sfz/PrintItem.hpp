@@ -32,6 +32,11 @@ class PrintItem {
     // ALLOW_COPY_AND_ASSIGN
 };
 
+template <typename T>
+void print(PrintTarget out, const T& item) {
+    PrintItem(item).print_to(out);
+}
+
 // Implementation details follow.
 
 }  // namespace sfz
@@ -56,8 +61,7 @@ struct PrintItem::Dispatch {
 };
 
 #define SFZ_PRINT_ITEM_SPECIALIZE(TYPE) \
-    template <> void PrintItem::Dispatch<TYPE>::print_to( \
-            const void* target, PrintTarget out);
+    template <> void PrintItem::Dispatch<TYPE>::print_to(const void* target, PrintTarget out);
 SFZ_PRINT_ITEM_SPECIALIZE(void);
 SFZ_PRINT_ITEM_SPECIALIZE(bool);
 SFZ_PRINT_ITEM_SPECIALIZE(char);
@@ -79,6 +83,9 @@ SFZ_PRINT_ITEM_SPECIALIZE(const void*);
 
 template <typename T>
 struct PrintItem::Dispatch<T*> : public Dispatch<const void*> { };
+
+template <typename T, int size>
+struct PrintItem::Dispatch<T[size]> : public Dispatch<T*> { };
 
 template <typename T>
 const PrintItem::DispatchTable PrintItem::Dispatch<T>::table = {

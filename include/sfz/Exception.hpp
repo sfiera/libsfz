@@ -6,14 +6,16 @@
 #ifndef SFZ_EXCEPTION_HPP_
 #define SFZ_EXCEPTION_HPP_
 
-#include "sfz/Format.hpp"
+#include <exception>
+#include "sfz/PrintItem.hpp"
 #include "sfz/String.hpp"
+#include "sfz/Bytes.hpp"
 
 namespace sfz {
 
 class Exception : public std::exception {
   public:
-    Exception(const char* fmt, SFZ_FORMAT_ITEMS_DECLARATION);
+    Exception(const PrintItem& message);
     virtual ~Exception() throw();
     virtual const String& message() const throw();
     virtual const char* what() const throw();

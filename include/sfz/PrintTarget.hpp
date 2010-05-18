@@ -12,7 +12,6 @@
 namespace sfz {
 
 class BytesPiece;
-class Encoding;
 class String;
 class StringPiece;
 
@@ -20,16 +19,16 @@ class PrintTarget {
   public:
     template <typename T> PrintTarget(T* t);
 
+    inline void append(const char* string);
     inline void append(const String& string);
     inline void append(const StringPiece& string);
-    inline void append(const BytesPiece& bytes, const Encoding& encoding);
     inline void append(size_t num, Rune rune);
 
   private:
     struct DispatchTable {
+        void (*append_c_string)(void* target, const char* string);
         void (*append_string)(void* target, const String& string);
         void (*append_string_piece)(void* target, const StringPiece& string);
-        void (*append_bytes)(void* target, const BytesPiece& bytes, const Encoding& encoding);
         void (*append_runes)(void* target, size_t num, Rune rune);
     };
 
@@ -43,14 +42,14 @@ class PrintTarget {
 
 template <typename T>
 struct PrintTarget::Dispatch {
+    static void append_c_string(void* target, const char* string) {
+        reinterpret_cast<T*>(target)->append(string);
+    }
     static void append_string(void* target, const String& string) {
         reinterpret_cast<T*>(target)->append(string);
     }
     static void append_string_piece(void* target, const StringPiece& string) {
         reinterpret_cast<T*>(target)->append(string);
-    }
-    static void append_bytes(void* target, const BytesPiece& bytes, const Encoding& encoding) {
-        reinterpret_cast<T*>(target)->append(bytes, encoding);
     }
     static void append_runes(void* target, size_t num, Rune rune) {
         reinterpret_cast<T*>(target)->append(num, rune);
@@ -60,9 +59,9 @@ struct PrintTarget::Dispatch {
 
 template <typename T>
 const PrintTarget::DispatchTable PrintTarget::Dispatch<T>::table = {
+    append_c_string,
     append_string,
     append_string_piece,
-    append_bytes,
     append_runes,
 };
 
@@ -71,16 +70,16 @@ PrintTarget::PrintTarget(T* t)
     : _target(t),
       _dispatch_table(&Dispatch<T>::table) { }
 
+inline void PrintTarget::append(const char* string) {
+    _dispatch_table->append_c_string(_target, string);
+}
+
 inline void PrintTarget::append(const String& string) {
     _dispatch_table->append_string(_target, string);
 }
 
 inline void PrintTarget::append(const StringPiece& string) {
     _dispatch_table->append_string_piece(_target, string);
-}
-
-inline void PrintTarget::append(const BytesPiece& bytes, const Encoding& encoding) {
-    _dispatch_table->append_bytes(_target, bytes, encoding);
 }
 
 inline void PrintTarget::append(size_t num, Rune rune) {

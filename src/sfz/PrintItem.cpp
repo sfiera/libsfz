@@ -5,7 +5,6 @@
 
 #include "sfz/PrintItem.hpp"
 
-#include "sfz/String.hpp"
 #include "sfz/Formatter.hpp"
 
 namespace sfz {
@@ -31,61 +30,61 @@ void PrintItem::Dispatch<char>::print_to(const void* target, PrintTarget out) {
 template <>
 void PrintItem::Dispatch<signed char>::print_to(const void* target, PrintTarget out) {
     signed char value = *reinterpret_cast<const signed char*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<signed short>::print_to(const void* target, PrintTarget out) {
     signed short value = *reinterpret_cast<const signed short*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<signed int>::print_to(const void* target, PrintTarget out) {
     signed int value = *reinterpret_cast<const signed int*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<signed long>::print_to(const void* target, PrintTarget out) {
     signed long value = *reinterpret_cast<const signed long*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<signed long long>::print_to(const void* target, PrintTarget out) {
     signed long long value = *reinterpret_cast<const signed long long*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<unsigned char>::print_to(const void* target, PrintTarget out) {
     unsigned char value = *reinterpret_cast<const unsigned char*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<unsigned short>::print_to(const void* target, PrintTarget out) {
     unsigned short value = *reinterpret_cast<const unsigned short*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<unsigned int>::print_to(const void* target, PrintTarget out) {
     unsigned int value = *reinterpret_cast<const unsigned int*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<unsigned long>::print_to(const void* target, PrintTarget out) {
     unsigned long value = *reinterpret_cast<const unsigned long*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
 void PrintItem::Dispatch<unsigned long long>::print_to(const void* target, PrintTarget out) {
     unsigned long long value = *reinterpret_cast<const unsigned long long*>(target);
-    PrintItem(dec(value)).print_to(out);
+    sfz::print_to(out, dec(value));
 }
 
 template <>
@@ -121,7 +120,7 @@ template <>
 void PrintItem::Dispatch<const void*>::print_to(const void* target, PrintTarget out) {
     uint64_t addr = *reinterpret_cast<const intptr_t*>(target);
     size_t size = sizeof(const void*) * 2;
-    PrintItem(hex(addr, size)).print_to(out);
+    sfz::print_to(out, hex(addr, size));
 }
 
 }  // namespace sfz

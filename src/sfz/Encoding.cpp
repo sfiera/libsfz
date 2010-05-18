@@ -7,14 +7,9 @@
 
 #include <algorithm>
 #include "sfz/Bytes.hpp"
-#include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
-#include "sfz/Format.hpp"
-#include "sfz/Macros.hpp"
 #include "sfz/Range.hpp"
 #include "sfz/String.hpp"
-
-using std::min;
 
 namespace sfz {
 
@@ -42,275 +37,157 @@ bool is_valid_code_point(Rune rune) {
     return (rune <= 0x10ffff) && (!is_surrogate(rune));
 }
 
-Encoding::~Encoding() { }
+namespace ascii {
 
-namespace {
-
-class AsciiEncoding : public Encoding {
-  public:
-    AsciiEncoding() { }
-
-    virtual StringPiece name() const {
-        static const String name("ASCII", ascii_encoding());
-        return name;
-    }
-
-    virtual bool can_decode(const BytesPiece& bytes) const {
-        foreach (it, bytes) {
-            if (static_cast<uint8_t>(*it) & 0x80) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    virtual void decode(const BytesPiece& in, String* out) const {
-        foreach (it, in) {
-            uint8_t c = *it;
-            if (c & 0x80) {
-                out->append(1, kUnknownCodePoint);
-            } else {
-                out->append(1, c);
-            }
-        }
-    }
-
-    virtual bool can_encode(const StringPiece& string) const {
-        foreach (it, string) {
-            if (*it > 0x7f) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    virtual void encode(const StringPiece& in, Bytes* out) const {
-        foreach (it, in) {
-            if (*it > 0x7f) {
-                out->append(1, kAsciiUnknownCodePoint);
-            } else {
-                out->append(1, *it);
-            }
-        }
-    }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(AsciiEncoding);
-};
-
-}  // namespace
-
-const Encoding& ascii_encoding() {
-    static const AsciiEncoding instance;
-    return instance;
-}
-
-namespace {
-
-class Latin1Encoding : public Encoding {
-  public:
-    Latin1Encoding() { }
-
-    virtual StringPiece name() const {
-        static const String name("ISO-8859-1", ascii_encoding());
-        return name;
-    }
-
-    virtual bool can_decode(const BytesPiece& bytes) const {
-        return true;
-    }
-
-    virtual void decode(const BytesPiece& in, String* out) const {
-        foreach (it, in) {
-            out->append(1, static_cast<uint8_t>(*it));
-        }
-    }
-
-    virtual bool can_encode(const StringPiece& string) const {
-        foreach (it, string) {
-            if (*it > 0xff) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    virtual void encode(const StringPiece& in, Bytes* out) const {
-        foreach (it, in) {
-            if (*it > 0xff) {
-                out->append(1, kAsciiUnknownCodePoint);
-            } else {
-                out->append(1, *it);
-            }
-        }
-    }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(Latin1Encoding);
-};
-
-}  // namespace
-
-const Encoding& latin1_encoding() {
-    static const Latin1Encoding instance;
-    return instance;
-}
-
-namespace {
-
-class Utf8Encoding : public Encoding {
-  public:
-    Utf8Encoding() { }
-
-    virtual StringPiece name() const {
-        static const String name("UTF-8", ascii_encoding());
-        return name;
-    }
-
-    virtual bool can_decode(const BytesPiece& bytes) const {
-        Rune rune;
-        for (BytesPiece::const_iterator i = begin(bytes); i != end(bytes); next(bytes, &i)) {
-            if (!dereference(bytes, i, &rune)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    virtual void decode(const BytesPiece& in, String* out) const {
-        for (BytesPiece::const_iterator i = begin(in); i != end(in); next(in, &i)) {
-            Rune rune;
-            if (dereference(in, i, &rune)) {
-                out->append(1, rune);
-            } else {
-                out->append(1, kUnknownCodePoint);
-            }
-        }
-    }
-
-    virtual void encode(const StringPiece& in, Bytes* out) const {
-        foreach (it, in) {
-            const Rune rune = *it;
-            if (rune <= 0x7f) {
-                out->append(1, rune);
-            } else if (rune <= 0x7ff) {
-                out->append(1, 0xc0 | (rune >> 6));
-                out->append(1, 0x80 | ((rune >> 0) & 0x3f));
-            } else if (rune <= 0xffff) {
-                out->append(1, 0xe0 | (rune >> 12));
-                out->append(1, 0x80 | ((rune >> 6) & 0x3f));
-                out->append(1, 0x80 | ((rune >> 0) & 0x3f));
-            } else {
-                out->append(1, 0xf0 | (rune >> 18));
-                out->append(1, 0x80 | ((rune >> 12) & 0x3f));
-                out->append(1, 0x80 | ((rune >> 6) & 0x3f));
-                out->append(1, 0x80 | ((rune >> 0) & 0x3f));
-            }
-        }
-    }
-
-    virtual bool can_encode(const StringPiece& string) const {
-        return true;
-    }
-
-  private:
-    BytesPiece::const_iterator begin(const BytesPiece& bytes) const {
-        return bytes.begin();
-    }
-
-    BytesPiece::const_iterator end(const BytesPiece& bytes) const {
-        return bytes.end();
-    }
-
-    void next(const BytesPiece& bytes, BytesPiece::const_iterator* it) const {
-        Rune rune;
-        if (dereference(bytes, *it, &rune)) {
-            if (rune < 0x80) {
-                *it += 1;
-            } else if (rune < 0x800) {
-                *it += 2;
-            } else if (rune < 0x10000) {
-                *it += 3;
-            } else {
-                *it += 4;
-            }
+void Ascii::encode_to(WriteTarget out, const StringPiece& string) {
+    foreach (it, string) {
+        if (*it > 0x7f) {
+            out.append(1, kAsciiUnknownCodePoint);
         } else {
-            ++(*it);
+            out.append(1, *it);
         }
     }
+}
 
-    bool dereference(
-            const BytesPiece& bytes, BytesPiece::const_iterator it, Rune* rune) const {
-        *rune = static_cast<uint8_t>(*it);
-        if ((*rune & 0x80) == 0) {
-            return true;
-        }
-        size_t continuations;
-        Rune min_code;
-        if (!start_continuation(rune, &continuations, &min_code)) {
-            return false;
-        }
-        foreach (i, range(continuations)) {
-            if (it + i + 1 == bytes.end()) {
-                return false;
-            }
-            if (!continue_continuation(rune, it[i + 1])) {
-                return false;
-            }
-        }
-        return (*rune >= min_code) && is_valid_code_point(*rune);
-    }
-
-    // Attempts to start a multi-byte UTF-8 code point.
-    //
-    // @param [in, out] rune The first byte of the potential multi-byte code point.  If it points
-    //                      to a valid continuation starting code point, then the continuation bits
-    //                      are removed, leaving only the content bits.
-    // @param [out] continuations The number of continuation bytes expected after this one.
-    // @param [out] min_code The minimum code point which can be represented by a multi-byte
-    //                      code point of this size.
-    // @returns             true iff `rune` correctly started a multi-byte code point.
-    bool start_continuation(Rune* rune, size_t* continuations, Rune* min_code) const {
-        if ((*rune & 0xe0) == 0xc0) {
-            *continuations = 1;
-            *min_code = 0x80;
-            *rune &= 0x1f;
-        } else if ((*rune & 0xf0) == 0xe0) {
-            *continuations = 2;
-            *min_code = 0x800;
-            *rune &= 0x0f;
-        } else if ((*rune & 0xf1) == 0xf0) {
-            *continuations = 3;
-            *min_code = 0x10000;
-            *rune &= 0x0e;
+void Ascii::decode_to(PrintTarget out, const BytesPiece& bytes) {
+    foreach (it, bytes) {
+        uint8_t c = *it;
+        if (c & 0x80) {
+            out.append(1, kUnknownCodePoint);
         } else {
-            return false;
+            out.append(1, c);
         }
-        return true;
     }
+}
 
-    // Attempts to continue a multi-byte UTF-8 code point.
-    //
-    // @param [in, out] rune Updated with the new value of the code point.
-    // @param [in] byte     The next byte in a multi-byte UTF-8 code point.
-    // @returns             true iff `byte` correctly continued a multi-byte code point.
-    bool continue_continuation(Rune* rune, uint8_t byte) const {
-        if ((byte & 0xc0) != 0x80) {
-            return false;
+}  // namespace ascii
+
+namespace latin1 {
+
+void Latin1::encode_to(WriteTarget out, const StringPiece& string) {
+    foreach (it, string) {
+        if (*it > 0xff) {
+            out.append(1, kAsciiUnknownCodePoint);
+        } else {
+            out.append(1, *it);
         }
-        *rune <<= 6;
-        *rune |= byte & 0x3f;
-        return true;
     }
+}
 
-    DISALLOW_COPY_AND_ASSIGN(Utf8Encoding);
-};
+void Latin1::decode_to(PrintTarget out, const BytesPiece& bytes) {
+    foreach (it, bytes) {
+        out.append(1, *it);
+    }
+}
+
+}  // namespace latin1
+
+namespace utf8 {
+
+namespace {
+
+// Returns the left-most or right-most `bits` bits of `byte`.
+//
+// @param [in] bits     The number of bits.  Only meaningful within [1, 7].
+// @param [in] byte     The byte to pull the bits from.
+inline uint8_t left(int bits, uint8_t byte) { return byte & ~((1 << (8 - bits)) - 1); }
+inline uint8_t right(int bits, uint8_t byte) { return byte & ((1 << bits) - 1); }
+
+// Returns true iff `byte` encodes an ASCII byte.
+bool is_ascii(uint8_t byte) {
+    return left(1, byte) == 0;
+}
+
+// Returns true iff `byte` is a UTF-8 multibyte character head of size `count`.
+//
+// @param [in] count    The size of the multibyte character to consider.  Must lie within [2, 4].
+// @param [in] byte     The byte to test.
+inline bool is_multibyte_head(int count, uint8_t byte) {
+    return left(count + 1, byte) == left(count, 0xff);
+}
+
+// Returns true iff `byte` is a UTF-8 continuation character.
+//
+// @param [in] byte     The byte to test.
+inline bool is_continuation_byte(uint8_t byte) {
+    return left(2, byte) == left(1, 0xff);
+}
+
+// Thresholds for UTF-8 multibyte encoding.  A single byte can represent code points in the range
+// [0, k[0]), a two-byte character can represent code points in the range [k[0], k[1]), a
+// three-byte character [k[1], k[2]), and a four-byte character [k[2], 0x110000).
+const Rune kUtf8Max[4] = { 0x80, 0x800, 0x10000 };
 
 }  // namespace
 
-const Encoding& utf8_encoding() {
-    static const Utf8Encoding instance;
-    return instance;
+void Utf8::encode_to(WriteTarget out, const StringPiece& string) {
+    foreach (it, string) {
+        const Rune rune = *it;
+        if (rune < kUtf8Max[0]) {
+            out.append(1, rune);
+        } else if (rune < kUtf8Max[1]) {
+            out.append(1, left(2, 0xff) | (rune >> 6));
+            out.append(1, left(1, 0xff) | right(6, rune >> 0));
+        } else if (rune < kUtf8Max[2]) {
+            out.append(1, left(3, 0xff) | (rune >> 12));
+            out.append(1, left(1, 0xff) | right(6, rune >> 6));
+            out.append(1, left(1, 0xff) | right(6, rune >> 0));
+        } else {
+            out.append(1, left(4, 0xff) | (rune >> 18));
+            out.append(1, left(1, 0xff) | right(6, rune >> 12));
+            out.append(1, left(1, 0xff) | right(6, rune >> 6));
+            out.append(1, left(1, 0xff) | right(6, rune >> 0));
+        }
+    }
 }
+
+void Utf8::decode_to(PrintTarget out, const BytesPiece& bytes) {
+    int multibytes_expected = 0;
+    int multibytes_seen = 0;
+    Rune rune = 0;
+
+    foreach (it, bytes) {
+        if (multibytes_expected > 0) {
+            if (is_continuation_byte(*it)) {
+                rune = (rune << 6) | right(6, *it);
+                --multibytes_expected;
+                ++multibytes_seen;
+                if (multibytes_expected == 0) {
+                    if (is_valid_code_point(rune) && (rune >= kUtf8Max[multibytes_seen - 2])) {
+                        out.append(1, rune);
+                    } else {
+                        out.append(multibytes_seen, kUnknownCodePoint);
+                    }
+                }
+                goto next_byte;
+            } else {
+                multibytes_expected = 0;
+                out.append(multibytes_seen, kUnknownCodePoint);
+            }
+        }
+
+        if (is_ascii(*it)) {
+            out.append(1, *it);
+            goto next_byte;
+        }
+        for (int count = 2; count <= 4; ++count) {
+            if (is_multibyte_head(count, *it)) {
+                multibytes_expected = count - 1;
+                multibytes_seen = 1;
+                rune = right(7 - count, *it);
+                goto next_byte;
+            }
+        }
+        out.append(1, kUnknownCodePoint);
+next_byte:
+        continue;
+    }
+
+    if (multibytes_expected) {
+        out.append(multibytes_seen, kUnknownCodePoint);
+    }
+}
+
+}  // namespace utf8
 
 }  // namespace sfz

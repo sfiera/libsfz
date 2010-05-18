@@ -7,28 +7,10 @@
 
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"
+#include "sfz/String.hpp"
 #include "sfz/StringUtilities.hpp"
 
 namespace sfz {
-
-void format(PrintTarget out, const char* fmt, SFZ_FORMAT_ITEMS_DEFINITION) {
-    const PrintItem* items[16] = SFZ_FORMAT_ITEMS_ARRAY;
-    FormatResult result(fmt, SFZ_FORMAT_ITEM_COUNT, items);
-    result.print_to(out);
-}
-
-void print(int fd, const char* fmt, SFZ_FORMAT_ITEMS_DEFINITION) {
-    const PrintItem* items[SFZ_FORMAT_ITEM_COUNT] = SFZ_FORMAT_ITEMS_ARRAY;
-    String decoded;
-    FormatResult(fmt, SFZ_FORMAT_ITEM_COUNT, items).print_to(&decoded);
-    Bytes encoded(decoded, utf8_encoding());
-    write(fd, encoded.data(), encoded.size());
-}
-
-FormatResult::FormatResult(const char* fmt, size_t item_count, const PrintItem** items)
-    : _fmt(fmt),
-      _item_count(item_count),
-      _items(items) { }
 
 namespace {
 
@@ -48,12 +30,12 @@ void span_complement(
 
 }  // namespace
 
-void FormatResult::print_to(PrintTarget out) const {
-    static const String kBraces("{}", ascii_encoding());
-    static const String kCloseBrace("}", ascii_encoding());
+void print_format_to(
+        PrintTarget out, const char* format_string, const PrintItem* const* items, size_t size) {
+    static const StringPiece kBraces = "{}";
+    static const StringPiece kCloseBrace = "}";
 
-    String decoded(_fmt, ascii_encoding());
-    StringPiece f = decoded;
+    StringPiece f = format_string;
 
     while (f.size() > 0) {
         StringPiece span;
@@ -78,8 +60,8 @@ void FormatResult::print_to(PrintTarget out) const {
 
                 int32_t index = -1;
                 if (string_to_int32_t(span, &index)) {
-                    if (index >= 0 && static_cast<uint32_t>(index) < _item_count) {
-                        _items[index]->print_to(out);
+                    if (index >= 0 && static_cast<uint32_t>(index) < size) {
+                        items[index]->print_to(out);
                     }
                 }
 

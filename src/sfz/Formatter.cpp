@@ -5,6 +5,8 @@
 
 #include "sfz/Formatter.hpp"
 
+#include "sfz/Bytes.hpp"
+#include "sfz/Encoding.hpp"
 #include "sfz/Foreach.hpp"
 
 namespace sfz {
@@ -39,7 +41,7 @@ void print_to(PrintTarget out, const FormattedUint& value) {
     if (size < value.min_width) {
         out.append(value.min_width - size, '0');
     }
-    out.append(BytesPiece(data, size), ascii_encoding());
+    print(out, ascii::decode(BytesPiece(data, size)));
 }
 
 namespace {

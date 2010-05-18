@@ -8,26 +8,22 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "sfz/Rune.hpp"
 
 namespace sfz {
 
 class StringPiece;
 class BytesPiece;
-class Encoding;
 
 class WriteTarget {
   public:
     template <typename T> WriteTarget(T* target);
 
     inline void append(const BytesPiece& bytes);
-    inline void append(const StringPiece& string, const Encoding& encoding);
     inline void append(size_t num, uint8_t byte);
 
   private:
     struct DispatchTable {
         void (*append_bytes)(void* target, const BytesPiece& bytes);
-        void (*append_string)(void* target, const StringPiece& string, const Encoding& encoding);
         void (*append_repeated_bytes)(void* target, size_t num, uint8_t byte);
     };
 
@@ -44,9 +40,6 @@ struct WriteTarget::Dispatch {
     static void append_bytes(void* target, const BytesPiece& bytes) {
         reinterpret_cast<T*>(target)->append(bytes);
     }
-    static void append_string(void* target, const StringPiece& string, const Encoding& encoding) {
-        reinterpret_cast<T*>(target)->append(string, encoding);
-    }
     static void append_repeated_bytes(void* target, size_t num, uint8_t byte) {
         reinterpret_cast<T*>(target)->append(num, byte);
     }
@@ -56,7 +49,6 @@ struct WriteTarget::Dispatch {
 template <typename T>
 const WriteTarget::DispatchTable WriteTarget::Dispatch<T>::table = {
     append_bytes,
-    append_string,
     append_repeated_bytes,
 };
 
@@ -67,10 +59,6 @@ WriteTarget::WriteTarget(T* t)
 
 inline void WriteTarget::append(const BytesPiece& bytes) {
     _dispatch_table->append_bytes(_target, bytes);
-}
-
-inline void WriteTarget::append(const StringPiece& string, const Encoding& encoding) {
-    _dispatch_table->append_string(_target, string, encoding);
 }
 
 inline void WriteTarget::append(size_t num, uint8_t byte) {

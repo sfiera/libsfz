@@ -11,6 +11,7 @@
 #include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
+#include "sfz/Format.hpp"
 #include "sfz/Range.hpp"
 
 using std::max;
@@ -64,32 +65,32 @@ void String::assign(const StringPiece& string) {
     append(string);
 }
 
-String::String(const char* data, const Encoding& encoding) {
+String::String(const char* string) {
     initialize(0);
-    append(BytesPiece(reinterpret_cast<const uint8_t*>(data), strlen(data)), encoding);
+    append(StringPiece(string));
 }
 
-void String::append(const char* data, const Encoding& encoding) {
-    append(BytesPiece(reinterpret_cast<const uint8_t*>(data), strlen(data)), encoding);
+void String::append(const char* string) {
+    append(StringPiece(string));
 }
 
-void String::assign(const char* data, const Encoding& encoding) {
+void String::assign(const char* string) {
     clear();
-    append(BytesPiece(reinterpret_cast<const uint8_t*>(data), strlen(data)), encoding);
+    append(StringPiece(string));
 }
 
-String::String(const BytesPiece& bytes, const Encoding& encoding) {
+String::String(const PrintItem& item) {
     initialize(0);
-    append(bytes, encoding);
+    append(item);
 }
 
-void String::append(const BytesPiece& bytes, const Encoding& encoding) {
-    encoding.decode(bytes, this);
+void String::append(const PrintItem& item) {
+    item.print_to(this);
 }
 
-void String::assign(const BytesPiece& bytes, const Encoding& encoding) {
+void String::assign(const PrintItem& item) {
     clear();
-    append(bytes, encoding);
+    append(item);
 }
 
 String::String(size_t num, Rune rune) {
@@ -99,7 +100,7 @@ String::String(size_t num, Rune rune) {
 
 void String::append(size_t num, Rune rune) {
     if (!is_valid_code_point(rune)) {
-        throw Exception("invalid code point {0}", rune);
+        throw Exception(format("invalid code point {0}", rune));
     }
     resize(_size + num, rune);
 }
@@ -221,8 +222,10 @@ StringPiece::StringPiece(const String& string)
 
 StringPiece::StringPiece(const char* ascii_string) {
     BytesPiece bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
-    if (!ascii_encoding().can_decode(bytes)) {
-        throw Exception("string is not ASCII");
+    foreach (it, bytes) {
+        if ((*it) & 0x80) {
+            throw Exception("string is not ASCII");
+        }
     }
     _data = bytes.data();
     _encoding = sizeof(uint8_t);

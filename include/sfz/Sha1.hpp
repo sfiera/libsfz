@@ -13,8 +13,6 @@ namespace sfz {
 
 class Bytes;
 class BytesPiece;
-class Encoding;
-class StringPiece;
 
 // Computes the SHA-1 digest of some sequence of bytes.
 //
@@ -37,9 +35,6 @@ class Sha1 {
     // identical, to add data in larger chunks.
     // @param [in] input    The data to add to the digest.
     void append(const BytesPiece& input);
-
-    void append(const StringPiece& input, const Encoding& encoding);
-
     void append(size_t num, uint8_t byte);
 
     // Appends the digest computed from the current content to `digest`.  This method does

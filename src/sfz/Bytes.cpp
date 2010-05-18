@@ -6,8 +6,6 @@
 #include "sfz/Bytes.hpp"
 
 #include <algorithm>
-#include "sfz/Encoding.hpp"
-#include "sfz/String.hpp"
 
 using std::max;
 
@@ -48,11 +46,11 @@ Bytes::Bytes(const uint8_t* data, size_t size)
     memcpy(_data.get(), data, size);
 }
 
-Bytes::Bytes(const StringPiece& string, const Encoding& encoding)
+Bytes::Bytes(WriteItem item)
     : _data(new uint8_t[kDefaultBytesSize]),
       _size(0),
       _capacity(kDefaultBytesSize) {
-    encoding.encode(string, this);
+    item.write_to(this);
 }
 
 Bytes::Bytes(size_t num, uint8_t byte)
@@ -86,8 +84,8 @@ void Bytes::append(const uint8_t* data, size_t size) {
     _size += size;
 }
 
-void Bytes::append(const StringPiece& string, const Encoding& encoding) {
-    encoding.encode(string, this);
+void Bytes::append(WriteItem item) {
+    item.write_to(this);
 }
 
 void Bytes::append(size_t num, uint8_t byte) {
@@ -106,9 +104,9 @@ void Bytes::assign(const uint8_t* data, size_t size) {
     _size = size;
 }
 
-void Bytes::assign(const StringPiece& string, const Encoding& encoding) {
+void Bytes::assign(WriteItem item) {
     clear();
-    encoding.encode(string, this);
+    item.write_to(this);
 }
 
 void Bytes::assign(size_t num, uint8_t byte) {
@@ -167,6 +165,10 @@ BytesPiece::BytesPiece()
 BytesPiece::BytesPiece(const Bytes& bytes)
     : _data(bytes.data()),
       _size(bytes.size()) { }
+
+BytesPiece::BytesPiece(const char* data)
+    : _data(reinterpret_cast<const uint8_t*>(data)),
+      _size(strlen(data)) { }
 
 BytesPiece::BytesPiece(const uint8_t* data, size_t size)
     : _data(data),

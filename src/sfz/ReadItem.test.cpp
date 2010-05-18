@@ -10,6 +10,7 @@
 #include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
+#include "sfz/Format.hpp"
 #include "sfz/Range.hpp"
 
 using testing::Eq;
@@ -35,7 +36,7 @@ void read_from(sfz::ReadSource in, Grapheme* grapheme) {
     if (byte <= YOGH) {
         *grapheme = static_cast<Grapheme>(byte);
     } else {
-        throw sfz::Exception("invalid Grapheme {0}", byte);
+        throw sfz::Exception(sfz::format("invalid Grapheme {0}", byte));
     }
 }
 

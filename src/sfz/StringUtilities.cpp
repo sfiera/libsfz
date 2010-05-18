@@ -6,14 +6,13 @@
 #include "sfz/StringUtilities.hpp"
 
 #include "sfz/Bytes.hpp"
-#include "sfz/Format.hpp"
-#include "sfz/Formatter.hpp"
+#include "sfz/Encoding.hpp"
 
 namespace sfz {
 
 bool string_to_int32_t(const StringPiece& s, int32_t* out, int base) {
     char* end;
-    Bytes encoded(s, ascii_encoding());
+    Bytes encoded(ascii::encode(s));
     encoded.resize(encoded.size() + 1);
     const char* c_str = reinterpret_cast<const char*>(encoded.data());
     int32_t id = strtoul(c_str, &end, base);

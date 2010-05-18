@@ -59,7 +59,7 @@ TEST_F(Sha1Test, Short) {
 // input size to the end.
 TEST_F(Sha1Test, ForceSecondBlock) {
     Sha1 sha;
-    sha.append("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", ascii_encoding());
+    sha.append("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     const char expected[21] =
         "\x84\x98\x3e\x44\x1c\x3b\xd2\x6e\xba\xae\x4a\xa1\xf9\x51\x29\xe5\xe5\x46\x70\xf1";
     EXPECT_THAT(sha, HasDigest(expected));
