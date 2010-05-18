@@ -27,11 +27,11 @@ Sha1::Sha1(const Sha1& other) {
 void Sha1::reset() {
     _size = 0;
     _message_block_index = 0;
-    _intermediate[0] = 0x67452301;
-    _intermediate[1] = 0xefcdab89;
-    _intermediate[2] = 0x98badcfe;
-    _intermediate[3] = 0x10325476;
-    _intermediate[4] = 0xc3d2e1f0;
+    _intermediate.digest[0] = 0x67452301;
+    _intermediate.digest[1] = 0xefcdab89;
+    _intermediate.digest[2] = 0x98badcfe;
+    _intermediate.digest[3] = 0x10325476;
+    _intermediate.digest[4] = 0xc3d2e1f0;
 }
 
 void Sha1::append(const BytesPiece& input) {
@@ -44,9 +44,8 @@ void Sha1::append(const BytesPiece& input) {
     BytesPiece remainder = input;
     while (_message_block_index + remainder.size() >= 64) {
         const int size = 64 - _message_block_index;
-        memcpy(_message_block + _message_block_index, remainder.data(), size);
+        remainder.shift(_message_block + _message_block_index, size);
         process_message_block();
-        remainder = remainder.substr(size);
     }
     memcpy(_message_block + _message_block_index, remainder.data(), remainder.size());
     _message_block_index += remainder.size();
@@ -58,10 +57,10 @@ void Sha1::append(size_t num, uint8_t byte) {
     append(bytes);
 }
 
-void Sha1::get_digest(Bytes* digest) const {
+Sha1::Digest Sha1::digest() const {
     Sha1 copy(*this);
     copy.finish();
-    write(digest, copy._intermediate, 5);
+    return copy._intermediate;
 }
 
 void Sha1::finish() {
@@ -106,11 +105,11 @@ void Sha1::process_message_block() {
         w[i] = left_rotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
     }
 
-    uint32_t a = _intermediate[0];
-    uint32_t b = _intermediate[1];
-    uint32_t c = _intermediate[2];
-    uint32_t d = _intermediate[3];
-    uint32_t e = _intermediate[4];
+    uint32_t a = _intermediate.digest[0];
+    uint32_t b = _intermediate.digest[1];
+    uint32_t c = _intermediate.digest[2];
+    uint32_t d = _intermediate.digest[3];
+    uint32_t e = _intermediate.digest[4];
 
     for (int i = 0; i < 20; ++i) {
         permute(&a, &b, &c, &d, &e, ((b & c) | ((~b) & d)) + e + w[i] + k[0]);
@@ -125,12 +124,16 @@ void Sha1::process_message_block() {
         permute(&a, &b, &c, &d, &e, (b ^ c ^ d) + e + w[i] + k[3]);
     }
 
-    _intermediate[0] += a;
-    _intermediate[1] += b;
-    _intermediate[2] += c;
-    _intermediate[3] += d;
-    _intermediate[4] += e;
+    _intermediate.digest[0] += a;
+    _intermediate.digest[1] += b;
+    _intermediate.digest[2] += c;
+    _intermediate.digest[3] += d;
+    _intermediate.digest[4] += e;
     _message_block_index = 0;
+}
+
+void write_to(WriteTarget out, const Sha1::Digest& digest) {
+    write(out, digest.digest, 5);
 }
 
 }  // namespace sfz

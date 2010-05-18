@@ -29,8 +29,7 @@ BytesPiece string_bytes(const char* string) {
 }
 
 MATCHER_P(HasDigest, digest, "") {
-    Bytes bytes;
-    arg.get_digest(&bytes);
+    Bytes bytes(arg.digest());
     return ExplainMatchResult(
             Eq(BytesPiece(reinterpret_cast<const uint8_t*>(digest), 20)),
             BytesPiece(bytes), result_listener);

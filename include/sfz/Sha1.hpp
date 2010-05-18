@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include "sfz/WriteTarget.hpp"
 
 namespace sfz {
 
@@ -19,6 +20,10 @@ class BytesPiece;
 // Based on the code provided by RFC 3174.
 class Sha1 {
   public:
+    struct Digest {
+        uint32_t digest[5];
+    };
+
     // Creates an instance in initial state.  Calling get_digest() on a default-initialized object
     // will result in the digest of 0 bytes of data.
     Sha1();
@@ -37,11 +42,10 @@ class Sha1 {
     void append(const BytesPiece& input);
     void append(size_t num, uint8_t byte);
 
-    // Appends the digest computed from the current content to `digest`.  This method does
-    // non-trivial work, so if the digest is to be used multiple times, it should be called once,
-    // and the retrieved digest reused.
-    // @param [in] digest   The object to append the digest to.
-    void get_digest(Bytes* digest) const;
+    // Returns a digest computed from the current content.  This method does non-trivial work, so
+    // if the digest is to be used multiple times, it should be called once, and the retrieved
+    // digest reused.
+    Digest digest() const;
 
   private:
     // Finishes computation of the digest of the current contents.  After this method is called, it
@@ -56,7 +60,7 @@ class Sha1 {
     void process_message_block();
 
     // The current value of the digest being computed.
-    uint32_t _intermediate[5];
+    Digest _intermediate;
 
     // The size of the current content.
     uint64_t _size;
@@ -70,6 +74,8 @@ class Sha1 {
     // Disallow assignment.  Copying is allowed but explicit.
     Sha1& operator=(const Sha1&);
 };
+
+void write_to(WriteTarget out, const Sha1::Digest& digest);
 
 }  // namespace sfz
 
