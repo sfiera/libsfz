@@ -37,7 +37,7 @@ class Bytes {
     explicit Bytes(const Bytes& bytes);
     explicit Bytes(const BytesPiece& bytes);
     Bytes(const uint8_t* data, size_t size);
-    Bytes(WriteItem item);
+    explicit Bytes(WriteItem item);
     Bytes(size_t num, uint8_t byte);
     ~Bytes();
 
