@@ -5,18 +5,15 @@
 
 #include "sfz/StringUtilities.hpp"
 
-#include "sfz/Bytes.hpp"
-#include "sfz/Encoding.hpp"
+#include "sfz/CString.hpp"
 
 namespace sfz {
 
 bool string_to_int32_t(const StringPiece& s, int32_t* out, int base) {
     char* end;
-    Bytes encoded(ascii::encode(s));
-    encoded.resize(encoded.size() + 1);
-    const char* c_str = reinterpret_cast<const char*>(encoded.data());
-    int32_t id = strtoul(c_str, &end, base);
-    if (end != (c_str + strlen(c_str))) {
+    CString c_str(s);
+    int32_t id = strtoul(c_str.data(), &end, base);
+    if (end != (c_str.data() + c_str.size())) {
         return false;
     }
     *out = id;

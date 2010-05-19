@@ -38,6 +38,7 @@
             'type': '<(library)',
             'sources': [
                 'src/sfz/Bytes.cpp',
+                'src/sfz/CString.cpp',
                 'src/sfz/Encoding.cpp',
                 'src/sfz/Exception.cpp',
                 'src/sfz/Format.cpp',

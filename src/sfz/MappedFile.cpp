@@ -10,8 +10,8 @@
 #include <errno.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include "sfz/CString.hpp"
 #include "sfz/Exception.hpp"
-#include "sfz/Encoding.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/ScopedFd.hpp"
@@ -22,10 +22,8 @@ MappedFile::MappedFile(const StringPiece& path)
         : _path(path),
           _size(0),
           _data(NULL) {
-    Bytes path_bytes(utf8::encode(path));
-    path_bytes.resize(path_bytes.size() + 1);
-    const char* c_path = reinterpret_cast<const char*>(path_bytes.data());
-    _fd = open(c_path, O_RDONLY, 0600);
+    CString c_path(path);
+    _fd = open(c_path.data(), O_RDONLY, 0600);
     if (_fd < 0) {
         throw Exception(format("{0}: {1}", path, posix_strerror()));
     }
