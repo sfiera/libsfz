@@ -7,6 +7,7 @@
 #define SFZ_SFZ_HPP_
 
 #include "sfz/Bytes.hpp"
+#include "sfz/CString.hpp"
 #include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
@@ -15,6 +16,7 @@
 #include "sfz/Macros.hpp"
 #include "sfz/MappedFile.hpp"
 #include "sfz/NetworkBytes.hpp"
+#include "sfz/Os.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/PrintItem.hpp"
 #include "sfz/PrintTarget.hpp"

@@ -45,6 +45,7 @@
                 'src/sfz/Formatter.cpp',
                 'src/sfz/MappedFile.cpp',
                 'src/sfz/NetworkBytes.cpp',
+                'src/sfz/Os.cpp',
                 'src/sfz/PosixFormatter.cpp',
                 'src/sfz/PrintItem.cpp',
                 'src/sfz/ReadItem.cpp',
@@ -61,6 +62,7 @@
             'type': 'executable',
             'sources': [
                 'src/sfz/Formatter.test.cpp',
+                'src/sfz/Os.test.cpp',
                 'src/sfz/PrintItem.test.cpp',
                 'src/sfz/ReadItem.test.cpp',
                 'src/sfz/Sha1.test.cpp',

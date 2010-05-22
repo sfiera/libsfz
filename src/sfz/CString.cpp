@@ -22,6 +22,10 @@ const char* CString::data() const {
     return reinterpret_cast<const char*>(_bytes.data());
 }
 
+char* CString::mutable_data() {
+    return const_cast<char*>(data());
+}
+
 size_t CString::size() const {
     return _bytes.size() - 1;
 }

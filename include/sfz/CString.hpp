@@ -17,6 +17,7 @@ class CString {
     CString(const StringPiece& string);
 
     const char* data() const;
+    char* mutable_data();
     size_t size() const;
 
   private:
