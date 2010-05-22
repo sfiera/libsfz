@@ -42,7 +42,7 @@ void Sha1::append(const BytesPiece& input) {
     if (input.empty()) {
         return;
     }
-    if ((numeric_limits<uint64_t>::max() - _size) < input.size()) {
+    if (((numeric_limits<uint64_t>::max() - _size) / 8) < input.size()) {
         throw Exception("message is too long");
     }
     BytesPiece remainder = input;
