@@ -7,9 +7,13 @@
 
 #include <limits>
 #include "sfz/Bytes.hpp"
+#include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
+#include "sfz/Format.hpp"
 #include "sfz/NetworkBytes.hpp"
+#include "sfz/Os.hpp"
 #include "sfz/ReadItem.hpp"
+#include "sfz/MappedFile.hpp"
 #include "sfz/WriteItem.hpp"
 
 using std::numeric_limits;
@@ -134,6 +138,54 @@ void Sha1::process_message_block() {
 
 void write_to(WriteTarget out, const Sha1::Digest& digest) {
     write(out, digest.digest, 5);
+}
+
+Sha1::Digest file_digest(const StringPiece& path) {
+    MappedFile file(path);
+    Sha1 sha;
+    sha.append(file.data());
+    return sha.digest();
+}
+
+Sha1::Digest tree_digest(const StringPiece& path) {
+    struct : TreeWalker {
+        // For files, hash the size and bytes of their UTF-8-encoded path, followed the size and
+        // bytes of the file content.  We don't worry about the mode or owner of the file, just as
+        // we wouldn't if taking the digest of a file.
+        void file(const StringPiece& path, const Stat&) {
+            Bytes path_bytes(utf8::encode(path));
+            write<uint64_t>(&sha, path_bytes.size());
+            sha.append(path_bytes);
+
+            MappedFile file(path);
+            write<uint64_t>(&sha, file.data().size());
+            sha.append(file.data());
+        }
+
+        // Ignore empty directories.  Directories which are not empty will be included in the
+        // resulting digest by virtue of the inclusion of their files.
+        void pre_directory(const StringPiece& path, const Stat&) { }
+        void post_directory(const StringPiece& path, const Stat&) { }
+
+        // Throw exceptions on anything that might break our logical view of a tree as a
+        // hierarchical listing of of regular files.
+        void cycle_directory(const StringPiece& path, const Stat&) {
+            throw Exception(format("Found directory cycle: {0}.", path));
+        }
+        void other(const StringPiece& path, const Stat&) {
+            throw Exception(format("Found non-regular file: {0}", path));
+        }
+
+        // Ignore broken symlinks; they effectively don't exist.
+        void broken_symlink(const StringPiece& path, const Stat&) { }
+
+        // Can't happen during WALK_LOGICAL.
+        void symlink(const StringPiece& path, const Stat&) { }
+
+        Sha1 sha;
+    } walker;
+    walk(path, WALK_LOGICAL, &walker);
+    return walker.sha.digest();
 }
 
 }  // namespace sfz

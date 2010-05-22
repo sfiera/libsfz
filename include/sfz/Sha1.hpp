@@ -77,6 +77,12 @@ class Sha1 {
 
 void write_to(WriteTarget out, const Sha1::Digest& digest);
 
+// Hashes a regular file.
+Sha1::Digest file_digest(const StringPiece& path);
+
+// Hashes a tree containing regular files (or symlinks).
+Sha1::Digest tree_digest(const StringPiece& path);
+
 }  // namespace sfz
 
 #endif  // SFZ_SHA1_HPP_
