@@ -148,12 +148,15 @@ Sha1::Digest file_digest(const StringPiece& path) {
 }
 
 Sha1::Digest tree_digest(const StringPiece& path) {
-    struct : TreeWalker {
-        // For files, hash the size and bytes of their UTF-8-encoded path, followed the size and
+    if (!path::isdir(path)) {
+        return file_digest(path);
+    }
+    struct DigestWalker : TreeWalker {
+        // For files, hash the size and bytes of their UTF-8-encoded path, followed by the size and
         // bytes of the file content.  We don't worry about the mode or owner of the file, just as
         // we wouldn't if taking the digest of a file.
         void file(const StringPiece& path, const Stat&) {
-            Bytes path_bytes(utf8::encode(path));
+            Bytes path_bytes(utf8::encode(path.substr(prefix_size)));
             write<uint64_t>(&sha, path_bytes.size());
             sha.append(path_bytes);
 
@@ -183,9 +186,20 @@ Sha1::Digest tree_digest(const StringPiece& path) {
         void symlink(const StringPiece& path, const Stat&) { }
 
         Sha1 sha;
-    } walker;
+
+        const int prefix_size;
+        DigestWalker(int prefix_size) : prefix_size(prefix_size) { }
+    } walker(path.size() + 1);
     walk(path, WALK_LOGICAL, &walker);
     return walker.sha.digest();
+}
+
+bool operator==(const Sha1::Digest& lhs, const Sha1::Digest& rhs) {
+    return memcmp(lhs.digest, rhs.digest, 5 * sizeof(uint32_t)) == 0;
+}
+
+bool operator!=(const Sha1::Digest& lhs, const Sha1::Digest& rhs) {
+    return !(lhs == rhs);
 }
 
 }  // namespace sfz

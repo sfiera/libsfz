@@ -75,6 +75,8 @@ class Sha1 {
     Sha1& operator=(const Sha1&);
 };
 
+bool operator==(const Sha1::Digest& lhs, const Sha1::Digest& rhs);
+bool operator!=(const Sha1::Digest& lhs, const Sha1::Digest& rhs);
 void write_to(WriteTarget out, const Sha1::Digest& digest);
 
 // Hashes a regular file.

@@ -5,13 +5,18 @@
 
 #include "sfz/Sha1.hpp"
 
+#include <fcntl.h>
 #include <cstring>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "sfz/Bytes.hpp"
+#include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
+#include "sfz/Format.hpp"
+#include "sfz/Os.hpp"
 #include "sfz/Range.hpp"
+#include "sfz/ScopedFd.hpp"
 #include "sfz/WriteItem.hpp"
 #include "sfz/WriteTarget.hpp"
 
@@ -28,20 +33,12 @@ BytesPiece string_bytes(const char* string) {
     return BytesPiece(reinterpret_cast<const uint8_t*>(string), strlen(string));
 }
 
-MATCHER_P(HasDigest, digest, "") {
-    Bytes bytes(arg.digest());
-    return ExplainMatchResult(
-            Eq(BytesPiece(reinterpret_cast<const uint8_t*>(digest), 20)),
-            BytesPiece(bytes), result_listener);
-}
-
-const char kEmptyDigest[21] =
-    "\xda\x39\xa3\xee\x5e\x6b\x4b\x0d\x32\x55\xbf\xef\x95\x60\x18\x90\xaf\xd8\x07\x09";
+const Sha1::Digest kEmptyDigest = { 0xda39a3ee, 0x5e6b4b0d, 0x3255bfef, 0x95601890, 0xafd80709 };
 
 // The empty string should have the given digest.
 TEST_F(Sha1Test, Empty) {
     Sha1 sha;
-    EXPECT_THAT(sha, HasDigest(kEmptyDigest));
+    EXPECT_THAT(sha.digest(), Eq(kEmptyDigest));
 }
 
 // A short value should have the given digest.  This doesn't test anything particularly complex
@@ -49,9 +46,8 @@ TEST_F(Sha1Test, Empty) {
 TEST_F(Sha1Test, Short) {
     Sha1 sha;
     write(&sha, "abc", 3);
-    const char expected[21] =
-        "\xa9\x99\x3e\x36\x47\x06\x81\x6a\xba\x3e\x25\x71\x78\x50\xc2\x6c\x9c\xd0\xd8\x9d";
-    EXPECT_THAT(sha, HasDigest(expected));
+    const Sha1::Digest expected = { 0xa9993e36, 0x4706816a, 0xba3e2571, 0x7850c26c, 0x9cd0d89d };
+    EXPECT_THAT(sha.digest(), Eq(expected));
 }
 
 // If the input size is > 55, then a second block will have to be added, in order to append the
@@ -59,27 +55,25 @@ TEST_F(Sha1Test, Short) {
 TEST_F(Sha1Test, ForceSecondBlock) {
     Sha1 sha;
     sha.append("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
-    const char expected[21] =
-        "\x84\x98\x3e\x44\x1c\x3b\xd2\x6e\xba\xae\x4a\xa1\xf9\x51\x29\xe5\xe5\x46\x70\xf1";
-    EXPECT_THAT(sha, HasDigest(expected));
+    const Sha1::Digest expected = { 0x84983e44, 0x1c3bd26e, 0xbaae4aa1, 0xf95129e5, 0xe54670f1 };
+    EXPECT_THAT(sha.digest(), Eq(expected));
 }
 
 // Test a long input, added in large chunks, which are not a multiple of 64 bytes (the block size).
 TEST_F(Sha1Test, Long) {
     Bytes input;
-    foreach (i, range(77)) {
-        write(&input, "abcdefghijklm", 13);
+    const char* kChars = "abcdefghijklm";
+    foreach (i, range(1000)) {
+        input.append(1, kChars[i % 13]);
     }
-    input.resize(1000);
 
     Sha1 sha;
     foreach (i, range(1000)) {
         sha.append(input);
     }
 
-    const char expected[21] =
-        "\x22\x87\xc7\x9b\xe6\x5d\x2e\x85\x10\x4e\x4c\x8e\xa7\x04\x68\x0a\x6b\xa6\x8a\x75";
-    EXPECT_THAT(sha, HasDigest(expected));
+    const Sha1::Digest expected = { 0x2287c79b, 0xe65d2e85, 0x104e4c8e, 0xa704680a, 0x6ba68a75 };
+    EXPECT_THAT(sha.digest(), Eq(expected));
 }
 
 // Adding the input in chunks of 512 bits (64 bytes) should work fine.
@@ -95,120 +89,181 @@ TEST_F(Sha1Test, EvenMultipleOf512Bits) {
         write(&sha, bytes);
     }
 
-    const char expected[21] =
-        "\xde\xa3\x56\xa2\xcd\xdd\x90\xc7\xa7\xec\xed\xc5\xeb\xb5\x63\x93\x4f\x46\x04\x52";
-    EXPECT_THAT(sha, HasDigest(expected));
+    const Sha1::Digest expected = { 0xdea356a2, 0xcddd90c7, 0xa7ecedc5, 0xebb56393, 0x4f460452 };
+    EXPECT_THAT(sha.digest(), Eq(expected));
 }
 
 // Add each character from ' ' ('\x20') to '\x7f'.  Check the hash after adding each character.
 TEST_F(Sha1Test, IncrementalDigest) {
-    const char expected[][21] = {
-        "\xb8\x58\xcb\x28\x26\x17\xfb\x09\x56\xd9\x60\x21\x5c\x8e\x84\xd1\xcc\xf9\x09\xc6",
-        "\x3a\xec\xb4\x74\x33\x2a\xd1\x32\xb0\x43\x25\xb2\xc1\xc5\x5e\x5d\x4e\xc7\x45\x32",
-        "\xdd\xb5\xa7\x49\x18\x0a\x7a\xbb\xd6\x94\x99\x4f\xcf\xd8\x2c\xcc\x50\x54\xe9\xcb",
-        "\x1d\xb3\x73\x69\x2b\xee\x18\x5f\x8f\xe3\xc4\x0c\xdb\x8c\x53\x9c\xe8\xca\x08\xe5",
-        "\x56\xd2\xb9\x95\x23\x68\x2a\xc4\xa6\x84\xa7\xd5\xb9\x17\x70\x7c\xfa\xed\xc2\xce",
-        "\x8c\x92\xc0\xf0\x93\xbc\xa9\xfd\xf5\x7a\x8a\x28\xca\x70\xe0\xd4\x98\xc5\xe8\xc1",
-        "\xfd\x28\x73\x31\x7d\xf5\x5f\x6d\x3c\xd1\x9b\xa5\x70\x45\xdf\xaf\x5b\x7f\x6d\x13",
-        "\xd1\x47\xd7\x6d\xdc\x5b\x77\x39\x53\xc6\xe8\x1f\xb1\xb5\x6e\x9e\x20\x5c\x09\x76",
-        "\x02\x17\x8c\x57\x80\x3f\x03\xb9\xca\x36\x8f\xc3\xfc\xc3\xde\x0d\xac\xdb\x43\x83",
-        "\x38\xa6\x13\x48\x7e\xe9\x10\x7e\x82\xdc\xd3\x12\xdb\xfd\xbf\x44\x55\x81\xcc\xb2",
-        "\x78\xc5\x2f\x1e\x6d\xd8\xc9\xbd\xb3\xa3\x38\xc0\xd9\xe9\x7b\x05\xf2\x46\x8d\xdf",
-        "\x33\xeb\x72\x60\x7f\x14\x47\xd0\x52\x60\x20\xce\xa8\x28\x0d\xd4\x7a\x92\x5d\x04",
-        "\x32\x7b\xaa\x4b\x40\x2b\x30\x58\x01\xc9\xc6\x55\xe9\x7b\x7e\x77\x85\x83\x18\x90",
-        "\x53\xb5\xa7\x33\xcb\xd3\x23\x46\xe9\x23\xf2\xcc\x2b\x82\x30\x3b\x47\xba\xb4\xbc",
-        "\x64\xaf\xe0\x78\xdb\xdc\x5a\x59\x62\x9f\x93\x5d\xdf\x07\xef\x6b\x20\xda\xa9\xa2",
-        "\x5c\x3f\x75\xdd\xa7\x7e\xb6\x1e\xf6\xd0\x4b\x50\x45\xbd\xf6\x61\xf4\xfa\x60\x8c",
-        "\xdd\xcf\x9a\xe9\xe6\x5f\x08\x63\x5b\x42\x4a\xa4\x9b\x5a\x80\xe4\x10\xd2\x3d\x88",
-        "\xf3\x6e\xb8\xbf\x04\xac\x8b\x3c\xb1\xf2\x73\x5d\x97\x2c\x42\xd7\xf4\x16\x0d\x42",
-        "\xc9\xe4\x57\x51\x96\x82\x9b\x57\xcd\xed\x45\x6c\x36\x3f\x15\x50\xce\xb6\x4f\x15",
-        "\x8b\x08\xd5\x80\xb0\xfc\xfd\xb4\x43\x43\xb8\xdb\x2d\x24\xfc\x4a\xe7\x17\x1c\x43",
-        "\xe0\x81\xc9\xcf\x08\x30\x0e\x5e\xa2\xfd\xa1\x82\x15\x78\xd3\xaa\x7d\x2e\x7c\x63",
-        "\x7e\x2a\x94\x46\x41\x7b\x01\x94\x2f\x0a\x8a\x19\x0d\xbd\x13\xcb\x5e\x95\x82\x1a",
-        "\xf3\x21\xed\x34\xdd\xbe\xa2\x5a\x15\x28\x57\x9d\xc8\x0a\xdf\x48\xe2\xf7\x8d\xe7",
-        "\x20\x50\x4f\x10\xbc\xa8\x6a\xdb\x0f\x11\x05\x8b\x8f\xcf\xc7\x08\xdc\x8c\xe1\xcb",
-        "\x46\x31\xb5\x68\x47\xc9\x4c\x57\xf6\xc4\x8d\x5b\x06\x7c\x59\x55\x61\xf6\x80\xb0",
-        "\xef\x2d\xca\x9c\x9f\x02\x05\x5e\x0b\x76\xe9\x4f\xfa\x17\x45\x44\xe1\x23\xb0\x63",
-        "\x3d\xe9\x8e\x18\xd3\xb9\x5c\xe3\xeb\x6a\x86\x7a\xbb\x77\xe2\xb1\x6e\xd8\x69\xf1",
-        "\x25\x4c\x0b\x10\x89\x48\x62\x0d\xf6\xbe\x13\x32\x63\xfc\x9b\x84\xcf\x28\x55\x42",
-        "\x54\xb7\x4a\x5b\x34\x00\xc0\xbf\x01\x5d\xcc\x02\xa3\xbe\x53\xf7\x3b\x55\x64\xf3",
-        "\x50\x6b\x68\x76\x0f\x46\xb3\xdb\x18\x93\x1b\xf4\xe0\x4e\x6f\xe8\x71\xf2\x0b\x53",
-        "\x44\xe8\xfc\x38\xc9\xb9\x70\x43\x5a\x0c\x1d\x2b\x02\x4c\x86\x2b\x5d\x63\x80\x2f",
-        "\x95\x02\x71\x1a\x5b\x64\x68\xa0\x40\x0d\x09\x54\x80\x51\x5d\x96\x10\xf3\x27\xac",
-        "\x16\x0a\x69\xc0\x88\x42\x22\xa7\xb0\xea\x86\x3b\xad\x01\x8f\x22\xf6\x06\x64\xb3",
-        "\x6b\x65\x42\x89\x2b\x4e\xb6\x8d\x78\x4c\x34\x2f\xbb\xb2\xb9\xa3\x39\x88\x10\x27",
-        "\x6f\xbf\x1f\x1d\x59\x5c\xad\x13\x1a\x40\x86\xd6\xc7\x6f\x13\xdf\xa0\xeb\xc5\xaf",
-        "\x63\x31\xdd\xba\x6f\xe0\x5d\x3a\xce\x0a\xff\xae\x59\x2f\x90\x29\x11\x1c\x48\x75",
-        "\xc6\x0d\x80\x92\xf6\xbb\x53\x3f\x72\x9a\x44\x06\x48\x2d\xf1\x34\x9f\xa0\x7e\xb0",
-        "\x43\xbc\x4b\x4e\x62\xb2\xb2\x89\xbf\x58\x96\x27\xbc\x12\xc3\x07\xb8\x69\x84\x2a",
-        "\xfe\x51\x04\xee\x1c\xd1\x32\x04\x12\x1a\x6d\xaa\x50\xad\x9a\xd6\xd2\x69\x9b\xb7",
-        "\xc8\x48\x80\xcb\x0e\xb1\x93\x25\x23\x52\x46\x7a\xa4\x57\xf0\xa4\x79\xc3\x49\x75",
-        "\x3d\x55\xae\xa1\xc1\x88\x96\xda\x65\x05\xfe\xb3\xd9\x92\x47\x71\x5f\x94\xa8\x18",
-        "\x61\x1d\x52\xe6\x0c\x7f\xb3\x65\xe3\xae\xea\x18\x28\x78\xd2\xa2\x43\xa3\xd0\xc3",
-        "\x36\x08\x6c\x17\x1e\x3c\x3b\xbc\x8e\x09\xe6\x3b\xa7\x49\x73\x91\xd3\x7d\x11\xc5",
-        "\x25\x26\x1e\x3d\x9f\x08\xe2\x7c\x81\xca\xd5\x2f\x5c\x08\xfc\xb1\x93\x68\x5e\xf5",
-        "\x88\x8d\xf7\x83\xb4\x0c\x07\x2c\x84\x08\x27\xbb\x5d\x54\xdd\x8f\x35\x43\x44\x4c",
-        "\x0e\x9b\x59\x58\xc8\xe7\xdd\xcd\x5e\xd4\x79\x34\x38\x20\x58\x21\x28\x57\x5a\x24",
-        "\xf8\x4e\x4e\xfb\x3e\x8a\xf8\x1e\xed\x7c\xc7\x6c\x01\x73\x9c\xa5\xc4\xd8\x89\x02",
-        "\xfc\xd3\xe8\x56\xd4\x74\xe9\x4e\xe6\x5e\xb9\x9d\x47\xe6\xd8\x14\xb1\x6a\x1e\xf5",
-        "\x56\x3d\x5c\xd1\xa2\xe7\x51\x0d\x40\x35\x51\xca\xb7\xe8\x11\xef\x08\x66\xb9\xee",
-        "\xbf\xd0\x44\x68\x50\x7b\xc9\x72\x4e\x34\xd8\x31\xcb\x98\x0e\x8f\xaf\x2f\x11\x0c",
-        "\x3a\xb7\x4a\xd4\xe0\x10\xe9\x25\x1d\xb2\xe0\x03\x3c\x9e\x07\xad\xef\x9a\x9a\xa2",
-        "\x42\x23\x4e\xeb\x00\x36\xa5\x2e\xca\x9f\x80\xa8\x96\x24\x1b\x54\xaa\x57\x2e\x9f",
-        "\xe9\x85\xe7\x6a\xb9\xaa\xd9\x15\xd5\x04\xac\xb3\xa1\x71\xc6\x06\x02\xb0\xff\xd7",
-        "\xac\x36\x63\x22\x43\x25\x76\x89\xb5\x28\x97\x6a\x30\xaa\x71\xa0\x06\x25\x72\x76",
-        "\x6b\x1a\x95\x31\xee\x7f\x08\x87\xaa\x38\x12\xb6\x93\xaa\x82\xa4\xbc\xab\x20\xdb",
-        "\x10\xef\xb3\x9d\x0f\xec\x45\xb0\x5f\x8a\x67\x9d\xcf\x63\x28\xf1\xeb\x5f\xc4\x69",
-        "\xe1\xcf\xcd\x09\xcc\x89\x66\xad\xc7\xb5\x60\x8d\xa4\x65\xf8\xf0\xe5\x85\xfd\x15",
-        "\xcb\xfa\x3b\xd9\x87\xda\xc6\x69\xcf\xb0\xde\x30\xca\x04\xe3\x78\x24\x98\xca\x17",
-        "\xcf\x63\x6e\x3e\xc3\x53\x55\x1d\x44\xfb\xdd\x6a\x29\x9e\x3c\xe2\x5e\xa5\xf1\x2f",
-        "\x4d\x37\xc1\x8d\x90\xd3\xd3\xc9\x63\x5d\x67\x26\x38\xab\x7c\x40\x41\xc1\xa1\x5e",
-        "\x72\xff\x97\x85\x6b\x74\xaa\x7e\xf3\x25\xe8\x36\x16\x5b\x07\xa9\x81\x8c\xd7\xdc",
-        "\xeb\xde\x99\x88\xb4\xa5\xc5\x50\xaf\x83\xb0\x0b\xa2\x9d\xfd\x6a\xe0\xf3\x40\xf3",
-        "\xfa\xf0\xe7\x05\x90\x32\x30\x70\x28\xdc\x94\xd0\xe9\x7d\x1b\xfd\x5c\xb6\xa1\x34",
-        "\xd4\x4e\x1f\xe0\xc1\xa7\xac\x33\xe8\x7a\x51\x02\x85\xe6\x41\x9a\xfd\x97\x27\xe8",
-        "\xe2\xac\xd1\xef\x1f\x11\xd0\x5e\x39\x55\xbb\x24\x4d\xba\x21\x15\x9d\xe9\x62\x1f",
-        "\x27\x5d\x88\x3e\x37\xea\xc6\xf2\xb5\xd9\x96\xe0\xc0\x65\x6e\xca\xbe\x65\x45\x3f",
-        "\x7c\x7c\x7b\x6c\xd0\x14\xd2\x19\xfd\x72\xf6\x26\x63\x6f\xbb\x59\xc9\x9a\xca\x58",
-        "\xa3\xbb\x9c\xf7\xcc\x3c\xa4\x08\x1f\x85\xac\xdb\xe1\xcc\x91\x05\x5b\x26\xc1\x73",
-        "\x6c\xfc\x9b\x15\xfe\x54\x35\x69\xf6\x75\xc4\xb7\x4f\xb7\xe0\x36\xe8\xc2\x4a\x8a",
-        "\xc3\xaf\xc3\x4c\x41\x8d\xd1\xf6\xb4\x98\x37\x95\xb2\xbe\x0a\xc3\x09\x72\x0a\x47",
-        "\xe3\x95\xcb\xd1\x8b\x96\x81\x94\xe6\xe6\x9e\x8a\x4f\xe8\x6a\x6e\x4d\x96\xd9\xca",
-        "\xc2\xfc\x03\x2f\x01\xd9\xf0\x26\x5e\x43\xe7\x54\xc1\xf2\xf8\x5e\xe4\x67\x42\x96",
-        "\xfc\xb7\x74\xdf\x95\x84\x16\x89\xf7\x80\x2b\x00\x21\xe5\x46\xa4\x11\xe1\x4f\xc0",
-        "\xa5\xd6\x32\xcf\xfa\x00\x32\x61\x0b\xb6\xd1\xce\x7c\x62\x91\x3a\x12\x47\xc7\xc5",
-        "\x6f\xf6\xf3\x32\x70\xf7\xf6\xb6\x8b\xcc\xa8\x46\x90\x25\xbe\x7e\xe9\x61\xff\x4d",
-        "\x2a\xad\x69\xa7\x50\xbe\x65\x04\x76\x15\x4d\x12\x84\xe4\xb5\x15\x05\x6e\xaa\xfb",
-        "\xbd\x04\x1c\xa5\x22\x12\xa1\x11\xe3\xd2\xb9\xdb\x52\x44\x71\x72\xa0\x5e\x1c\xe5",
-        "\x59\xbc\x66\x23\x21\xdb\x64\x3d\xa5\x90\xbe\x5f\x3f\x96\xc1\x32\x24\x92\xb9\xb1",
-        "\x8e\x61\xca\x1b\xa4\x6b\xde\x4b\x10\x36\xd5\xf3\x28\x0c\xea\xca\x77\x87\xc7\xc1",
-        "\xf9\x90\xab\x4f\xda\xd6\xf5\x10\x4b\x77\x70\x59\x3d\xb9\x16\xda\x04\x04\xe6\x1d",
-        "\xbf\x36\xa1\x6a\x96\x5a\x0e\x96\x27\xb0\x97\x8f\x71\x3d\x96\xd8\x3b\x8e\x4d\x12",
-        "\xc7\x03\x96\x04\xec\x5b\xf9\x6f\xb4\x35\x97\x40\xfb\x3a\xb7\x0e\x6b\xcf\xf1\xfe",
-        "\xfb\xd5\xe6\xcd\xdf\xbe\x76\x85\x12\x23\xb0\x29\x01\xfe\x7f\x11\xba\xef\xce\x4f",
-        "\x07\xb9\x21\x2f\x06\xf3\x9d\x3e\x90\xa1\x8f\x78\x15\x08\xc2\xe8\x97\x34\x24\x67",
-        "\x73\xf9\xc9\xb6\xa5\x27\x50\x37\x4a\x12\x87\x69\xa9\x29\x4c\x27\x28\xa9\xdc\x56",
-        "\x25\x81\xe1\x0b\x2b\xba\x90\x3b\x66\x3e\x41\x0d\x11\x29\x31\x35\x09\x44\x8f\xba",
-        "\x0b\x40\xb6\xaf\x70\x97\x04\x5d\x7a\x0d\x26\xf0\x2a\xb6\xc0\xab\x12\x86\x0d\xbd",
-        "\xbd\x6f\x4f\x4f\x8c\x41\x1f\x0f\xbb\xa2\xf6\xfe\x8f\x01\x54\xba\x4b\x1d\x3a\x74",
-        "\xd6\xae\x70\x80\x98\x1d\x00\xad\x41\x77\x3b\x7d\xff\x73\xfa\x55\x0a\x8e\x1b\x0a",
-        "\xf5\x3b\x1c\x88\xd4\x00\xed\xfa\x66\x6a\x98\x15\x33\x6b\x50\x62\x10\xe0\x55\xe5",
-        "\xd3\xcc\x63\xfe\x01\x37\xa1\x46\x66\x1c\xe4\xd5\xc8\xa6\x5b\xad\x1e\x1d\x95\x6e",
-        "\xe0\x19\x7d\xb2\x3a\x89\x81\xfa\x20\x92\x56\x79\x88\x33\x78\x43\x91\xd8\xcf\xd2",
-        "\x0e\x85\x37\xc0\x82\x4e\xf6\xe2\xcb\x93\x0f\x54\xf0\xa8\x20\xb3\x7a\xaa\x18\x68",
-        "\x35\x30\xd5\xfe\xf6\x1f\x5d\xe6\xf0\x9a\x67\xa1\x5b\x56\xaf\x26\xe9\xb8\x24\x5d",
-        "\xe4\xf8\x18\x8c\xdc\xa2\xa6\x8b\x07\x40\x05\xe2\xcc\xab\x5b\x67\x84\x2c\x6f\xc7",
-        "\x4a\x4a\x4e\x9c\x64\x60\x05\xda\x73\x11\x71\x41\x70\x59\xd9\x35\xc3\x8e\x5b\xa1",
+    const Sha1::Digest expected[] = {
+        { 0xb858cb28, 0x2617fb09, 0x56d96021, 0x5c8e84d1, 0xccf909c6 },
+        { 0x3aecb474, 0x332ad132, 0xb04325b2, 0xc1c55e5d, 0x4ec74532 },
+        { 0xddb5a749, 0x180a7abb, 0xd694994f, 0xcfd82ccc, 0x5054e9cb },
+        { 0x1db37369, 0x2bee185f, 0x8fe3c40c, 0xdb8c539c, 0xe8ca08e5 },
+        { 0x56d2b995, 0x23682ac4, 0xa684a7d5, 0xb917707c, 0xfaedc2ce },
+        { 0x8c92c0f0, 0x93bca9fd, 0xf57a8a28, 0xca70e0d4, 0x98c5e8c1 },
+        { 0xfd287331, 0x7df55f6d, 0x3cd19ba5, 0x7045dfaf, 0x5b7f6d13 },
+        { 0xd147d76d, 0xdc5b7739, 0x53c6e81f, 0xb1b56e9e, 0x205c0976 },
+        { 0x02178c57, 0x803f03b9, 0xca368fc3, 0xfcc3de0d, 0xacdb4383 },
+        { 0x38a61348, 0x7ee9107e, 0x82dcd312, 0xdbfdbf44, 0x5581ccb2 },
+        { 0x78c52f1e, 0x6dd8c9bd, 0xb3a338c0, 0xd9e97b05, 0xf2468ddf },
+        { 0x33eb7260, 0x7f1447d0, 0x526020ce, 0xa8280dd4, 0x7a925d04 },
+        { 0x327baa4b, 0x402b3058, 0x01c9c655, 0xe97b7e77, 0x85831890 },
+        { 0x53b5a733, 0xcbd32346, 0xe923f2cc, 0x2b82303b, 0x47bab4bc },
+        { 0x64afe078, 0xdbdc5a59, 0x629f935d, 0xdf07ef6b, 0x20daa9a2 },
+        { 0x5c3f75dd, 0xa77eb61e, 0xf6d04b50, 0x45bdf661, 0xf4fa608c },
+        { 0xddcf9ae9, 0xe65f0863, 0x5b424aa4, 0x9b5a80e4, 0x10d23d88 },
+        { 0xf36eb8bf, 0x04ac8b3c, 0xb1f2735d, 0x972c42d7, 0xf4160d42 },
+        { 0xc9e45751, 0x96829b57, 0xcded456c, 0x363f1550, 0xceb64f15 },
+        { 0x8b08d580, 0xb0fcfdb4, 0x4343b8db, 0x2d24fc4a, 0xe7171c43 },
+        { 0xe081c9cf, 0x08300e5e, 0xa2fda182, 0x1578d3aa, 0x7d2e7c63 },
+        { 0x7e2a9446, 0x417b0194, 0x2f0a8a19, 0x0dbd13cb, 0x5e95821a },
+        { 0xf321ed34, 0xddbea25a, 0x1528579d, 0xc80adf48, 0xe2f78de7 },
+        { 0x20504f10, 0xbca86adb, 0x0f11058b, 0x8fcfc708, 0xdc8ce1cb },
+        { 0x4631b568, 0x47c94c57, 0xf6c48d5b, 0x067c5955, 0x61f680b0 },
+        { 0xef2dca9c, 0x9f02055e, 0x0b76e94f, 0xfa174544, 0xe123b063 },
+        { 0x3de98e18, 0xd3b95ce3, 0xeb6a867a, 0xbb77e2b1, 0x6ed869f1 },
+        { 0x254c0b10, 0x8948620d, 0xf6be1332, 0x63fc9b84, 0xcf285542 },
+        { 0x54b74a5b, 0x3400c0bf, 0x015dcc02, 0xa3be53f7, 0x3b5564f3 },
+        { 0x506b6876, 0x0f46b3db, 0x18931bf4, 0xe04e6fe8, 0x71f20b53 },
+        { 0x44e8fc38, 0xc9b97043, 0x5a0c1d2b, 0x024c862b, 0x5d63802f },
+        { 0x9502711a, 0x5b6468a0, 0x400d0954, 0x80515d96, 0x10f327ac },
+        { 0x160a69c0, 0x884222a7, 0xb0ea863b, 0xad018f22, 0xf60664b3 },
+        { 0x6b654289, 0x2b4eb68d, 0x784c342f, 0xbbb2b9a3, 0x39881027 },
+        { 0x6fbf1f1d, 0x595cad13, 0x1a4086d6, 0xc76f13df, 0xa0ebc5af },
+        { 0x6331ddba, 0x6fe05d3a, 0xce0affae, 0x592f9029, 0x111c4875 },
+        { 0xc60d8092, 0xf6bb533f, 0x729a4406, 0x482df134, 0x9fa07eb0 },
+        { 0x43bc4b4e, 0x62b2b289, 0xbf589627, 0xbc12c307, 0xb869842a },
+        { 0xfe5104ee, 0x1cd13204, 0x121a6daa, 0x50ad9ad6, 0xd2699bb7 },
+        { 0xc84880cb, 0x0eb19325, 0x2352467a, 0xa457f0a4, 0x79c34975 },
+        { 0x3d55aea1, 0xc18896da, 0x6505feb3, 0xd9924771, 0x5f94a818 },
+        { 0x611d52e6, 0x0c7fb365, 0xe3aeea18, 0x2878d2a2, 0x43a3d0c3 },
+        { 0x36086c17, 0x1e3c3bbc, 0x8e09e63b, 0xa7497391, 0xd37d11c5 },
+        { 0x25261e3d, 0x9f08e27c, 0x81cad52f, 0x5c08fcb1, 0x93685ef5 },
+        { 0x888df783, 0xb40c072c, 0x840827bb, 0x5d54dd8f, 0x3543444c },
+        { 0x0e9b5958, 0xc8e7ddcd, 0x5ed47934, 0x38205821, 0x28575a24 },
+        { 0xf84e4efb, 0x3e8af81e, 0xed7cc76c, 0x01739ca5, 0xc4d88902 },
+        { 0xfcd3e856, 0xd474e94e, 0xe65eb99d, 0x47e6d814, 0xb16a1ef5 },
+        { 0x563d5cd1, 0xa2e7510d, 0x403551ca, 0xb7e811ef, 0x0866b9ee },
+        { 0xbfd04468, 0x507bc972, 0x4e34d831, 0xcb980e8f, 0xaf2f110c },
+        { 0x3ab74ad4, 0xe010e925, 0x1db2e003, 0x3c9e07ad, 0xef9a9aa2 },
+        { 0x42234eeb, 0x0036a52e, 0xca9f80a8, 0x96241b54, 0xaa572e9f },
+        { 0xe985e76a, 0xb9aad915, 0xd504acb3, 0xa171c606, 0x02b0ffd7 },
+        { 0xac366322, 0x43257689, 0xb528976a, 0x30aa71a0, 0x06257276 },
+        { 0x6b1a9531, 0xee7f0887, 0xaa3812b6, 0x93aa82a4, 0xbcab20db },
+        { 0x10efb39d, 0x0fec45b0, 0x5f8a679d, 0xcf6328f1, 0xeb5fc469 },
+        { 0xe1cfcd09, 0xcc8966ad, 0xc7b5608d, 0xa465f8f0, 0xe585fd15 },
+        { 0xcbfa3bd9, 0x87dac669, 0xcfb0de30, 0xca04e378, 0x2498ca17 },
+        { 0xcf636e3e, 0xc353551d, 0x44fbdd6a, 0x299e3ce2, 0x5ea5f12f },
+        { 0x4d37c18d, 0x90d3d3c9, 0x635d6726, 0x38ab7c40, 0x41c1a15e },
+        { 0x72ff9785, 0x6b74aa7e, 0xf325e836, 0x165b07a9, 0x818cd7dc },
+        { 0xebde9988, 0xb4a5c550, 0xaf83b00b, 0xa29dfd6a, 0xe0f340f3 },
+        { 0xfaf0e705, 0x90323070, 0x28dc94d0, 0xe97d1bfd, 0x5cb6a134 },
+        { 0xd44e1fe0, 0xc1a7ac33, 0xe87a5102, 0x85e6419a, 0xfd9727e8 },
+        { 0xe2acd1ef, 0x1f11d05e, 0x3955bb24, 0x4dba2115, 0x9de9621f },
+        { 0x275d883e, 0x37eac6f2, 0xb5d996e0, 0xc0656eca, 0xbe65453f },
+        { 0x7c7c7b6c, 0xd014d219, 0xfd72f626, 0x636fbb59, 0xc99aca58 },
+        { 0xa3bb9cf7, 0xcc3ca408, 0x1f85acdb, 0xe1cc9105, 0x5b26c173 },
+        { 0x6cfc9b15, 0xfe543569, 0xf675c4b7, 0x4fb7e036, 0xe8c24a8a },
+        { 0xc3afc34c, 0x418dd1f6, 0xb4983795, 0xb2be0ac3, 0x09720a47 },
+        { 0xe395cbd1, 0x8b968194, 0xe6e69e8a, 0x4fe86a6e, 0x4d96d9ca },
+        { 0xc2fc032f, 0x01d9f026, 0x5e43e754, 0xc1f2f85e, 0xe4674296 },
+        { 0xfcb774df, 0x95841689, 0xf7802b00, 0x21e546a4, 0x11e14fc0 },
+        { 0xa5d632cf, 0xfa003261, 0x0bb6d1ce, 0x7c62913a, 0x1247c7c5 },
+        { 0x6ff6f332, 0x70f7f6b6, 0x8bcca846, 0x9025be7e, 0xe961ff4d },
+        { 0x2aad69a7, 0x50be6504, 0x76154d12, 0x84e4b515, 0x056eaafb },
+        { 0xbd041ca5, 0x2212a111, 0xe3d2b9db, 0x52447172, 0xa05e1ce5 },
+        { 0x59bc6623, 0x21db643d, 0xa590be5f, 0x3f96c132, 0x2492b9b1 },
+        { 0x8e61ca1b, 0xa46bde4b, 0x1036d5f3, 0x280ceaca, 0x7787c7c1 },
+        { 0xf990ab4f, 0xdad6f510, 0x4b777059, 0x3db916da, 0x0404e61d },
+        { 0xbf36a16a, 0x965a0e96, 0x27b0978f, 0x713d96d8, 0x3b8e4d12 },
+        { 0xc7039604, 0xec5bf96f, 0xb4359740, 0xfb3ab70e, 0x6bcff1fe },
+        { 0xfbd5e6cd, 0xdfbe7685, 0x1223b029, 0x01fe7f11, 0xbaefce4f },
+        { 0x07b9212f, 0x06f39d3e, 0x90a18f78, 0x1508c2e8, 0x97342467 },
+        { 0x73f9c9b6, 0xa5275037, 0x4a128769, 0xa9294c27, 0x28a9dc56 },
+        { 0x2581e10b, 0x2bba903b, 0x663e410d, 0x11293135, 0x09448fba },
+        { 0x0b40b6af, 0x7097045d, 0x7a0d26f0, 0x2ab6c0ab, 0x12860dbd },
+        { 0xbd6f4f4f, 0x8c411f0f, 0xbba2f6fe, 0x8f0154ba, 0x4b1d3a74 },
+        { 0xd6ae7080, 0x981d00ad, 0x41773b7d, 0xff73fa55, 0x0a8e1b0a },
+        { 0xf53b1c88, 0xd400edfa, 0x666a9815, 0x336b5062, 0x10e055e5 },
+        { 0xd3cc63fe, 0x0137a146, 0x661ce4d5, 0xc8a65bad, 0x1e1d956e },
+        { 0xe0197db2, 0x3a8981fa, 0x20925679, 0x88337843, 0x91d8cfd2 },
+        { 0x0e8537c0, 0x824ef6e2, 0xcb930f54, 0xf0a820b3, 0x7aaa1868 },
+        { 0x3530d5fe, 0xf61f5de6, 0xf09a67a1, 0x5b56af26, 0xe9b8245d },
+        { 0xe4f8188c, 0xdca2a68b, 0x074005e2, 0xccab5b67, 0x842c6fc7 },
+        { 0x4a4a4e9c, 0x646005da, 0x73117141, 0x7059d935, 0xc38e5ba1 },
     };
 
     Sha1 sha;
     foreach (byte, range<uint8_t>(' ', '\x80')) {
         write(&sha, byte);
-        EXPECT_THAT(sha, HasDigest(expected[byte - ' ']));
+        EXPECT_THAT(sha.digest(), Eq(expected[byte - ' ']));
     }
 
     sha.reset();
-    EXPECT_THAT(sha, HasDigest(kEmptyDigest));
+    EXPECT_THAT(sha.digest(), Eq(kEmptyDigest));
+}
+
+struct TreeData {
+    const char* path;
+    const char* data;
+    Sha1::Digest digest;
+};
+
+const TreeData kTreeData[] = {
+    {
+        "beowulf",
+        "Hwæt! We Gar‐Dena in gear‐dagum\n"
+            "þeod‐cyninga þrym gefrunon,\n"
+            "hu þa æðelingas ellen fremedon.\n",
+        { 0x894a8e64, 0x9a526228, 0x452f0bd1, 0x48236c6d, 0xf50e88e8 },
+    },
+    {
+        "rune-poem/æsc",
+        "Æsc biþ oferheah, eldum dyre\n"
+            "stiþ on staþule, stede rihte hylt,\n"
+            "ðeah him feohtan on firas monige.\n",
+        { 0xbb04d3ad, 0x414793d0, 0xaf29d691, 0x68bc8f98, 0xbe725301 },
+    },
+    {
+        "rune-poem/wynn",
+        "Wenne bruceþ, ðe can weana lyt\n"
+            "sares and sorge and him sylfa hæfþ\n"
+            "blæd and blysse and eac byrga geniht.\n",
+        { 0xa97a4951, 0xfce250aa, 0x4584b0e0, 0xa7deafb6, 0xd9c522a8 },
+    },
+    {
+        "rune-poem/þorn",
+        "Ðorn byþ ðearle scearp; ðegna gehwylcum\n"
+            "anfeng ys yfyl, ungemetum reþe\n"
+            "manna gehwelcum, ðe him mid resteð.\n",
+        { 0x41f05cfb, 0x597e0e2f, 0x594142e9, 0x3f72003f, 0x804cac79 },
+    },
+    {
+        "rune-poem/yogh",
+        "Gyfu gumena byþ gleng and herenys,\n"
+            "wraþu and wyrþscype and wræcna gehwam\n"
+            "ar and ætwist, ðe byþ oþra leas.\n",
+        { 0xccdf48d1, 0x5528a2dc, 0xf9c65218, 0x7e9058a4, 0xef6f3a31 },
+    },
+};
+
+const Sha1::Digest kTreeDigest = { 0x9ff59f85, 0x3ca5ef83, 0x62cf1fcd, 0x3f293716, 0x6730bb0d };
+
+TEST_F(Sha1Test, TreeDigest) {
+    TemporaryDirectory dir("sha1-test");
+
+    foreach (it, array_range(kTreeData)) {
+        String path(format("{0}/{1}", dir.path(), utf8::decode(it->path)));
+        String data(utf8::decode(it->data));
+
+        makedirs(path::dirname(path), 0700);
+        ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0600));
+        write(&fd, utf8::encode(data));
+
+        EXPECT_THAT(file_digest(path), Eq(it->digest));
+    }
+    EXPECT_THAT(tree_digest(dir.path()), Eq(kTreeDigest));
 }
 
 }  // namespace

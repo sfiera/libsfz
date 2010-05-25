@@ -7,16 +7,20 @@
 #define SFZ_SCOPED_FD_HPP_
 
 #include "sfz/Macros.hpp"
+#include "sfz/Bytes.hpp"
 
 namespace sfz {
 
 class ScopedFd {
   public:
-    ScopedFd(int fd);
+    explicit ScopedFd(int fd);
     ~ScopedFd();
 
     int get();
     int release();
+
+    void append(const BytesPiece& bytes);
+    void append(size_t num, uint8_t byte);
 
   private:
     int _fd;

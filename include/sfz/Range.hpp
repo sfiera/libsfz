@@ -35,6 +35,11 @@ basic_range<T> range(T end) {
     return basic_range<T>(T(), end);
 }
 
+template <typename T, int size>
+basic_range<T*> array_range(T (&array)[size]) {
+    return range(array, array + size);
+}
+
 }
 
 #endif // _SFZ_RANGE_HPP

@@ -195,7 +195,7 @@ void walk(const StringPiece& root, WalkType type, TreeWalker* visitor) {
     }
     FtsCloser deleter(fts);
     while (FTSENT* ent = fts_read(fts)) {
-        String path(utf8::decode(ent->fts_accpath));
+        String path(utf8::decode(ent->fts_path));
         const Stat& st = *ent->fts_statp;
         switch (ent->fts_info) {
           case FTS_D:        visitor->pre_directory(    path, st); break;

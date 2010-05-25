@@ -6,6 +6,11 @@
 #include "sfz/ScopedFd.hpp"
 
 #include <unistd.h>
+#include "sfz/Exception.hpp"
+#include "sfz/Foreach.hpp"
+#include "sfz/Format.hpp"
+#include "sfz/Range.hpp"
+#include "sfz/PosixFormatter.hpp"
 
 namespace sfz {
 
@@ -24,6 +29,26 @@ int ScopedFd::release() {
     int fd = _fd;
     _fd = -1;
     return fd;
+}
+
+void ScopedFd::append(const BytesPiece& bytes) {
+    BytesPiece remainder(bytes);
+    while (!remainder.empty()) {
+        ssize_t written = ::write(_fd, remainder.data(), remainder.size());
+        if (written < 0) {
+            throw Exception(format("write: {0}", posix_strerror()));
+        } else if (written == 0) {
+            throw Exception("write: didn't write anything");
+        } else {
+            remainder.shift(written);
+        }
+    }
+}
+
+void ScopedFd::append(size_t num, uint8_t byte) {
+    foreach (it, range(num)) {
+        append(BytesPiece(&byte, 1));
+    }
 }
 
 }  // namespace sfz
