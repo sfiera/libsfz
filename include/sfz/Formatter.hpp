@@ -28,8 +28,6 @@ struct FormattedSint {
     int64_t value;
     int base;
     size_t min_width;
-    FormattedSint(int64_t value, int base, size_t min_width)
-        : value(value), base(base), min_width(min_width) { }
 };
 void print_to(PrintTarget out, const FormattedSint& value);
 
@@ -37,8 +35,6 @@ struct FormattedUint {
     uint64_t value;
     int base;
     size_t min_width;
-    FormattedUint(uint64_t value, int base, size_t min_width)
-        : value(value), base(base), min_width(min_width) { }
 };
 void print_to(PrintTarget out, const FormattedUint& value);
 
@@ -53,33 +49,39 @@ template <> struct FormattedInt<unsigned int> { typedef FormattedUint Type; };
 template <> struct FormattedInt<unsigned long> { typedef FormattedUint Type; };
 template <> struct FormattedInt<unsigned long long> { typedef FormattedUint Type; };
 
-template <typename T> typename FormattedInt<T>::Type dec(T value, size_t min_width = 1) {
-    return typename FormattedInt<T>::Type(value, 10, min_width);
+template <typename T> inline typename FormattedInt<T>::Type dec(T value, size_t min_width = 1) {
+    return (typename FormattedInt<T>::Type){ value, 10, min_width };
 }
 
-template <typename T> typename FormattedInt<T>::Type hex(T value, size_t min_width = 1) {
-    return typename FormattedInt<T>::Type(value, 16, min_width);
+template <typename T> inline typename FormattedInt<T>::Type hex(T value, size_t min_width = 1) {
+    return (typename FormattedInt<T>::Type){ value, 16, min_width };
 }
 
-template <typename T> typename FormattedInt<T>::Type oct(T value, size_t min_width = 1) {
-    return typename FormattedInt<T>::Type(value, 8, min_width);
+template <typename T> inline typename FormattedInt<T>::Type oct(T value, size_t min_width = 1) {
+    return (typename FormattedInt<T>::Type){ value, 8, min_width };
 }
 
-template <typename T> typename FormattedInt<T>::Type bin(T value, size_t min_width = 1) {
-    return typename FormattedInt<T>::Type(value, 2, min_width);
+template <typename T> inline typename FormattedInt<T>::Type bin(T value, size_t min_width = 1) {
+    return (typename FormattedInt<T>::Type){ value, 2, min_width };
 }
 
 struct EscapedString {
     const StringPiece& string;
-    EscapedString(const StringPiece& s) : string(s) { }
 };
 void print_to(PrintTarget out, const EscapedString& value);
 
+inline EscapedString escape(const StringPiece& string) {
+    return (EscapedString){ string };
+}
+
 struct QuotedString {
     const StringPiece& string;
-    QuotedString(const StringPiece& s) : string(s) { }
 };
 void print_to(PrintTarget out, const QuotedString& value);
+
+inline QuotedString quote(const StringPiece& string) {
+    return (QuotedString){ string };
+}
 
 }  // namespace sfz
 
