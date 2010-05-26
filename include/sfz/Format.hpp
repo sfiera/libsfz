@@ -13,7 +13,7 @@ namespace sfz {
 
 template <size_t size> class Format;
 
-inline Format<16> format(
+Format<16> format(
         const char* format_string,
         const PrintItem& item0 = PrintItem(), const PrintItem& item1 = PrintItem(),
         const PrintItem& item2 = PrintItem(), const PrintItem& item3 = PrintItem(),
@@ -38,7 +38,7 @@ inline void print_to(PrintTarget out, const Format<size>& format) {
     print_format_to(out, format.format_string, format.items, size);
 }
 
-Format<16> format(
+inline Format<16> format(
         const char* format_string,
         const PrintItem& item0, const PrintItem& item1,
         const PrintItem& item2, const PrintItem& item3,
@@ -48,14 +48,13 @@ Format<16> format(
         const PrintItem& item10, const PrintItem& item11,
         const PrintItem& item12, const PrintItem& item13,
         const PrintItem& item14, const PrintItem& item15) {
-    Format<16> result = {
+    return (Format<16>){
         format_string,
         {
             &item0, &item1, &item2, &item3, &item4, &item5, &item6, &item7,
             &item8, &item9, &item10, &item11, &item12, &item13, &item14, &item15,
         },
     };
-    return result;
 }
 
 }  // namespace sfz
