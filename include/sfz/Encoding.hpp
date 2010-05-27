@@ -118,6 +118,27 @@ template <typename T> void write_to(WriteTarget out, const DecodedBytes<T>& byte
     T::encode_to(out, bytes.string);
 }
 
+// MacRoman text encoding.
+//
+// This encoding can represent code points in the range [U+00, U+7F], as well as a further set of
+// 128 points.  It represents each code point as a 1-byte value with the corresponding integer.
+//
+// All ASCII code points are encoded equivalently in MacRoman; as a consequence, all valid
+// ASCII-encoded strings are also MacRoman-encoded strings with equal values.  Code points in the
+// MacRoman supplement make up the other half of valid values.  All byte sequences are valid
+// MacRoman-encoded strings.
+namespace macroman {
+
+struct MacRoman {
+    static void encode_to(WriteTarget out, const StringPiece& string);
+    static void decode_to(PrintTarget out, const BytesPiece& bytes);
+};
+
+inline DecodedBytes<MacRoman> encode(const StringPiece& string) { return string; }
+inline EncodedString<MacRoman> decode(const BytesPiece& bytes) { return bytes; }
+
+}  // namespace latin1
+
 }  // namespace sfz
 
 #endif  // SFZ_ENCODING_HPP_
