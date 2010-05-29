@@ -72,7 +72,7 @@ StringPiece dirname(const StringPiece& path) {
 void chdir(const StringPiece& path) {
     CString c_str(path);
     if (::chdir(c_str.data()) < 0) {
-        throw Exception(format("chdir: {0}", posix_strerror()));
+        throw Exception(format("chdir: {0}: {1}", path, posix_strerror()));
     }
 }
 
@@ -80,7 +80,7 @@ void symlink(const StringPiece& content, const StringPiece& container) {
     CString content_c_str(content);
     CString container_c_str(container);
     if (::symlink(content_c_str.data(), container_c_str.data()) < 0) {
-        throw Exception(format("symlink: {0}", posix_strerror()));
+        throw Exception(format("symlink: {0}: {1}", container, posix_strerror()));
     }
 }
 
@@ -88,7 +88,7 @@ int open(const StringPiece& path, int oflag, mode_t mode) {
     CString c_str(path);
     int fd = ::open(c_str.data(), oflag, mode);
     if (fd < 0) {
-        throw Exception(format("open: {0}", posix_strerror()));
+        throw Exception(format("open: {0}: {1}", path, posix_strerror()));
     }
     return fd;
 }
@@ -96,14 +96,14 @@ int open(const StringPiece& path, int oflag, mode_t mode) {
 void mkdir(const StringPiece& path, mode_t mode) {
     CString c_str(path);
     if (::mkdir(c_str.data(), mode) != 0) {
-        throw Exception(format("mkdir: {0}", posix_strerror()));
+        throw Exception(format("mkdir: {0}: {1}", path, posix_strerror()));
     }
 }
 
 void mkfifo(const StringPiece& path, mode_t mode) {
     CString c_str(path);
     if (::mkfifo(c_str.data(), mode) != 0) {
-        throw Exception(format("mkfifo: {0}", posix_strerror()));
+        throw Exception(format("mkfifo: {0}: {1}", path, posix_strerror()));
     }
 }
 
@@ -117,14 +117,14 @@ void makedirs(const StringPiece& path, mode_t mode) {
 void unlink(const StringPiece& path) {
     CString c_str(path);
     if (::unlink(c_str.data()) < 0) {
-        throw Exception(format("unlink: {0}", posix_strerror()));
+        throw Exception(format("unlink: {0}: {1}", path, posix_strerror()));
     }
 }
 
 void rmdir(const StringPiece& path) {
     CString c_str(path);
     if (::rmdir(c_str.data()) < 0) {
-        throw Exception(format("rmdir: {0}", posix_strerror()));
+        throw Exception(format("rmdir: {0}: {1}", path, posix_strerror()));
     }
 }
 
@@ -191,7 +191,7 @@ void walk(const StringPiece& root, WalkType type, TreeWalker* visitor) {
 
     FTS* fts = fts_open(pathv, options, compare_ftsent);
     if (fts == NULL) {
-        throw Exception(format("fts_open: {0}", posix_strerror()));
+        throw Exception(format("fts_open: {0}: {1}", root, posix_strerror()));
     }
     FtsCloser deleter(fts);
     while (FTSENT* ent = fts_read(fts)) {
@@ -209,7 +209,7 @@ void walk(const StringPiece& root, WalkType type, TreeWalker* visitor) {
           case FTS_DNR:
           case FTS_ERR:
           case FTS_NS:
-            throw Exception(format("fts_read: {0}", posix_strerror(ent->fts_errno)));
+            throw Exception(format("fts_read: {0}: {1}", path, posix_strerror(ent->fts_errno)));
 
           case FTS_DOT:
           case FTS_NSOK:
