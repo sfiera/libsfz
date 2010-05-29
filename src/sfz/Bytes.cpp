@@ -149,6 +149,7 @@ void Bytes::resize(size_t size, uint8_t byte) {
     } else {
         reserve(size);
         memset(_data.get() + _size, byte, size - _size);
+        _size = size;
     }
 }
 
