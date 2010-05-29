@@ -13,6 +13,7 @@
 #include "sfz/Foreach.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/Formatter.hpp"
+#include "sfz/Io.hpp"
 #include "sfz/Macros.hpp"
 #include "sfz/MappedFile.hpp"
 #include "sfz/NetworkBytes.hpp"

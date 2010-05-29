@@ -43,6 +43,7 @@
                 'src/sfz/Exception.cpp',
                 'src/sfz/Format.cpp',
                 'src/sfz/Formatter.cpp',
+                'src/sfz/Io.cpp',
                 'src/sfz/MappedFile.cpp',
                 'src/sfz/NetworkBytes.cpp',
                 'src/sfz/Os.cpp',
