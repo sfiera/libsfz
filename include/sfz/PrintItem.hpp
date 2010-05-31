@@ -85,7 +85,7 @@ template <typename T>
 struct PrintItem::Dispatch<T*> : public Dispatch<const void*> { };
 
 template <typename T, int size>
-struct PrintItem::Dispatch<T[size]> : public Dispatch<T*> { };
+struct PrintItem::Dispatch<T[size]> : public Dispatch<const T*> { };
 
 template <typename T>
 const PrintItem::DispatchTable PrintItem::Dispatch<T>::table = {
