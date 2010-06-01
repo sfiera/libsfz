@@ -78,14 +78,15 @@ SFZ_PRINT_ITEM_SPECIALIZE(unsigned long long);
 SFZ_PRINT_ITEM_SPECIALIZE(float);
 SFZ_PRINT_ITEM_SPECIALIZE(double);
 SFZ_PRINT_ITEM_SPECIALIZE(const char*);
+SFZ_PRINT_ITEM_SPECIALIZE(const char[]);
 SFZ_PRINT_ITEM_SPECIALIZE(const void*);
 #undef SFZ_PRINT_ITEM_SPECIALIZE
 
 template <typename T>
 struct PrintItem::Dispatch<T*> : public Dispatch<const void*> { };
 
-template <typename T, int size>
-struct PrintItem::Dispatch<T[size]> : public Dispatch<const T*> { };
+template <int size>
+struct PrintItem::Dispatch<const char[size]> : public Dispatch<const char[]> { };
 
 template <typename T>
 const PrintItem::DispatchTable PrintItem::Dispatch<T>::table = {

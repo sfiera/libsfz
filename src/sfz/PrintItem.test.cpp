@@ -85,7 +85,7 @@ class PrintItemTest : public Test {
         foreach (it, range(data, data + i)) {
             typename T::TestType value(it->value);
             String s(prefix);
-            PrintItem(value).print_to(&s);
+            print(&s, value);
             EXPECT_THAT(s, Eq(it->expected));
         }
     }
@@ -105,6 +105,19 @@ TEST_F(PrintItemTest, CStringItem) {
         { "long and\nmultiline", "const char*: long and\nmultiline" },
     };
     Run("const char*: ", data);
+}
+
+TEST_F(PrintItemTest, CStringLiteralItem) {
+    {
+        String s("const char[1]: ");
+        print(&s, "");
+        EXPECT_THAT(s, Eq<StringPiece>("const char[1]: "));
+    }
+    {
+        String s("const char[14]: ");
+        print(&s, "quoted string");
+        EXPECT_THAT(s, Eq<StringPiece>("const char[14]: quoted string"));
+    }
 }
 
 TEST_F(PrintItemTest, BoolItem) {

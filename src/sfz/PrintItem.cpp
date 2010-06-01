@@ -117,6 +117,11 @@ void PrintItem::Dispatch<const char*>::print_to(const void* target, PrintTarget 
 }
 
 template <>
+void PrintItem::Dispatch<const char[]>::print_to(const void* target, PrintTarget out) {
+    out.append(reinterpret_cast<const char*>(target));
+}
+
+template <>
 void PrintItem::Dispatch<const void*>::print_to(const void* target, PrintTarget out) {
     uint64_t addr = *reinterpret_cast<const intptr_t*>(target);
     size_t size = sizeof(const void*) * 2;
