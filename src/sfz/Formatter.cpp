@@ -14,9 +14,11 @@ namespace sfz {
 void print_to(PrintTarget out, const FormattedSint& value) {
     if (value.value < 0) {
         out.append(1, '-');
-        print_to(out, (FormattedUint){ -value.value, value.base, value.min_width });
+        FormattedUint item = { -value.value, value.base, value.min_width };
+        print_to(out, item);
     } else {
-        print_to(out, (FormattedUint){ value.value, value.base, value.min_width });
+        FormattedUint item = { value.value, value.base, value.min_width };
+        print_to(out, item);
     }
 }
 
@@ -74,7 +76,8 @@ void print_to(PrintTarget out, const EscapedString& value) {
 
 void print_to(PrintTarget out, const QuotedString& value) {
     out.append(1, '"');
-    print_to(out, (EscapedString){ value.string });
+    EscapedString item = { value.string };
+    print_to(out, item);
     out.append(1, '"');
 }
 

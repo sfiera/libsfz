@@ -48,13 +48,14 @@ inline Format<16> format(
         const PrintItem& item10, const PrintItem& item11,
         const PrintItem& item12, const PrintItem& item13,
         const PrintItem& item14, const PrintItem& item15) {
-    return (Format<16>){
+    Format<16> result = {
         format_string,
         {
             &item0, &item1, &item2, &item3, &item4, &item5, &item6, &item7,
             &item8, &item9, &item10, &item11, &item12, &item13, &item14, &item15,
         },
     };
+    return result;
 }
 
 }  // namespace sfz

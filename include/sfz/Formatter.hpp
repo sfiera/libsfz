@@ -50,19 +50,23 @@ template <> struct FormattedInt<unsigned long> { typedef FormattedUint Type; };
 template <> struct FormattedInt<unsigned long long> { typedef FormattedUint Type; };
 
 template <typename T> inline typename FormattedInt<T>::Type dec(T value, size_t min_width = 1) {
-    return (typename FormattedInt<T>::Type){ value, 10, min_width };
+    typename FormattedInt<T>::Type result = { value, 10, min_width };
+    return result;
 }
 
 template <typename T> inline typename FormattedInt<T>::Type hex(T value, size_t min_width = 1) {
-    return (typename FormattedInt<T>::Type){ value, 16, min_width };
+    typename FormattedInt<T>::Type result = { value, 16, min_width };
+    return result;
 }
 
 template <typename T> inline typename FormattedInt<T>::Type oct(T value, size_t min_width = 1) {
-    return (typename FormattedInt<T>::Type){ value, 8, min_width };
+    typename FormattedInt<T>::Type result = { value, 8, min_width };
+    return result;
 }
 
 template <typename T> inline typename FormattedInt<T>::Type bin(T value, size_t min_width = 1) {
-    return (typename FormattedInt<T>::Type){ value, 2, min_width };
+    typename FormattedInt<T>::Type result = { value, 2, min_width };
+    return result;
 }
 
 struct EscapedString {
@@ -71,7 +75,8 @@ struct EscapedString {
 void print_to(PrintTarget out, const EscapedString& value);
 
 inline EscapedString escape(const StringPiece& string) {
-    return (EscapedString){ string };
+    EscapedString result = { string };
+    return result;
 }
 
 struct QuotedString {
@@ -80,7 +85,8 @@ struct QuotedString {
 void print_to(PrintTarget out, const QuotedString& value);
 
 inline QuotedString quote(const StringPiece& string) {
-    return (QuotedString){ string };
+    QuotedString result = { string };
+    return result;
 }
 
 }  // namespace sfz
