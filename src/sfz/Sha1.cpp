@@ -70,10 +70,10 @@ Sha1::Digest Sha1::digest() const {
 void Sha1::finish() {
     _message_block[_message_block_index++] = 0x80;
     if (_message_block_index > 56) {
-        bzero(_message_block + _message_block_index, 64 - _message_block_index);
+        memset(_message_block + _message_block_index, '\0', 64 - _message_block_index);
         process_message_block();
     }
-    bzero(_message_block + _message_block_index, 56 - _message_block_index);
+    memset(_message_block + _message_block_index, '\0', 56 - _message_block_index);
     NetworkBytes<uint64_t> size_bytes(_size);
     memcpy(_message_block + 56, size_bytes.data(), 8);
     process_message_block();
