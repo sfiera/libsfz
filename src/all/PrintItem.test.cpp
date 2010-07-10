@@ -5,6 +5,7 @@
 
 #include "sfz/PrintItem.hpp"
 
+#include <limits>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "sfz/Bytes.hpp"
@@ -13,6 +14,7 @@
 #include "sfz/Formatter.hpp"
 #include "sfz/Range.hpp"
 
+using std::numeric_limits;
 using testing::Eq;
 using testing::Ne;
 using testing::Test;
@@ -223,8 +225,15 @@ TEST_F(PrintItemTest, FloatItem) {
 
 TEST_F(PrintItemTest, DoubleItem) {
     const TestData<double> data[] = {
-        { 1.0,      "double: 1.000000" },
-        { 1.234567, "double: 1.234567" },
+        { 0.0,                                  "double: 0.000000" },
+        { -0.0,                                 "double: -0.000000" },
+        { 1.0,                                  "double: 1.000000" },
+        { -1.0,                                 "double: -1.000000" },
+        { 1.234567,                             "double: 1.234567" },
+        { -1.234567,                            "double: -1.234567" },
+        { numeric_limits<double>::infinity(),   "double: inf" },
+        { -numeric_limits<double>::infinity(),  "double: -inf" },
+        { numeric_limits<double>::quiet_NaN(),  "double: nan" },
     };
     Run("double: ", data);
 }
