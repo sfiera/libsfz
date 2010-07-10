@@ -17,6 +17,7 @@
                 'src/all/Exception.cpp',
                 'src/all/Format.cpp',
                 'src/all/Formatter.cpp',
+                'src/all/Integer.cpp',
                 'src/posix/Io.cpp',
                 'src/posix/MappedFile.cpp',
                 'src/all/NetworkBytes.cpp',

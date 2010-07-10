@@ -11,24 +11,13 @@
 
 namespace sfz {
 
-void print_to(PrintTarget out, const FormattedSint& value) {
-    if (value.value < 0) {
-        out.append(1, '-');
-        FormattedUint item = { -value.value, value.base, value.min_width };
-        print_to(out, item);
-    } else {
-        FormattedUint item = { value.value, value.base, value.min_width };
-        print_to(out, item);
-    }
-}
-
-void print_to(PrintTarget out, const FormattedUint& value) {
+void print_to(PrintTarget out, const FormattedInt& value) {
     static const char kDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
     uint8_t buffer[64];
     size_t size = 0;
     uint8_t* data = buffer + 64;
-    uint64_t v = value.value;
+    uint64_t v = value.value.abs();
 
     while (v > 0) {
         --data;
@@ -37,6 +26,9 @@ void print_to(PrintTarget out, const FormattedUint& value) {
         v /= value.base;
     }
 
+    if (value.value.negative()) {
+        out.append(1, '-');
+    }
     if (size < value.min_width) {
         out.append(value.min_width - size, '0');
     }
