@@ -56,6 +56,7 @@ class Bytes {
     void assign(size_t num, uint8_t byte);
 
     uint8_t at(size_t loc) const;
+    uint8_t front() const { return at(0); }
 
     void clear();
 
@@ -112,6 +113,7 @@ class BytesPiece {
     size_t size() const;
 
     uint8_t at(size_t loc) const;
+    uint8_t front() const { return at(0); }
 
     bool empty() const;
 
