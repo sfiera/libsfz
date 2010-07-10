@@ -10,6 +10,7 @@
 #include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
+#include "sfz/Formatter.hpp"
 #include "sfz/NetworkBytes.hpp"
 #include "sfz/Os.hpp"
 #include "sfz/ReadItem.hpp"
@@ -136,8 +137,18 @@ void Sha1::process_message_block() {
     _message_block_index = 0;
 }
 
+void read_from(ReadSource in, Sha1::Digest* digest) {
+    read(in, digest->digest, 5);
+}
+
 void write_to(WriteTarget out, const Sha1::Digest& digest) {
     write(out, digest.digest, 5);
+}
+
+void print_to(PrintTarget out, const Sha1::Digest& digest) {
+    for (int i = 0; i < 5; ++i) {
+        print(out, hex(digest.digest[i], 8));
+    }
 }
 
 Sha1::Digest file_digest(const StringPiece& path) {

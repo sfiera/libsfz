@@ -15,13 +15,14 @@
 #include "sfz/Foreach.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/Os.hpp"
+#include "sfz/PrintItem.hpp"
 #include "sfz/Range.hpp"
+#include "sfz/ReadItem.hpp"
 #include "sfz/ScopedFd.hpp"
 #include "sfz/WriteItem.hpp"
 #include "sfz/WriteTarget.hpp"
 
 using testing::Eq;
-using testing::ExplainMatchResult;
 using testing::Test;
 
 namespace sfz {
@@ -202,6 +203,28 @@ TEST_F(Sha1Test, IncrementalDigest) {
 
     sha.reset();
     EXPECT_THAT(sha.digest(), Eq(kEmptyDigest));
+}
+
+TEST_F(Sha1Test, ReadWrite) {
+    const BytesPiece written(
+            "\xda\x39\xa3\xee\x5e\x6b\x4b\x0d\x32\x55\xbf\xef\x95\x60\x18\x90\xaf\xd8\x07\x09");
+
+    BytesPiece in(written);
+    Sha1::Digest digest;
+    read(&in, &digest);
+    EXPECT_THAT(digest, Eq(kEmptyDigest));
+
+    Bytes out;
+    write(&out, kEmptyDigest);
+    EXPECT_THAT(out, Eq(written));
+}
+
+TEST_F(Sha1Test, Print) {
+    StringPiece printed("da39a3ee5e6b4b0d3255bfef95601890afd80709");
+
+    String out;
+    print(&out, kEmptyDigest);
+    EXPECT_THAT(out, Eq(printed));
 }
 
 struct TreeData {
