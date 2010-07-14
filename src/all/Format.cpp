@@ -58,9 +58,9 @@ void print_format_to(
                 f = f.substr(1);
                 span_complement(f, kCloseBrace, &span, &remainder);
 
-                int32_t index = -1;
-                if (string_to_int32_t(span, &index)) {
-                    if (index >= 0 && static_cast<uint32_t>(index) < size) {
+                uint32_t index;
+                if (string_to_int(span, &index)) {
+                    if (index < size) {
                         items[index]->print_to(out);
                     }
                 }

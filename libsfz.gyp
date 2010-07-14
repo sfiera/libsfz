@@ -54,6 +54,7 @@
                 'src/all/ReadItem.test.cpp',
                 'src/all/Sha1.test.cpp',
                 'src/all/String.test.cpp',
+                'src/all/StringUtilities.test.cpp',
                 'src/all/WriteItem.test.cpp',
             ],
             'dependencies': [

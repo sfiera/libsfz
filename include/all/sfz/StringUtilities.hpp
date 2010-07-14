@@ -7,11 +7,13 @@
 #define SFZ_STRING_UTILITIES_HPP_
 
 #include <stdint.h>
-#include "sfz/String.hpp"
 
 namespace sfz {
 
-bool string_to_int32_t(const StringPiece& s, int32_t* out, int base = 10);
+class StringPiece;
+
+template <typename T>
+bool string_to_int(const StringPiece& s, T* out, int base = 10);
 
 }  // namespace sfz
 
