@@ -7,7 +7,7 @@
 #define SFZ_OS_HPP_
 
 #include <sys/stat.h>
-#include "sfz/String.hpp"
+#include <sfz/String.hpp>
 
 namespace sfz {
 

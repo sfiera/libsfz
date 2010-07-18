@@ -5,8 +5,8 @@
 
 #include "sfz/StringUtilities.hpp"
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"
 #include "sfz/String.hpp"

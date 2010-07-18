@@ -6,7 +6,7 @@
 #ifndef SFZ_POSIX_FORMATTER_HPP_
 #define SFZ_POSIX_FORMATTER_HPP_
 
-#include "PrintTarget.hpp"
+#include <sfz/PrintTarget.hpp>
 
 namespace sfz {
 

@@ -7,7 +7,7 @@
 #define SFZ_PRINT_TARGET_HPP_
 
 #include <stdlib.h>
-#include "sfz/Rune.hpp"
+#include <sfz/Rune.hpp>
 
 namespace sfz {
 

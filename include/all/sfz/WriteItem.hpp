@@ -6,7 +6,7 @@
 #ifndef SFZ_WRITE_ITEM_HPP_
 #define SFZ_WRITE_ITEM_HPP_
 
-#include "sfz/WriteTarget.hpp"
+#include <sfz/WriteTarget.hpp>
 
 namespace sfz {
 

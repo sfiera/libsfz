@@ -6,8 +6,8 @@
 #include "sfz/Os.hpp"
 
 #include <fcntl.h>
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using testing::_;
 using testing::Eq;

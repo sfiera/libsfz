@@ -5,8 +5,8 @@
 
 #include "sfz/WriteItem.hpp"
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include "sfz/Bytes.hpp"
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"

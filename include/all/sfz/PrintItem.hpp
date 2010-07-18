@@ -6,7 +6,7 @@
 #ifndef SFZ_PRINT_ITEM_HPP_
 #define SFZ_PRINT_ITEM_HPP_
 
-#include "sfz/PrintTarget.hpp"
+#include <sfz/PrintTarget.hpp>
 
 namespace sfz {
 

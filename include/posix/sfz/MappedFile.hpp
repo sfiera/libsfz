@@ -6,9 +6,9 @@
 #ifndef SFZ_MAPPED_FILE_HPP_
 #define SFZ_MAPPED_FILE_HPP_
 
-#include "sfz/Bytes.hpp"
-#include "sfz/Macros.hpp"
-#include "sfz/String.hpp"
+#include <sfz/Bytes.hpp>
+#include <sfz/Macros.hpp>
+#include <sfz/String.hpp>
 
 namespace sfz {
 

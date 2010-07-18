@@ -7,10 +7,10 @@
 #define SFZ_EXCEPTION_HPP_
 
 #include <exception>
-#include "sfz/CString.hpp"
-#include "sfz/PrintItem.hpp"
-#include "sfz/ReferenceCounted.hpp"
-#include "sfz/String.hpp"
+#include <sfz/CString.hpp>
+#include <sfz/PrintItem.hpp>
+#include <sfz/ReferenceCounted.hpp>
+#include <sfz/String.hpp>
 
 namespace sfz {
 

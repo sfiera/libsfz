@@ -6,10 +6,9 @@
 #ifndef SFZ_FORMATTER_HPP_
 #define SFZ_FORMATTER_HPP_
 
-#include "sfz/PrintTarget.hpp"
-
-#include "sfz/Integer.hpp"
-#include "sfz/String.hpp"
+#include <sfz/Integer.hpp>
+#include <sfz/PrintTarget.hpp>
+#include <sfz/String.hpp>
 
 namespace sfz {
 

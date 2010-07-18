@@ -6,7 +6,7 @@
 #ifndef SFZ_READ_ITEM_HPP_
 #define SFZ_READ_ITEM_HPP_
 
-#include "sfz/ReadSource.hpp"
+#include <sfz/ReadSource.hpp>
 
 namespace sfz {
 
