@@ -119,7 +119,7 @@ uint8_t Bytes::at(size_t loc) const {
     if (loc >= _size) {
         abort();
     }
-    return _data.get()[loc];
+    return _data[loc];
 }
 
 void Bytes::clear() {

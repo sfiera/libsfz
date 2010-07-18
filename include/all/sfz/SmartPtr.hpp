@@ -54,8 +54,7 @@ class scoped_array {
     ~scoped_array() { reset(); }
 
     T* get() const { return _ptr; }
-    T* operator->() const { return _ptr; }
-    T& operator*() const { return *_ptr; }
+    T& operator[](int index) const { return _ptr[index]; }
 
     T* release() {
         T* ptr = _ptr;

@@ -133,7 +133,7 @@ void String::resize(size_t size, Rune rune) {
     if (size > _size) {
         reserve(size);
         foreach (i, range(_size, size)) {
-            _data.get()[i] = rune;
+            _data[i] = rune;
         }
     }
     _size = size;
