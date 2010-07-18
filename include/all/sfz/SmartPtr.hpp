@@ -13,70 +13,77 @@
 namespace sfz {
 
 template <typename T>
-class scoped_ptr {
-  public:
-    explicit scoped_ptr(T* ptr = NULL) : _ptr(ptr) { }
-
-    ~scoped_ptr() { reset(); }
-
-    T* get() const { return _ptr; }
-    T* operator->() const { return _ptr; }
-    T& operator*() const { return *_ptr; }
-
-    T* release() {
-        T* ptr = _ptr;
-        _ptr = NULL;
-        return ptr;
-    }
-
-    void reset(T* new_ptr = NULL) {
-        if (_ptr) {
-            delete _ptr;
-        }
-        _ptr = new_ptr;
-    }
-
-    void swap(scoped_ptr<T>* s) {
-        std::swap(_ptr, s->_ptr);
-    }
-
-  private:
-    T* _ptr;
-
-    DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
+struct ptr_traits {
+    typedef T   value_type;
+    typedef T*  pointer;
+    typedef T&  reference;
+    static inline void destroy(pointer t) { delete t; }
 };
 
 template <typename T>
-class scoped_array {
+struct array_traits {
+    typedef T   value_type;
+    typedef T*  pointer;
+    typedef T&  reference;
+    static inline void destroy(pointer t) { delete[] t; }
+};
+
+template <typename T, template <typename T> class traits>
+class scoped {
   public:
-    explicit scoped_array(T* ptr = NULL) : _ptr(ptr) { }
+    typedef typename traits<T>::value_type  value_type;
+    typedef typename traits<T>::pointer     pointer;
 
-    ~scoped_array() { reset(); }
+    scoped(pointer ptr) : _ptr(ptr) { }
 
-    T* get() const { return _ptr; }
-    T& operator[](int index) const { return _ptr[index]; }
+    ~scoped() { reset(); }
 
-    T* release() {
-        T* ptr = _ptr;
-        _ptr = NULL;
+    pointer get() const { return _ptr; }
+
+    pointer release() {
+        pointer ptr = NULL;
+        std::swap(ptr, _ptr);
         return ptr;
     }
 
-    void reset(T* new_ptr = NULL) {
-        if (_ptr) {
-            delete [] _ptr;
+    void reset(pointer new_ptr = NULL) {
+        if (this->_ptr) {
+            traits<T>::destroy(this->_ptr);
         }
-        _ptr = new_ptr;
+        this->_ptr = new_ptr;
     }
 
-    void swap(scoped_array<T>* s) {
+    void swap(scoped* s) {
         std::swap(_ptr, s->_ptr);
     }
 
   private:
-    T* _ptr;
+    pointer _ptr;
 
-    DISALLOW_COPY_AND_ASSIGN(scoped_array);
+    DISALLOW_COPY_AND_ASSIGN(scoped);
+};
+
+template <typename T>
+class scoped_ptr : public scoped<T, ptr_traits> {
+  public:
+    typedef scoped<T, ptr_traits>               super;
+    typedef typename ptr_traits<T>::pointer     pointer;
+    typedef typename ptr_traits<T>::reference   reference;
+
+    explicit scoped_ptr(pointer ptr = NULL) : super(ptr) { }
+    pointer operator->() const { return this->get(); }
+    reference operator*() const { return *this->get(); }
+};
+
+template <typename T>
+class scoped_array : public scoped<T, array_traits> {
+  public:
+    typedef scoped<T, array_traits>             super;
+    typedef typename array_traits<T>::pointer   pointer;
+    typedef typename array_traits<T>::reference reference;
+
+    explicit scoped_array(pointer ptr = NULL) : super(ptr) { }
+    reference operator[](int index) const { return this->get()[index]; }
 };
 
 }  // namespace sfz
