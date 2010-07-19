@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <iterator>
-#include <sfz/SmartPtr.hpp>
+#include <sfz/ScopedPtr.hpp>
 #include <sfz/WriteItem.hpp>
 #include <sfz/WriteTarget.hpp>
 

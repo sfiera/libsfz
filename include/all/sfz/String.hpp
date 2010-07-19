@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <iterator>
-#include <sfz/SmartPtr.hpp>
+#include <sfz/ScopedPtr.hpp>
 #include <sfz/PrintItem.hpp>
 #include <sfz/PrintTarget.hpp>
 #include <sfz/Rune.hpp>

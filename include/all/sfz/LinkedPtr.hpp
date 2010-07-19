@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <algorithm>
+#include <sfz/Macros.hpp>
 #include <sfz/SmartPtr.hpp>
 
 namespace sfz {

@@ -28,6 +28,7 @@
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/Rune.hpp>
 #include <sfz/ScopedFd.hpp>
+#include <sfz/ScopedPtr.hpp>
 #include <sfz/Sha1.hpp>
 #include <sfz/SmartPtr.hpp>
 #include <sfz/String.hpp>
