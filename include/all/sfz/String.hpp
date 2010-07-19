@@ -154,28 +154,6 @@ class String {
     String& operator=(const String&);
 };
 
-// String variant suitable for use in std::map and std::set.
-//
-// Adds to String the necessary features for use as the key of a std::map, or the value of a
-// std::set.  It is implicitly copyable, assignable, and defines a 'less than' operator for
-// comparison.  It should not be used for any other purpose.
-class StringKey : public String {
-  public:
-    StringKey(const String& string) : String(string) { }
-    StringKey(const StringKey& string) : String(string) { }
-    StringKey(const StringPiece& string) : String(string) { }
-    StringKey(size_t num, Rune rune) : String(num, rune) { }
-
-    StringKey& operator=(const String& string) { assign(string); return *this; }
-    StringKey& operator=(const StringKey& string) { assign(string); return *this; }
-    StringKey& operator=(const StringPiece& string) { assign(string); return *this; }
-
-  private:
-    // ALLOW_COPY_AND_ASSIGN
-};
-
-bool operator<(const StringKey& lhs, const StringKey& rhs);
-
 // References a sequence of Unicode code points.
 //
 // StringPiece references a sequence of valid Unicode code points.  This is represented as a
@@ -308,7 +286,6 @@ class StringPiece {
 
 inline void print_to(PrintTarget out, const String& s) { out.append(s); }
 inline void print_to(PrintTarget out, const StringPiece& s) { out.append(s); }
-inline void print_to(PrintTarget out, const StringKey& s) { out.append(s); }
 
 bool operator==(const String& lhs, const String& rhs);
 bool operator!=(const String& lhs, const String& rhs);

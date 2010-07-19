@@ -195,19 +195,6 @@ void String::initialize(size_t capacity) {
     _capacity = capacity;
 }
 
-// StringKey implementation.
-
-bool operator<(const StringKey& lhs, const StringKey& rhs) {
-    foreach (i, range(min(lhs.size(), rhs.size()))) {
-        if (lhs.at(i) < rhs.at(i)) {
-            return true;
-        } else if (lhs.at(i) > rhs.at(i)) {
-            return false;
-        }
-    }
-    return lhs.size() < rhs.size();
-}
-
 // StringPiece implementation.
 
 StringPiece::StringPiece()
