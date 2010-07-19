@@ -10,6 +10,7 @@
 #include <sfz/CString.hpp>
 #include <sfz/PrintItem.hpp>
 #include <sfz/ReferenceCounted.hpp>
+#include <sfz/ScopedPtr.hpp>
 #include <sfz/String.hpp>
 
 namespace sfz {
@@ -28,7 +29,7 @@ class Exception : public std::exception {
         CString what;
     };
 
-    RefPtr<const Impl> _impl;
+    scoped_ref<const Impl> _impl;
 };
 
 }  // namespace sfz

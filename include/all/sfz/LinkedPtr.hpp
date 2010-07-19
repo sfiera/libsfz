@@ -36,7 +36,10 @@ class linked {
     typedef typename traits<T>::value_type  value_type;
     typedef typename traits<T>::pointer     pointer;
 
-    linked(pointer ptr) : _ptr(ptr) { }
+    linked(pointer ptr)
+            : _ptr(ptr) {
+        traits<T>::acquire(_ptr);
+    }
 
     linked(const linked& other) {
         copy(other);
@@ -75,10 +78,11 @@ class linked {
     }
 
     void reset(pointer new_ptr = NULL) {
-        if (_group.depart() && _ptr) {
-            traits<T>::destroy(_ptr);
+        if (_group.depart()) {
+            traits<T>::release(_ptr);
         }
         _ptr = new_ptr;
+        traits<T>::acquire(_ptr);
     }
 
     void swap(linked* s) {
