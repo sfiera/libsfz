@@ -19,6 +19,7 @@
                 'src/all/Formatter.cpp',
                 'src/all/Integer.cpp',
                 'src/posix/Io.cpp',
+                'src/all/LinkedPtr.cpp',
                 'src/posix/MappedFile.cpp',
                 'src/all/NetworkBytes.cpp',
                 'src/posix/Os.cpp',
@@ -49,6 +50,7 @@
             'sources': [
                 'src/all/Encoding.test.cpp',
                 'src/all/Formatter.test.cpp',
+                'src/all/LinkedPtr.test.cpp',
                 'src/all/Os.test.cpp',
                 'src/all/PrintItem.test.cpp',
                 'src/all/ReadItem.test.cpp',
