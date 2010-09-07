@@ -3,5 +3,5 @@
 set -e
 
 git submodule init
-git submodule update
+#git submodule update
 ./ext/gyp/gyp --depth=. -Dlibrary=static_library -Iext/gyputil/util.gypi

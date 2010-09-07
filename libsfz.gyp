@@ -33,9 +33,6 @@
                 'src/all/StringUtilities.cpp',
                 'src/all/WriteItem.cpp',
             ],
-            'dependencies': [
-                ':check-deps',
-            ],
             'direct_dependent_settings': {
                 'include_dirs': [
                     'include/all',
@@ -60,7 +57,6 @@
                 'src/all/WriteItem.test.cpp',
             ],
             'dependencies': [
-                ':check-deps',
                 ':libsfz',
                 '<(DEPTH)/ext/googlemock/googlemock.gyp:gmock_main',
             ],
