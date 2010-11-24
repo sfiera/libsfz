@@ -7,9 +7,10 @@
 
 #include <algorithm>
 
-using std::max;
-
 namespace sfz {
+
+using std::max;
+using std::swap;
 
 namespace {
 
@@ -138,7 +139,7 @@ void Bytes::reserve(size_t capacity) {
         }
         scoped_array<uint8_t> new_data(new uint8_t[new_capacity]);
         memcpy(new_data.get(), _data.get(), _size);
-        _data.swap(&new_data);
+        swap(_data, new_data);
         _capacity = new_capacity;
     }
 }
@@ -151,12 +152,6 @@ void Bytes::resize(size_t size, uint8_t byte) {
         memset(_data.get() + _size, byte, size - _size);
         _size = size;
     }
-}
-
-void Bytes::swap(Bytes* bytes) {
-    _data.swap(&bytes->_data);
-    std::swap(_size, bytes->_size);
-    std::swap(_capacity, bytes->_capacity);
 }
 
 BytesPiece::BytesPiece()
@@ -219,6 +214,17 @@ void BytesPiece::shift(size_t size) {
 void BytesPiece::shift(uint8_t* data, size_t size) {
     shift(size);
     memcpy(data, _data - size, size);
+}
+
+void swap(Bytes& x, Bytes& y) {
+    swap(x._data, y._data);
+    swap(x._size, y._size);
+    swap(x._capacity, y._capacity);
+}
+
+void swap(BytesPiece& x, BytesPiece& y) {
+    swap(x._data, y._data);
+    swap(x._size, y._size);
 }
 
 // Equality operators.

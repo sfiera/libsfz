@@ -13,6 +13,10 @@
 
 namespace sfz {
 
+template <typename T, template <typename T> class traits> class linked;
+template <typename T, template <typename T> class traits>
+void swap(linked<T, traits>& x, linked<T, traits>& y);
+
 class linked_group {
   public:
     linked_group();
@@ -71,9 +75,10 @@ class linked {
     bool unique() const { return _group.unique(); }
 
     pointer release() {
+        using std::swap;
         _group.check_unique();
         pointer ptr = NULL;
-        std::swap(ptr, _ptr);
+        swap(ptr, _ptr);
         return ptr;
     }
 
@@ -85,11 +90,7 @@ class linked {
         traits<T>::acquire(_ptr);
     }
 
-    void swap(linked* s) {
-        _group.check_unique();
-        s->_group.check_unique();
-        std::swap(_ptr, s->_ptr);
-    }
+    friend void swap<>(linked& x, linked& y);
 
   private:
     template <typename U, template <typename V> class other_traits>
@@ -143,6 +144,28 @@ class linked_array : public linked<T, array_traits> {
 template <typename T>
 linked_ptr<T> make_linked_ptr(T* ptr) {
     return linked_ptr<T>(ptr);
+}
+
+template <typename T, template <typename T> class traits>
+void swap(linked<T, traits>& x, linked<T, traits>& y) {
+    using std::swap;
+    x._group.check_unique();
+    y._group.check_unique();
+    swap(x._ptr, y._ptr);
+}
+
+template <typename T>
+void swap(linked_ptr<T>& x, linked_ptr<T>& y) {
+    typename linked_ptr<T>::super& super_x = x;
+    typename linked_ptr<T>::super& super_y = y;
+    swap(super_x, super_y);
+}
+
+template <typename T>
+void swap(linked_array<T>& x, linked_array<T>& y) {
+    typename linked_array<T>::super& super_x = x;
+    typename linked_array<T>::super& super_y = y;
+    swap(super_x, super_y);
 }
 
 }  // namespace sfz

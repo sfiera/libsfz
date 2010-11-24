@@ -14,10 +14,11 @@
 #include "sfz/Format.hpp"
 #include "sfz/Range.hpp"
 
+namespace sfz {
+
 using std::max;
 using std::min;
-
-namespace sfz {
+using std::swap;
 
 namespace {
 
@@ -124,7 +125,7 @@ void String::reserve(size_t capacity) {
         }
         scoped_array<Rune> new_data(new Rune[new_capacity]);
         memcpy(new_data.get(), _data.get(), _size * sizeof(Rune));
-        _data.swap(&new_data);
+        swap(_data, new_data);
         _capacity = new_capacity;
     }
 }
@@ -137,12 +138,6 @@ void String::resize(size_t size, Rune rune) {
         }
     }
     _size = size;
-}
-
-void String::swap(String* string) {
-    _data.swap(&string->_data);
-    std::swap(_size, string->_size);
-    std::swap(_capacity, string->_capacity);
 }
 
 void String::replace(size_t index, size_t num, const StringPiece& string) {
@@ -382,6 +377,17 @@ StringPiece::iterator StringPiece::iterator::operator-(int n) const {
 
 StringPiece::difference_type StringPiece::iterator::operator-(const iterator& it) const {
     return (_it - it._it) / _encoding;
+}
+
+void swap(String& x, String& y) {
+    swap(x._data, y._data);
+    swap(x._size, y._size);
+    swap(x._capacity, y._capacity);
+}
+
+void swap(StringPiece& x, StringPiece& y) {
+    swap(x._data, y._data);
+    swap(x._size, y._size);
 }
 
 bool operator==(const String& lhs, const String& rhs) {

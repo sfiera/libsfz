@@ -112,13 +112,6 @@ class String {
     // @param [in] rune     If the String is extended, the code point to fill new positions with.
     void resize(size_t size, Rune rune = 0);
 
-    // Swaps the contents of two String objects.
-    //
-    // This is significantly more efficient than the naive approach.
-    //
-    // @param [in, out] string The string to swap with.
-    void swap(String* string);
-
     void replace(size_t index, size_t num, const StringPiece& string);
 
     size_t size() const;
@@ -140,6 +133,8 @@ class String {
     reverse_iterator rend() { return reverse_iterator(begin()); }
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+
+    friend void swap(String& x, String& y);
 
   private:
     friend class StringPiece;
@@ -272,6 +267,8 @@ class StringPiece {
         // ALLOW_COPY_AND_ASSIGN
     };
 
+    friend void swap(StringPiece& x, StringPiece& y);
+
   private:
     friend class String;
 
@@ -286,6 +283,9 @@ class StringPiece {
 
 inline void print_to(PrintTarget out, const String& s) { out.append(s); }
 inline void print_to(PrintTarget out, const StringPiece& s) { out.append(s); }
+
+void swap(String& x, String& y);
+void swap(StringPiece& x, StringPiece& y);
 
 bool operator==(const String& lhs, const String& rhs);
 bool operator!=(const String& lhs, const String& rhs);

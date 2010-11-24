@@ -161,7 +161,7 @@ TEST_F(LinkedPtrTest, Release) {
     one->mark();
 }
 
-// Test linked_ptr<>::swap().
+// Test swap(linked_ptr& x, linked_ptr& y).
 TEST_F(LinkedPtrTest, Swap) {
     LifeObserver observer_one;
     LifeObserver observer_two;
@@ -175,13 +175,13 @@ TEST_F(LinkedPtrTest, Swap) {
     linked_ptr<ObservedObject> one(new ObservedObject(&observer_one));
     linked_ptr<ObservedObject> two(new ObservedObject(&observer_two));
     linked_ptr<ObservedObject> block = two;
-    EXPECT_THROW(one.swap(&two), Exception);
-    EXPECT_THROW(two.swap(&one), Exception);
+    EXPECT_THROW(swap(one, two), Exception);
+    EXPECT_THROW(swap(two, one), Exception);
     block.reset();
-    one.swap(&two);
+    swap(one, two);
 }
 
-// Test linked_ptr<>::swap().
+// Test linked_array<>.
 TEST_F(LinkedPtrTest, LinkedArray) {
     LifeObserver observer;
     {

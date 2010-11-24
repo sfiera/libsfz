@@ -13,6 +13,10 @@
 
 namespace sfz {
 
+template <typename T, template <typename T> class traits> class scoped;
+template <typename T, template <typename T> class traits>
+inline void swap(scoped<T, traits>& x, scoped<T, traits>& y);
+
 template <typename T, template <typename T> class traits>
 class scoped {
   public:
@@ -41,8 +45,9 @@ class scoped {
     pointer get() const { return _ptr; }
 
     pointer release() {
+        using std::swap;
         pointer ptr = NULL;
-        std::swap(ptr, _ptr);
+        swap(ptr, _ptr);
         return ptr;
     }
 
@@ -52,9 +57,7 @@ class scoped {
         traits<T>::acquire(_ptr);
     }
 
-    void swap(scoped* s) {
-        std::swap(_ptr, s->_ptr);
-    }
+    friend void swap<>(scoped& x, scoped& y);
 
   private:
     pointer _ptr;
@@ -98,6 +101,33 @@ class scoped_ref : public scoped<T, ref_traits> {
     pointer operator->() const { return this->get(); }
     reference operator*() const { return *this->get(); }
 };
+
+template <typename T, template <typename T> class traits>
+inline void swap(scoped<T, traits>& x, scoped<T, traits>& y) {
+    using std::swap;
+    swap(x._ptr, y._ptr);
+}
+
+template <typename T>
+inline void swap(scoped_ptr<T>& x, scoped_ptr<T>& y) {
+    typename scoped_ptr<T>::super& super_x = x;
+    typename scoped_ptr<T>::super& super_y = y;
+    swap(super_x, super_y);
+}
+
+template <typename T>
+inline void swap(scoped_array<T>& x, scoped_array<T>& y) {
+    typename scoped_array<T>::super& super_x = x;
+    typename scoped_array<T>::super& super_y = y;
+    swap(super_x, super_y);
+}
+
+template <typename T>
+inline void swap(scoped_ref<T>& x, scoped_ref<T>& y) {
+    typename scoped_ref<T>::super& super_x = x;
+    typename scoped_ref<T>::super& super_y = y;
+    swap(super_x, super_y);
+}
 
 }  // namespace sfz
 

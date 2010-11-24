@@ -66,7 +66,7 @@ class Bytes {
 
     void resize(size_t size, uint8_t byte = '\0');
 
-    void swap(Bytes* bytes);
+    friend void swap(Bytes& a, Bytes& b);
 
     // Iterator support.
     iterator begin() { return iterator(_data.get()); }
@@ -128,6 +128,8 @@ class BytesPiece {
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
+    friend void swap(BytesPiece& a, BytesPiece& b);
+
   private:
     const uint8_t* _data;
     size_t _size;
@@ -137,6 +139,9 @@ class BytesPiece {
 
 inline void write_to(WriteTarget out, const Bytes& bytes) { out.append(bytes); }
 inline void write_to(WriteTarget out, const BytesPiece& bytes) { out.append(bytes); }
+
+void swap(Bytes& x, Bytes& y);
+void swap(BytesPiece& x, BytesPiece& y);
 
 bool operator==(const Bytes& lhs, const Bytes& rhs);
 bool operator!=(const Bytes& lhs, const Bytes& rhs);
