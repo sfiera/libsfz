@@ -38,5 +38,4 @@ bool linked_group::unique() const {
     return _next == this;
 }
 
-
 }  // namespace sfz

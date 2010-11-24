@@ -141,38 +141,8 @@ class linked_array : public linked<T, array_traits> {
 };
 
 template <typename T>
-class linked_key : public linked<const T, ptr_traits> {
-  public:
-    typedef linked<const T, ptr_traits>                 super;
-    typedef typename ptr_traits<const T>::value_type    value_type;
-    typedef typename ptr_traits<const T>::pointer       pointer;
-    typedef typename ptr_traits<const T>::reference     reference;
-
-    explicit linked_key(pointer ptr = NULL) : super(ptr) { }
-    pointer operator->() const { return this->get(); }
-    reference operator*() const { return *this->get(); }
-};
-#define SFZ_LINKED_KEY_OP(OP) \
-    template <typename T> \
-    bool operator OP(const linked_key<T>& lhs, const linked_key<T>& rhs) { \
-        return *lhs OP *rhs; \
-    }
-SFZ_LINKED_KEY_OP(==);
-SFZ_LINKED_KEY_OP(!=);
-SFZ_LINKED_KEY_OP(<);
-SFZ_LINKED_KEY_OP(<=);
-SFZ_LINKED_KEY_OP(>);
-SFZ_LINKED_KEY_OP(>=);
-#undef SFZ_LINKED_KEY_OP
-
-template <typename T>
 linked_ptr<T> make_linked_ptr(T* ptr) {
     return linked_ptr<T>(ptr);
-}
-
-template <typename T>
-linked_key<T> make_linked_key(T* ptr) {
-    return linked_key<T>(ptr);
 }
 
 }  // namespace sfz
