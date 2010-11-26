@@ -36,6 +36,7 @@ class Bytes {
     Bytes();
     explicit Bytes(const Bytes& bytes);
     explicit Bytes(const BytesPiece& bytes);
+    explicit Bytes(const char* data);
     Bytes(const uint8_t* data, size_t size);
     explicit Bytes(WriteItem item);
     Bytes(size_t num, uint8_t byte);
@@ -45,12 +46,16 @@ class Bytes {
     uint8_t* mutable_data() const;
     size_t size() const;
 
+    void append(const Bytes& bytes);
     void append(const BytesPiece& bytes);
+    void append(const char* data);
     void append(const uint8_t* data, size_t size);
     void append(WriteItem item);
     void append(size_t num, uint8_t byte);
 
+    void assign(const Bytes& bytes);
     void assign(const BytesPiece& bytes);
+    void assign(const char* data);
     void assign(const uint8_t* data, size_t size);
     void assign(WriteItem item);
     void assign(size_t num, uint8_t byte);
@@ -58,9 +63,19 @@ class Bytes {
     uint8_t at(size_t loc) const;
     uint8_t front() const { return at(0); }
 
+    size_type find(uint8_t byte) const;
+    size_type find(const BytesPiece& bytes) const;
+    size_type rfind(uint8_t byte) const;
+    size_type rfind(const BytesPiece& bytes) const;
+
     void clear();
 
     bool empty() const;
+
+    BytesPiece substr(size_t index) const;
+    BytesPiece substr(size_t index, size_t size) const;
+
+    void replace(size_t index, size_t num, const BytesPiece& bytes);
 
     void reserve(size_t capacity);
 
@@ -115,6 +130,11 @@ class BytesPiece {
     uint8_t at(size_t loc) const;
     uint8_t front() const { return at(0); }
 
+    size_type find(uint8_t byte) const;
+    size_type find(const BytesPiece& bytes) const;
+    size_type rfind(uint8_t byte) const;
+    size_type rfind(const BytesPiece& bytes) const;
+
     bool empty() const;
 
     BytesPiece substr(size_t index) const;
@@ -143,11 +163,22 @@ inline void write_to(WriteTarget out, const BytesPiece& bytes) { out.append(byte
 void swap(Bytes& x, Bytes& y);
 void swap(BytesPiece& x, BytesPiece& y);
 
-bool operator==(const Bytes& lhs, const Bytes& rhs);
-bool operator!=(const Bytes& lhs, const Bytes& rhs);
+int compare(const Bytes& x, const Bytes& y);
+int compare(const BytesPiece& x, const BytesPiece& y);
 
-bool operator==(const BytesPiece& lhs, const BytesPiece& rhs);
-bool operator!=(const BytesPiece& lhs, const BytesPiece& rhs);
+bool operator==(const Bytes& x, const Bytes& y);
+bool operator!=(const Bytes& x, const Bytes& y);
+bool operator< (const Bytes& x, const Bytes& y);
+bool operator<=(const Bytes& x, const Bytes& y);
+bool operator> (const Bytes& x, const Bytes& y);
+bool operator>=(const Bytes& x, const Bytes& y);
+
+bool operator==(const BytesPiece& x, const BytesPiece& y);
+bool operator!=(const BytesPiece& x, const BytesPiece& y);
+bool operator< (const BytesPiece& x, const BytesPiece& y);
+bool operator<=(const BytesPiece& x, const BytesPiece& y);
+bool operator> (const BytesPiece& x, const BytesPiece& y);
+bool operator>=(const BytesPiece& x, const BytesPiece& y);
 
 }  // namespace sfz
 
