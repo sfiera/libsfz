@@ -250,12 +250,7 @@ class StringPiece {
 
         value_type operator[](int n) const { return *(*this + n); }
 
-        bool operator==(const iterator& other) const { return _it == other._it; }
-        bool operator!=(const iterator& other) const { return _it != other._it; }
-        bool operator<(const iterator& other) const { return _it < other._it; }
-        bool operator<=(const iterator& other) const { return _it <= other._it; }
-        bool operator>(const iterator& other) const { return _it > other._it; }
-        bool operator>=(const iterator& other) const { return _it >= other._it; }
+        friend int compare(const StringPiece::iterator& x, const StringPiece::iterator& y);
 
       private:
         friend class StringPiece;
@@ -287,10 +282,30 @@ inline void print_to(PrintTarget out, const StringPiece& s) { out.append(s); }
 void swap(String& x, String& y);
 void swap(StringPiece& x, StringPiece& y);
 
-bool operator==(const String& lhs, const String& rhs);
-bool operator!=(const String& lhs, const String& rhs);
-bool operator==(const StringPiece& lhs, const StringPiece& rhs);
-bool operator!=(const StringPiece& lhs, const StringPiece& rhs);
+int compare(const String& x, const String& y);
+int compare(const StringPiece& x, const StringPiece& y);
+int compare(const StringPiece::iterator& x, const StringPiece::iterator& y);
+
+bool operator==(const String& x, const String& y);
+bool operator!=(const String& x, const String& y);
+bool operator< (const String& x, const String& y);
+bool operator<=(const String& x, const String& y);
+bool operator> (const String& x, const String& y);
+bool operator>=(const String& x, const String& y);
+
+bool operator==(const StringPiece& x, const StringPiece& y);
+bool operator!=(const StringPiece& x, const StringPiece& y);
+bool operator< (const StringPiece& x, const StringPiece& y);
+bool operator<=(const StringPiece& x, const StringPiece& y);
+bool operator> (const StringPiece& x, const StringPiece& y);
+bool operator>=(const StringPiece& x, const StringPiece& y);
+
+bool operator==(const StringPiece::iterator& x, const StringPiece::iterator& y);
+bool operator!=(const StringPiece::iterator& x, const StringPiece::iterator& y);
+bool operator< (const StringPiece::iterator& x, const StringPiece::iterator& y);
+bool operator<=(const StringPiece::iterator& x, const StringPiece::iterator& y);
+bool operator> (const StringPiece::iterator& x, const StringPiece::iterator& y);
+bool operator>=(const StringPiece::iterator& x, const StringPiece::iterator& y);
 
 }  // namespace sfz
 

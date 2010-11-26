@@ -390,29 +390,41 @@ void swap(StringPiece& x, StringPiece& y) {
     swap(x._size, y._size);
 }
 
-bool operator==(const String& lhs, const String& rhs) {
-    return StringPiece(lhs) == StringPiece(rhs);
+int compare(const String& x, const String& y) {
+    return compare(StringPiece(x), StringPiece(y));
 }
 
-bool operator!=(const String& lhs, const String& rhs) {
-    return StringPiece(lhs) != StringPiece(rhs);
-}
-
-bool operator==(const StringPiece& lhs, const StringPiece& rhs) {
-    if (lhs.size() != rhs.size()) {
-        return false;
-    }
-    for (StringPiece::const_iterator it = lhs.begin(), jt = rhs.begin();
-            it != lhs.end() && jt != rhs.end(); ++it, ++jt) {
-        if (*it != *jt) {
-            return false;
+int compare(const StringPiece& x, const StringPiece& y) {
+    for (StringPiece::iterator xit = x.begin(), yit = y.begin(), xend = x.end(), yend = y.end();
+            true; ++xit, ++yit) {
+        if ((xit == xend) && (yit == yend)) {
+            return 0;
+        } else if (xit == xend) {
+            return -1;
+        } else if (yit == yend) {
+            return 1;
+        } else if (*xit < *yit) {
+            return -1;
+        } else if (*yit < *xit) {
+            return 1;
         }
     }
-    return true;
 }
 
-bool operator!=(const StringPiece& lhs, const StringPiece& rhs) {
-    return !(lhs == rhs);
+int compare(const StringPiece::iterator& x, const StringPiece::iterator& y) {
+    return x._it - y._it;
 }
+
+#define DEFINE_OPERATORS(TYPE) \
+    bool operator==(const TYPE& x, const TYPE& y) { return compare(x, y) == 0; } \
+    bool operator!=(const TYPE& x, const TYPE& y) { return compare(x, y) != 0; } \
+    bool operator< (const TYPE& x, const TYPE& y) { return compare(x, y) <  0; } \
+    bool operator<=(const TYPE& x, const TYPE& y) { return compare(x, y) <= 0; } \
+    bool operator> (const TYPE& x, const TYPE& y) { return compare(x, y) >  0; } \
+    bool operator>=(const TYPE& x, const TYPE& y) { return compare(x, y) >= 0; }
+
+DEFINE_OPERATORS(String)
+DEFINE_OPERATORS(StringPiece)
+DEFINE_OPERATORS(StringPiece::iterator)
 
 }  // namespace sfz

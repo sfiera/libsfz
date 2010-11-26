@@ -13,6 +13,10 @@
 
 using testing::ByRef;
 using testing::Eq;
+using testing::Ge;
+using testing::Gt;
+using testing::Le;
+using testing::Lt;
 using testing::Ne;
 using testing::Test;
 
@@ -271,6 +275,36 @@ TEST_F(StringTest, ReplaceJapanese) {
     const String kyouha_anatawo_nokositeimasu(utf8::decode("今日あなたを残しています"));
     string.replace(0, 9, kyouha_anatawo_nokositeimasu);
     EXPECT_THAT(string, Eq<StringPiece>(kyouha_anatawo_nokositeimasu));
+}
+
+template <typename Left, typename Right>
+void TestComparison() {
+    const String hello_string("Hello");
+    const String world_string("World");
+    const String kalimera_string(utf8::decode("Καλημέρα"));
+
+    Left world_left(world_string);
+    Right hello(hello_string);
+    Right world_right(world_string);
+    Right kalimera(kalimera_string);
+
+    EXPECT_THAT(world_left, Ne(ByRef(hello)));
+    EXPECT_THAT(world_left, Eq(ByRef(world_right)));
+    EXPECT_THAT(world_left, Ne(ByRef(kalimera)));
+
+    EXPECT_THAT(world_left, Gt(ByRef(hello)));
+    EXPECT_THAT(world_left, Le(ByRef(world_right)));
+    EXPECT_THAT(world_left, Le(ByRef(kalimera)));
+
+    EXPECT_THAT(world_left, Ge(ByRef(hello)));
+    EXPECT_THAT(world_left, Ge(ByRef(world_right)));
+    EXPECT_THAT(world_left, Lt(ByRef(kalimera)));
+}
+
+TEST_F(StringTest, Comparison) {
+    TestComparison<String,      String>();
+    TestComparison<String,      StringPiece>();
+    TestComparison<StringPiece, StringPiece>();
 }
 
 }  // namespace
