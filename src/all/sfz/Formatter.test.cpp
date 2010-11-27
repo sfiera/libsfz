@@ -21,13 +21,13 @@ namespace {
 
 struct TestData {
     PrintItem value;
-    StringPiece expected;
+    StringSlice expected;
 };
 
 class FormatterTest : public Test {
   protected:
     template <int i>
-    void Run(const StringPiece& prefix, const TestData (&data)[i]) {
+    void Run(const StringSlice& prefix, const TestData (&data)[i]) {
         foreach (it, range(data, data + i)) {
             String s(prefix);
             it->value.print_to(&s);

@@ -16,7 +16,7 @@
 
 namespace sfz {
 
-class StringPiece;
+class StringSlice;
 
 // Stores a sequence of Unicode code points.
 //
@@ -75,7 +75,7 @@ class String {
     void append(size_t num, Rune rune);
     void assign(size_t num, Rune rune);
 
-    void push(const StringPiece& string);
+    void push(const StringSlice& string);
     void push(size_t num, Rune rune);
 
     // Destroys the String.
@@ -99,19 +99,19 @@ class String {
     // @param [in] rune     If the String is extended, the code point to fill new positions with.
     void resize(size_t size, Rune rune = 0);
 
-    void replace(size_t index, size_t num, const StringPiece& string);
+    void replace(size_t index, size_t num, const StringSlice& string);
 
     size_t size() const;
     bool empty() const;
     Rune at(size_t loc) const;
     size_t find(Rune rune, size_t index = 0) const;
-    size_t find(const StringPiece& string, size_t index = 0) const;
+    size_t find(const StringSlice& string, size_t index = 0) const;
     size_t rfind(Rune rune, size_t index = npos) const;
-    size_t rfind(const StringPiece& string, size_t index = npos) const;
-    StringPiece substr(size_t loc) const;
-    StringPiece substr(size_t loc, size_t size) const;
+    size_t rfind(const StringSlice& string, size_t index = npos) const;
+    StringSlice slice(size_t loc) const;
+    StringSlice slice(size_t loc, size_t size) const;
 
-    // @returns             STL-like iterators over the StringPiece.
+    // @returns             STL-like iterators over the StringSlice.
     iterator begin() { return _data.get(); }
     iterator end() { return _data.get() + _size; }
     const_iterator begin() const { return _data.get(); }
@@ -124,7 +124,7 @@ class String {
     friend void swap(String& x, String& y);
 
   private:
-    friend class StringPiece;
+    friend class StringSlice;
 
     void initialize(size_t capacity);
 
@@ -138,12 +138,12 @@ class String {
 
 // References a sequence of Unicode code points.
 //
-// StringPiece references a sequence of valid Unicode code points.  This is represented as a
-// pairing between a BytesPiece and an encoding.  Unlike String, it does not guarantee linear-time
+// StringSlice references a sequence of valid Unicode code points.  This is represented as a
+// pairing between a BytesSlice and an encoding.  Unlike String, it does not guarantee linear-time
 // access to individual code points within the sequence, although, depending on the encoding,
 // linear-time access is possible.  Access to ASCII code points, for example, is always constant
 // time, whereas access to UTF-8 code points is linear.
-class StringPiece {
+class StringSlice {
   public:
     // STL container types and constants.
     typedef uint32_t value_type;
@@ -159,22 +159,22 @@ class StringPiece {
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    // Initializes the StringPiece to the empty string.
-    StringPiece();
+    // Initializes the StringSlice to the empty string.
+    StringSlice();
 
-    // Initializes the StringPiece with the contents of `string`.
+    // Initializes the StringSlice with the contents of `string`.
     //
     // @param [in] string   The string to reference.
-    StringPiece(const String& string);
+    StringSlice(const String& string);
 
-    StringPiece(const char* ascii_string);
+    StringSlice(const char* ascii_string);
 
     // Accessors.
     //
-    // Typically, size(), at(), and substr() will run in constant time when the StringPiece is
+    // Typically, size(), at(), and slice() will run in constant time when the StringSlice is
     // encoded using a fixed-width encoding (e.g. ASCII or UCS-2), and in linear time when encoded
     // using a variable-width encoding (e.g. UTF-8 or UTF-16).  As a result, it is typically a much
-    // better idea to loop over a StringPiece using iterators than indices.
+    // better idea to loop over a StringSlice using iterators than indices.
     //
     // It is expected that empty() will run in constant time, and iterating over the string will
     // take linear time.  These are, regardless, dependent on the encoding.
@@ -190,30 +190,30 @@ class StringPiece {
     Rune at(size_t loc) const;
 
     size_t find(Rune rune, size_t index = 0) const;
-    size_t find(const StringPiece& string, size_t index = 0) const;
+    size_t find(const StringSlice& string, size_t index = 0) const;
     size_t rfind(Rune rune, size_t index = npos) const;
-    size_t rfind(const StringPiece& string, size_t index = npos) const;
+    size_t rfind(const StringSlice& string, size_t index = npos) const;
 
     // @param [in] loc      An index into the code point sequence.  Must be at most size().
-    // @param [in] size     The desired number of code points in the returned substring.  If
-    //                      provided, the sum of `loc` and `size` must be at most size().
-    // @returns             The substring starting at index `loc` and containing `size` code
-    //                      points.  If `size` is not provided, the returned substring extends to
-    //                      the end of the source string.
-    StringPiece substr(size_t loc) const;
-    StringPiece substr(size_t loc, size_t size) const;
+    // @param [in] size     The desired number of code points in the returned slice.  If provided,
+    //                      the sum of `loc` and `size` must be at most size().
+    // @returns             The slice starting at index `loc` and containing `size` code points. If
+    //                      `size` is not provided, the returned slice extends to the end of the
+    //                      source string.
+    StringSlice slice(size_t loc) const;
+    StringSlice slice(size_t loc, size_t size) const;
 
-    // @returns             STL-like iterators over the StringPiece.
+    // @returns             STL-like iterators over the StringSlice.
     const_iterator begin() const;
     const_iterator end() const;
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
-    // StringPiece iterator class.
+    // StringSlice iterator class.
     class iterator {
       public:
         typedef std::random_access_iterator_tag iterator_category;
-        typedef StringPiece container_type;
+        typedef StringSlice container_type;
         typedef Rune value_type;
         typedef const Rune* pointer;
         typedef const Rune& reference;
@@ -237,10 +237,10 @@ class StringPiece {
 
         value_type operator[](int n) const { return *(*this + n); }
 
-        friend int compare(const StringPiece::iterator& x, const StringPiece::iterator& y);
+        friend int compare(const StringSlice::iterator& x, const StringSlice::iterator& y);
 
       private:
-        friend class StringPiece;
+        friend class StringSlice;
         iterator(const uint8_t* it, int encoding);
 
         const uint8_t* _it;
@@ -249,12 +249,12 @@ class StringPiece {
         // ALLOW_COPY_AND_ASSIGN
     };
 
-    friend void swap(StringPiece& x, StringPiece& y);
+    friend void swap(StringSlice& x, StringSlice& y);
 
   private:
     friend class String;
 
-    StringPiece(const uint8_t* data, size_t size, int encoding);
+    StringSlice(const uint8_t* data, size_t size, int encoding);
 
     const uint8_t* _data;
     int _encoding;
@@ -264,14 +264,14 @@ class StringPiece {
 };
 
 inline void print_to(PrintTarget out, const String& s) { out.push(s); }
-inline void print_to(PrintTarget out, const StringPiece& s) { out.push(s); }
+inline void print_to(PrintTarget out, const StringSlice& s) { out.push(s); }
 
 void swap(String& x, String& y);
-void swap(StringPiece& x, StringPiece& y);
+void swap(StringSlice& x, StringSlice& y);
 
 int compare(const String& x, const String& y);
-int compare(const StringPiece& x, const StringPiece& y);
-int compare(const StringPiece::iterator& x, const StringPiece::iterator& y);
+int compare(const StringSlice& x, const StringSlice& y);
+int compare(const StringSlice::iterator& x, const StringSlice::iterator& y);
 
 bool operator==(const String& x, const String& y);
 bool operator!=(const String& x, const String& y);
@@ -280,19 +280,19 @@ bool operator<=(const String& x, const String& y);
 bool operator> (const String& x, const String& y);
 bool operator>=(const String& x, const String& y);
 
-bool operator==(const StringPiece& x, const StringPiece& y);
-bool operator!=(const StringPiece& x, const StringPiece& y);
-bool operator< (const StringPiece& x, const StringPiece& y);
-bool operator<=(const StringPiece& x, const StringPiece& y);
-bool operator> (const StringPiece& x, const StringPiece& y);
-bool operator>=(const StringPiece& x, const StringPiece& y);
+bool operator==(const StringSlice& x, const StringSlice& y);
+bool operator!=(const StringSlice& x, const StringSlice& y);
+bool operator< (const StringSlice& x, const StringSlice& y);
+bool operator<=(const StringSlice& x, const StringSlice& y);
+bool operator> (const StringSlice& x, const StringSlice& y);
+bool operator>=(const StringSlice& x, const StringSlice& y);
 
-bool operator==(const StringPiece::iterator& x, const StringPiece::iterator& y);
-bool operator!=(const StringPiece::iterator& x, const StringPiece::iterator& y);
-bool operator< (const StringPiece::iterator& x, const StringPiece::iterator& y);
-bool operator<=(const StringPiece::iterator& x, const StringPiece::iterator& y);
-bool operator> (const StringPiece::iterator& x, const StringPiece::iterator& y);
-bool operator>=(const StringPiece::iterator& x, const StringPiece::iterator& y);
+bool operator==(const StringSlice::iterator& x, const StringSlice::iterator& y);
+bool operator!=(const StringSlice::iterator& x, const StringSlice::iterator& y);
+bool operator< (const StringSlice::iterator& x, const StringSlice::iterator& y);
+bool operator<=(const StringSlice::iterator& x, const StringSlice::iterator& y);
+bool operator> (const StringSlice::iterator& x, const StringSlice::iterator& y);
+bool operator>=(const StringSlice::iterator& x, const StringSlice::iterator& y);
 
 }  // namespace sfz
 

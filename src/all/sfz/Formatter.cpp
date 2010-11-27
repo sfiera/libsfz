@@ -32,7 +32,7 @@ void print_to(PrintTarget out, const FormattedInt& value) {
     if (size < value.min_width) {
         out.push(value.min_width - size, '0');
     }
-    print(out, ascii::decode(BytesPiece(data, size)));
+    print(out, ascii::decode(BytesSlice(data, size)));
 }
 
 namespace {

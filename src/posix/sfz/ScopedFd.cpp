@@ -31,8 +31,8 @@ int ScopedFd::release() {
     return fd;
 }
 
-void ScopedFd::push(const BytesPiece& bytes) {
-    BytesPiece remainder(bytes);
+void ScopedFd::push(const BytesSlice& bytes) {
+    BytesSlice remainder(bytes);
     while (!remainder.empty()) {
         ssize_t written = ::write(_fd, remainder.data(), remainder.size());
         if (written < 0) {
@@ -47,7 +47,7 @@ void ScopedFd::push(const BytesPiece& bytes) {
 
 void ScopedFd::push(size_t num, uint8_t byte) {
     foreach (it, range(num)) {
-        push(BytesPiece(&byte, 1));
+        push(BytesSlice(&byte, 1));
     }
 }
 

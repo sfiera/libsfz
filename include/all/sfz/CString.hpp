@@ -14,7 +14,7 @@ namespace sfz {
 
 class CString {
   public:
-    CString(const StringPiece& string);
+    CString(const StringSlice& string);
 
     const char* data() const;
     char* mutable_data();

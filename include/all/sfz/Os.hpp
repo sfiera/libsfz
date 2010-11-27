@@ -15,32 +15,32 @@ typedef struct stat Stat;
 
 namespace path {
 
-bool exists(const StringPiece& path);
-bool isdir(const StringPiece& path);
-bool isfile(const StringPiece& path);
-bool islink(const StringPiece& path);
+bool exists(const StringSlice& path);
+bool isdir(const StringSlice& path);
+bool isfile(const StringSlice& path);
+bool islink(const StringSlice& path);
 
-StringPiece basename(const StringPiece& path);
-StringPiece dirname(const StringPiece& path);
+StringSlice basename(const StringSlice& path);
+StringSlice dirname(const StringSlice& path);
 
 }  // namespace path
 
-void chdir(const StringPiece& path);
-void symlink(const StringPiece& content, const StringPiece& container);
+void chdir(const StringSlice& path);
+void symlink(const StringSlice& content, const StringSlice& container);
 
-int open(const StringPiece& path, int oflag, mode_t mode);
+int open(const StringSlice& path, int oflag, mode_t mode);
 
-void mkdir(const StringPiece& path, mode_t mode);
-void mkfifo(const StringPiece& path, mode_t mode);
-void makedirs(const StringPiece& path, mode_t mode);
+void mkdir(const StringSlice& path, mode_t mode);
+void mkfifo(const StringSlice& path, mode_t mode);
+void makedirs(const StringSlice& path, mode_t mode);
 
-void unlink(const StringPiece& path);
-void rmdir(const StringPiece& path);
-void rmtree(const StringPiece& path);
+void unlink(const StringSlice& path);
+void rmdir(const StringSlice& path);
+void rmtree(const StringSlice& path);
 
 class TemporaryDirectory {
   public:
-    TemporaryDirectory(const StringPiece& prefix);
+    TemporaryDirectory(const StringSlice& prefix);
     ~TemporaryDirectory();
 
     const String& path() const;
@@ -52,22 +52,22 @@ class TemporaryDirectory {
 
 class TreeWalker;
 enum WalkType { WALK_LOGICAL, WALK_PHYSICAL };
-void walk(const StringPiece& root, WalkType type, TreeWalker* visitor);
+void walk(const StringSlice& root, WalkType type, TreeWalker* visitor);
 
 class TreeWalker {
   public:
     virtual ~TreeWalker();
 
-    virtual void pre_directory(const StringPiece& name, const Stat& st) = 0;
-    virtual void cycle_directory(const StringPiece& name, const Stat& st) = 0;
-    virtual void post_directory(const StringPiece& name, const Stat& st) = 0;
+    virtual void pre_directory(const StringSlice& name, const Stat& st) = 0;
+    virtual void cycle_directory(const StringSlice& name, const Stat& st) = 0;
+    virtual void post_directory(const StringSlice& name, const Stat& st) = 0;
 
-    virtual void file(const StringPiece& name, const Stat& st) = 0;
+    virtual void file(const StringSlice& name, const Stat& st) = 0;
 
-    virtual void symlink(const StringPiece& name, const Stat& st) = 0;
-    virtual void broken_symlink(const StringPiece& name, const Stat& st) = 0;
+    virtual void symlink(const StringSlice& name, const Stat& st) = 0;
+    virtual void broken_symlink(const StringSlice& name, const Stat& st) = 0;
 
-    virtual void other(const StringPiece& name, const Stat& st) = 0;
+    virtual void other(const StringSlice& name, const Stat& st) = 0;
 };
 
 }  // namespace sfz

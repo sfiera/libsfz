@@ -23,7 +23,7 @@ const size_t kDefaultBytesSize = 16;
 }  // namespace
 
 const size_t Bytes::npos = -1;
-const size_t BytesPiece::npos = -1;
+const size_t BytesSlice::npos = -1;
 
 Bytes::Bytes()
     : _data(new uint8_t[kDefaultBytesSize]),
@@ -72,7 +72,7 @@ size_t Bytes::size() const {
     return _size;
 }
 
-void Bytes::push(const BytesPiece& bytes) {
+void Bytes::push(const BytesSlice& bytes) {
     append(bytes.data(), bytes.size());
 }
 
@@ -114,23 +114,23 @@ void Bytes::assign(size_t num, uint8_t byte) {
 }
 
 uint8_t Bytes::at(size_t loc) const {
-    return BytesPiece(*this).at(loc);
+    return BytesSlice(*this).at(loc);
 }
 
 size_t Bytes::find(uint8_t byte) const {
-    return BytesPiece(*this).find(byte);
+    return BytesSlice(*this).find(byte);
 }
 
-size_t Bytes::find(const BytesPiece& bytes) const {
-    return BytesPiece(*this).find(bytes);
+size_t Bytes::find(const BytesSlice& bytes) const {
+    return BytesSlice(*this).find(bytes);
 }
 
 size_t Bytes::rfind(uint8_t byte) const {
-    return BytesPiece(*this).rfind(byte);
+    return BytesSlice(*this).rfind(byte);
 }
 
-size_t Bytes::rfind(const BytesPiece& bytes) const {
-    return BytesPiece(*this).rfind(bytes);
+size_t Bytes::rfind(const BytesSlice& bytes) const {
+    return BytesSlice(*this).rfind(bytes);
 }
 
 void Bytes::clear() {
@@ -141,16 +141,16 @@ bool Bytes::empty() const {
     return _size == 0;
 }
 
-BytesPiece Bytes::substr(size_t index) const {
-    return BytesPiece(*this).substr(index);
+BytesSlice Bytes::slice(size_t index) const {
+    return BytesSlice(*this).slice(index);
 }
 
-BytesPiece Bytes::substr(size_t index, size_t size) const {
-    return BytesPiece(*this).substr(index, size);
+BytesSlice Bytes::slice(size_t index, size_t size) const {
+    return BytesSlice(*this).slice(index, size);
 }
 
-void Bytes::replace(size_t index, size_t num, const BytesPiece& bytes) {
-    Bytes tail(substr(index + num));
+void Bytes::replace(size_t index, size_t num, const BytesSlice& bytes) {
+    Bytes tail(slice(index + num));
     resize(index);
     append(bytes);
     append(tail);
@@ -179,98 +179,98 @@ void Bytes::resize(size_t size, uint8_t byte) {
     }
 }
 
-BytesPiece::BytesPiece()
+BytesSlice::BytesSlice()
     : _data(NULL),
       _size(0) { }
 
-BytesPiece::BytesPiece(const Bytes& bytes)
+BytesSlice::BytesSlice(const Bytes& bytes)
     : _data(bytes.data()),
       _size(bytes.size()) { }
 
-BytesPiece::BytesPiece(const char* data)
+BytesSlice::BytesSlice(const char* data)
     : _data(reinterpret_cast<const uint8_t*>(data)),
       _size(strlen(data)) { }
 
-BytesPiece::BytesPiece(const uint8_t* data, size_t size)
+BytesSlice::BytesSlice(const uint8_t* data, size_t size)
     : _data(data),
       _size(size) { }
 
-const uint8_t* BytesPiece::data() const {
+const uint8_t* BytesSlice::data() const {
     return _data;
 }
 
-size_t BytesPiece::size() const {
+size_t BytesSlice::size() const {
     return _size;
 }
 
-uint8_t BytesPiece::at(size_t loc) const {
+uint8_t BytesSlice::at(size_t loc) const {
     if (loc >= _size) {
         throw Exception("out-of-bounds");
     }
     return _data[loc];
 }
 
-size_t BytesPiece::find(uint8_t byte) const {
+size_t BytesSlice::find(uint8_t byte) const {
     foreach (i, range(_size)) {
         if (at(i) == byte) {
             return i;
         }
     }
-    return BytesPiece::npos;
+    return BytesSlice::npos;
 }
 
-size_t BytesPiece::find(const BytesPiece& bytes) const {
+size_t BytesSlice::find(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
-        return BytesPiece::npos;
+        return BytesSlice::npos;
     }
     foreach (i, range(_size - bytes.size() + 1)) {
-        if (substr(i, bytes.size()) == bytes) {
+        if (slice(i, bytes.size()) == bytes) {
             return i;
         }
     }
-    return BytesPiece::npos;
+    return BytesSlice::npos;
 }
 
-size_t BytesPiece::rfind(uint8_t byte) const {
+size_t BytesSlice::rfind(uint8_t byte) const {
     foreach (i, range(_size)) {
         if (at(_size - i - 1) == byte) {
             return _size - i - 1;
         }
     }
-    return BytesPiece::npos;
+    return BytesSlice::npos;
 }
 
-size_t BytesPiece::rfind(const BytesPiece& bytes) const {
+size_t BytesSlice::rfind(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
-        return BytesPiece::npos;
+        return BytesSlice::npos;
     }
     foreach (i, range(_size - bytes.size() + 1)) {
-        if (substr(_size - bytes.size() - i, bytes.size()) == bytes) {
+        if (slice(_size - bytes.size() - i, bytes.size()) == bytes) {
             return _size - bytes.size() - i;
         }
     }
-    return BytesPiece::npos;
+    return BytesSlice::npos;
 }
 
-bool BytesPiece::empty() const {
+bool BytesSlice::empty() const {
     return _size == 0;
 }
 
-BytesPiece BytesPiece::substr(size_t index) const {
+BytesSlice BytesSlice::slice(size_t index) const {
     if (index > _size) {
         throw Exception("out-of-bounds");
     }
-    return BytesPiece(_data + index, _size - index);
+    return BytesSlice(_data + index, _size - index);
 }
 
-BytesPiece BytesPiece::substr(size_t index, size_t size) const {
+BytesSlice BytesSlice::slice(size_t index, size_t size) const {
     if (index + size > _size) {
         throw Exception("out-of-bounds");
     }
-    return BytesPiece(_data + index, size);
+    return BytesSlice(_data + index, size);
 }
 
-void BytesPiece::shift(size_t size) {
+void BytesSlice::shift(size_t size) {
     if (size > _size) {
         throw Exception("out-of-bounds");
     }
@@ -278,7 +278,7 @@ void BytesPiece::shift(size_t size) {
     _size -= size;
 }
 
-void BytesPiece::shift(uint8_t* data, size_t size) {
+void BytesSlice::shift(uint8_t* data, size_t size) {
     shift(size);
     memcpy(data, _data - size, size);
 }
@@ -289,7 +289,7 @@ void swap(Bytes& x, Bytes& y) {
     swap(x._capacity, y._capacity);
 }
 
-void swap(BytesPiece& x, BytesPiece& y) {
+void swap(BytesSlice& x, BytesSlice& y) {
     swap(x._data, y._data);
     swap(x._size, y._size);
 }
@@ -297,10 +297,10 @@ void swap(BytesPiece& x, BytesPiece& y) {
 // Equality operators.
 
 int compare(const Bytes& x, const Bytes& y) {
-    return compare(BytesPiece(x), BytesPiece(y));
+    return compare(BytesSlice(x), BytesSlice(y));
 }
 
-int compare(const BytesPiece& x, const BytesPiece& y) {
+int compare(const BytesSlice& x, const BytesSlice& y) {
     int result = memcmp(x.data(), y.data(), min(x.size(), y.size()));
     if (result) {
         return result;
@@ -323,6 +323,6 @@ int compare(const BytesPiece& x, const BytesPiece& y) {
     bool operator>=(const TYPE& x, const TYPE& y) { return compare(x, y) >= 0; }
 
 DEFINE_OPERATORS(Bytes)
-DEFINE_OPERATORS(BytesPiece)
+DEFINE_OPERATORS(BytesSlice)
 
 }  // namespace sfz

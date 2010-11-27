@@ -11,19 +11,19 @@
 
 namespace sfz {
 
-class BytesPiece;
-class StringPiece;
+class BytesSlice;
+class StringSlice;
 template <typename T> struct EncodedString;
 template <typename T> struct DecodedBytes;
 
 template <typename T> struct EncodedString {
-    const BytesPiece& bytes;
-    EncodedString(const BytesPiece& b) : bytes(b) { }
+    const BytesSlice& bytes;
+    EncodedString(const BytesSlice& b) : bytes(b) { }
 };
 
 template <typename T> struct DecodedBytes {
-    const StringPiece& string;
-    DecodedBytes(const StringPiece& s) : string(s) { }
+    const StringSlice& string;
+    DecodedBytes(const StringSlice& s) : string(s) { }
 };
 
 // Constants for replacing code points which cannot be encoded.
@@ -58,12 +58,12 @@ bool is_valid_code_point(Rune rune);
 namespace ascii {
 
 struct Ascii {
-    static void encode_to(WriteTarget out, const StringPiece& string);
-    static void decode_to(PrintTarget out, const BytesPiece& bytes);
+    static void encode_to(WriteTarget out, const StringSlice& string);
+    static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<Ascii> encode(const StringPiece& string) { return string; }
-inline EncodedString<Ascii> decode(const BytesPiece& bytes) { return bytes; }
+inline DecodedBytes<Ascii> encode(const StringSlice& string) { return string; }
+inline EncodedString<Ascii> decode(const BytesSlice& bytes) { return bytes; }
 
 }  // namespace ascii
 
@@ -79,12 +79,12 @@ inline EncodedString<Ascii> decode(const BytesPiece& bytes) { return bytes; }
 namespace latin1 {
 
 struct Latin1 {
-    static void encode_to(WriteTarget out, const StringPiece& string);
-    static void decode_to(PrintTarget out, const BytesPiece& bytes);
+    static void encode_to(WriteTarget out, const StringSlice& string);
+    static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<Latin1> encode(const StringPiece& string) { return string; }
-inline EncodedString<Latin1> decode(const BytesPiece& bytes) { return bytes; }
+inline DecodedBytes<Latin1> encode(const StringSlice& string) { return string; }
+inline EncodedString<Latin1> decode(const BytesSlice& bytes) { return bytes; }
 
 }  // namespace latin1
 
@@ -101,12 +101,12 @@ inline EncodedString<Latin1> decode(const BytesPiece& bytes) { return bytes; }
 namespace utf8 {
 
 struct Utf8 {
-    static void encode_to(WriteTarget out, const StringPiece& string);
-    static void decode_to(PrintTarget out, const BytesPiece& bytes);
+    static void encode_to(WriteTarget out, const StringSlice& string);
+    static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<Utf8> encode(const StringPiece& string) { return string; }
-inline EncodedString<Utf8> decode(const BytesPiece& bytes) { return bytes; }
+inline DecodedBytes<Utf8> encode(const StringSlice& string) { return string; }
+inline EncodedString<Utf8> decode(const BytesSlice& bytes) { return bytes; }
 
 }  // namespace latin1
 
@@ -130,12 +130,12 @@ template <typename T> void write_to(WriteTarget out, const DecodedBytes<T>& byte
 namespace macroman {
 
 struct MacRoman {
-    static void encode_to(WriteTarget out, const StringPiece& string);
-    static void decode_to(PrintTarget out, const BytesPiece& bytes);
+    static void encode_to(WriteTarget out, const StringSlice& string);
+    static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<MacRoman> encode(const StringPiece& string) { return string; }
-inline EncodedString<MacRoman> decode(const BytesPiece& bytes) { return bytes; }
+inline DecodedBytes<MacRoman> encode(const StringSlice& string) { return string; }
+inline EncodedString<MacRoman> decode(const BytesSlice& bytes) { return bytes; }
 
 }  // namespace latin1
 

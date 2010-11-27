@@ -11,20 +11,20 @@
 
 namespace sfz {
 
-class BytesPiece;
+class BytesSlice;
 class String;
-class StringPiece;
+class StringSlice;
 
 class PrintTarget {
   public:
     template <typename T> PrintTarget(T* t);
 
-    inline void push(const StringPiece& string);
+    inline void push(const StringSlice& string);
     inline void push(size_t num, Rune rune);
 
   private:
     struct DispatchTable {
-        void (*push_string)(void* target, const StringPiece& string);
+        void (*push_string)(void* target, const StringSlice& string);
         void (*push_repeated_runes)(void* target, size_t num, Rune rune);
     };
 
@@ -38,7 +38,7 @@ class PrintTarget {
 
 template <typename T>
 struct PrintTarget::Dispatch {
-    static void push_string(void* target, const StringPiece& string) {
+    static void push_string(void* target, const StringSlice& string) {
         reinterpret_cast<T*>(target)->push(string);
     }
     static void push_repeated_runes(void* target, size_t num, Rune rune) {
@@ -58,7 +58,7 @@ PrintTarget::PrintTarget(T* t)
     : _target(t),
       _dispatch_table(&Dispatch<T>::table) { }
 
-inline void PrintTarget::push(const StringPiece& string) {
+inline void PrintTarget::push(const StringSlice& string) {
     _dispatch_table->push_string(_target, string);
 }
 

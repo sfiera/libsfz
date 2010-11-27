@@ -19,10 +19,10 @@ FormattedInt oct(Integer value, size_t min_width = 1);
 FormattedInt bin(Integer value, size_t min_width = 1);
 
 struct EscapedString;
-EscapedString escape(const StringPiece& string);
+EscapedString escape(const StringSlice& string);
 
 struct QuotedString;
-QuotedString quote(const StringPiece& string);
+QuotedString quote(const StringSlice& string);
 
 struct FormattedInt {
     Integer value;
@@ -52,21 +52,21 @@ inline FormattedInt bin(Integer value, size_t min_width) {
 }
 
 struct EscapedString {
-    const StringPiece& string;
+    const StringSlice& string;
 };
 void print_to(PrintTarget out, const EscapedString& value);
 
-inline EscapedString escape(const StringPiece& string) {
+inline EscapedString escape(const StringSlice& string) {
     EscapedString result = { string };
     return result;
 }
 
 struct QuotedString {
-    const StringPiece& string;
+    const StringSlice& string;
 };
 void print_to(PrintTarget out, const QuotedString& value);
 
-inline QuotedString quote(const StringPiece& string) {
+inline QuotedString quote(const StringSlice& string) {
     QuotedString result = { string };
     return result;
 }

@@ -15,14 +15,14 @@ namespace sfz {
 namespace {
 
 inline void write_bytes_to(const void* target, WriteTarget out, size_t count) {
-    out.push(BytesPiece(reinterpret_cast<const uint8_t*>(target), count));
+    out.push(BytesSlice(reinterpret_cast<const uint8_t*>(target), count));
 }
 
 template <typename T>
 inline void write_integers_to(const void* target, WriteTarget out, size_t count) {
     foreach (i, range(count)) {
         NetworkBytes<T> bytes(reinterpret_cast<const T*>(target)[i]);
-        out.push(BytesPiece(bytes.data(), bytes.size()));
+        out.push(BytesSlice(bytes.data(), bytes.size()));
     }
 }
 

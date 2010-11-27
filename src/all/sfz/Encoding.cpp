@@ -39,7 +39,7 @@ bool is_valid_code_point(Rune rune) {
 
 namespace ascii {
 
-void Ascii::encode_to(WriteTarget out, const StringPiece& string) {
+void Ascii::encode_to(WriteTarget out, const StringSlice& string) {
     foreach (it, string) {
         if (*it > 0x7f) {
             out.push(1, kAsciiUnknownCodePoint);
@@ -49,7 +49,7 @@ void Ascii::encode_to(WriteTarget out, const StringPiece& string) {
     }
 }
 
-void Ascii::decode_to(PrintTarget out, const BytesPiece& bytes) {
+void Ascii::decode_to(PrintTarget out, const BytesSlice& bytes) {
     foreach (it, bytes) {
         uint8_t c = *it;
         if (c & 0x80) {
@@ -64,7 +64,7 @@ void Ascii::decode_to(PrintTarget out, const BytesPiece& bytes) {
 
 namespace latin1 {
 
-void Latin1::encode_to(WriteTarget out, const StringPiece& string) {
+void Latin1::encode_to(WriteTarget out, const StringSlice& string) {
     foreach (it, string) {
         if (*it > 0xff) {
             out.push(1, kAsciiUnknownCodePoint);
@@ -74,7 +74,7 @@ void Latin1::encode_to(WriteTarget out, const StringPiece& string) {
     }
 }
 
-void Latin1::decode_to(PrintTarget out, const BytesPiece& bytes) {
+void Latin1::decode_to(PrintTarget out, const BytesSlice& bytes) {
     foreach (it, bytes) {
         out.push(1, *it);
     }
@@ -120,7 +120,7 @@ const Rune kUtf8Max[4] = { 0x80, 0x800, 0x10000 };
 
 }  // namespace
 
-void Utf8::encode_to(WriteTarget out, const StringPiece& string) {
+void Utf8::encode_to(WriteTarget out, const StringSlice& string) {
     foreach (it, string) {
         const Rune rune = *it;
         if (rune < kUtf8Max[0]) {
@@ -141,7 +141,7 @@ void Utf8::encode_to(WriteTarget out, const StringPiece& string) {
     }
 }
 
-void Utf8::decode_to(PrintTarget out, const BytesPiece& bytes) {
+void Utf8::decode_to(PrintTarget out, const BytesSlice& bytes) {
     int multibytes_expected = 0;
     int multibytes_seen = 0;
     Rune rune = 0;
@@ -327,7 +327,7 @@ uint16_t kMacRomanSupplement[0x80] = {
 
 }  // namespace
 
-void MacRoman::encode_to(WriteTarget out, const StringPiece& string) {
+void MacRoman::encode_to(WriteTarget out, const StringSlice& string) {
     foreach (it, string) {
         if (*it <= 0x7f) {
             out.push(1, *it);
@@ -345,7 +345,7 @@ next_rune:
     }
 }
 
-void MacRoman::decode_to(PrintTarget out, const BytesPiece& bytes) {
+void MacRoman::decode_to(PrintTarget out, const BytesSlice& bytes) {
     foreach (it, bytes) {
         if (*it < 0x80) {
             out.push(1, *it);

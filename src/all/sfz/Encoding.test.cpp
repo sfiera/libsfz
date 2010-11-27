@@ -174,7 +174,7 @@ TEST_F(MacRomanEncodingTest, Decode) {
         EXPECT_THAT(string.at(i), Eq<Rune>(i));
     }
     const String supplement(utf8::decode(kMacRomanSupplement));
-    EXPECT_THAT(string.substr(0x80), Eq<StringPiece>(supplement));
+    EXPECT_THAT(string.slice(0x80), Eq<StringSlice>(supplement));
 }
 
 TEST_F(MacRomanEncodingTest, EncodeValid) {
@@ -239,7 +239,7 @@ TEST_F(Utf8EncodingTest, EncodeLatin1) {
     }
 
     Bytes bytes(utf8::encode(string));
-    ASSERT_THAT(bytes, Eq<BytesPiece>(kLatin1Supplement));
+    ASSERT_THAT(bytes, Eq<BytesSlice>(kLatin1Supplement));
 }
 
 TEST_F(Utf8EncodingTest, EncodeCJK) {
@@ -255,7 +255,7 @@ TEST_F(Utf8EncodingTest, EncodeCJK) {
     }
 
     Bytes bytes(utf8::encode(string));
-    ASSERT_THAT(bytes, Eq<BytesPiece>(kHiragana));
+    ASSERT_THAT(bytes, Eq<BytesSlice>(kHiragana));
 }
 
 TEST_F(Utf8EncodingTest, EncodeHigherPlane) {
@@ -282,7 +282,7 @@ TEST_F(Utf8EncodingTest, EncodeHigherPlane) {
     string.append(1, 0x10ffff);
 
     Bytes bytes(utf8::encode(string));
-    ASSERT_THAT(bytes, Eq<BytesPiece>(kHigherPlane));
+    ASSERT_THAT(bytes, Eq<BytesSlice>(kHigherPlane));
 }
 
 TEST_F(Utf8EncodingTest, DecodeInvalid) {
@@ -346,7 +346,7 @@ TEST_F(Utf8EncodingTest, DecodeInvalid) {
     };
 
     foreach (it, array_range(kInvalid)) {
-        BytesPiece bytes(*it);
+        BytesSlice bytes(*it);
         String string(utf8::decode(bytes));
         ASSERT_THAT(string.size(), Eq(bytes.size()));
         foreach (i, range(string.size())) {

@@ -44,14 +44,14 @@ TEST_F(BytesTest, EmptyConst) {
     EXPECT_THAT(bytes.rfind("socks"), Eq<size_t>(Bytes::npos));
 
     EXPECT_THAT(bytes, Eq(ByRef(bytes)));
-    EXPECT_THAT(bytes, Eq<BytesPiece>(bytes));
-    EXPECT_THAT(bytes, Eq(BytesPiece()));
+    EXPECT_THAT(bytes, Eq<BytesSlice>(bytes));
+    EXPECT_THAT(bytes, Eq(BytesSlice()));
 
-    EXPECT_THAT(bytes.substr(0), Eq(BytesPiece()));
-    EXPECT_THAT(bytes.substr(0, 0), Eq(BytesPiece()));
-    EXPECT_THROW(bytes.substr(1), Exception);
-    EXPECT_THROW(bytes.substr(0, 1), Exception);
-    EXPECT_THROW(bytes.substr(1, 0), Exception);
+    EXPECT_THAT(bytes.slice(0), Eq(BytesSlice()));
+    EXPECT_THAT(bytes.slice(0, 0), Eq(BytesSlice()));
+    EXPECT_THROW(bytes.slice(1), Exception);
+    EXPECT_THROW(bytes.slice(0, 1), Exception);
+    EXPECT_THROW(bytes.slice(1, 0), Exception);
 }
 
 // Test all of the 'const' methods of a non-empty Bytes.
@@ -82,17 +82,17 @@ TEST_F(BytesTest, HelloWorldConst) {
     EXPECT_THAT(bytes.rfind("orl"), Eq<size_t>(8));
 
     EXPECT_THAT(bytes, Eq(ByRef(bytes)));
-    EXPECT_THAT(bytes, Eq<BytesPiece>(bytes));
-    EXPECT_THAT(bytes, Ne(BytesPiece()));
+    EXPECT_THAT(bytes, Eq<BytesSlice>(bytes));
+    EXPECT_THAT(bytes, Ne(BytesSlice()));
 
-    EXPECT_THAT(bytes.substr(0), Eq<BytesPiece>(bytes));
-    EXPECT_THAT(bytes.substr(0, 5), Eq("Hello"));
-    EXPECT_THAT(bytes.substr(7), Eq("world!"));
-    EXPECT_THAT(bytes.substr(13), Eq(BytesPiece("")));
-    EXPECT_THAT(bytes.substr(13, 0), Eq(BytesPiece("")));
-    EXPECT_THROW(bytes.substr(14), Exception);
-    EXPECT_THROW(bytes.substr(13, 1), Exception);
-    EXPECT_THROW(bytes.substr(14, 0), Exception);
+    EXPECT_THAT(bytes.slice(0), Eq<BytesSlice>(bytes));
+    EXPECT_THAT(bytes.slice(0, 5), Eq("Hello"));
+    EXPECT_THAT(bytes.slice(7), Eq("world!"));
+    EXPECT_THAT(bytes.slice(13), Eq(BytesSlice("")));
+    EXPECT_THAT(bytes.slice(13, 0), Eq(BytesSlice("")));
+    EXPECT_THROW(bytes.slice(14), Exception);
+    EXPECT_THROW(bytes.slice(13, 1), Exception);
+    EXPECT_THROW(bytes.slice(14, 0), Exception);
 }
 
 // Test all five non-default overloads of Bytes's constructor.
@@ -104,7 +104,7 @@ TEST_F(BytesTest, AllNonEmptyConstructors) {
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
-        const BytesPiece s(expected);
+        const BytesSlice s(expected);
         const Bytes bytes(s);
         EXPECT_THAT(bytes, Eq(expected));
     }
@@ -113,7 +113,7 @@ TEST_F(BytesTest, AllNonEmptyConstructors) {
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
-        StringPiece string(expected);
+        StringSlice string(expected);
         const Bytes bytes(ascii::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
     }
@@ -133,7 +133,7 @@ TEST_F(BytesTest, AllAssignOverloads) {
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
-        BytesPiece s(expected);
+        BytesSlice s(expected);
         Bytes bytes("Hello, ");
         bytes.assign(s);
         EXPECT_THAT(bytes, Eq(expected));
@@ -144,7 +144,7 @@ TEST_F(BytesTest, AllAssignOverloads) {
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
-        StringPiece string(expected);
+        StringSlice string(expected);
         Bytes bytes("Hello, ");
         bytes.assign(ascii::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
@@ -167,7 +167,7 @@ TEST_F(BytesTest, AllAppendOverloads) {
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
-        BytesPiece s(append);
+        BytesSlice s(append);
         Bytes bytes("Hello, ");
         bytes.append(s);
         EXPECT_THAT(bytes, Eq(expected));
@@ -178,7 +178,7 @@ TEST_F(BytesTest, AllAppendOverloads) {
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
-        StringPiece string("world!");
+        StringSlice string("world!");
         Bytes bytes("Hello, ");
         bytes.append(ascii::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
@@ -198,7 +198,7 @@ TEST_F(BytesTest, ExtensionByOnes) {
         bytes.append(1, '!');
         EXPECT_THAT(bytes.size(), Eq<size_t>(i + 1));
         const Bytes expected(i + 1, '!');
-        EXPECT_THAT(bytes, Eq<BytesPiece>(expected));
+        EXPECT_THAT(bytes, Eq<BytesSlice>(expected));
     }
 }
 
@@ -211,7 +211,7 @@ TEST_F(BytesTest, ExtensionByPowersOfTwo) {
         bytes.append(1 << i, '!');
         EXPECT_THAT(bytes.size(), Eq<size_t>(2 << i));
         const Bytes expected(2 << i, '!');
-        EXPECT_THAT(bytes, Eq<BytesPiece>(expected));
+        EXPECT_THAT(bytes, Eq<BytesSlice>(expected));
     }
 }
 
@@ -258,8 +258,8 @@ void TestComparison() {
 
 TEST_F(BytesTest, Comparison) {
     TestComparison<Bytes,      Bytes>();
-    TestComparison<Bytes,      BytesPiece>();
-    TestComparison<BytesPiece, BytesPiece>();
+    TestComparison<Bytes,      BytesSlice>();
+    TestComparison<BytesSlice, BytesSlice>();
 }
 
 }  // namespace

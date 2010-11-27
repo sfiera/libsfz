@@ -15,7 +15,7 @@
 
 namespace sfz {
 
-class BytesPiece;
+class BytesSlice;
 
 class Bytes {
   public:
@@ -44,7 +44,7 @@ class Bytes {
     uint8_t* mutable_data() const;
     size_t size() const;
 
-    void push(const BytesPiece& bytes);
+    void push(const BytesSlice& bytes);
     void push(size_t num, uint8_t byte);
 
     void append(WriteItem item);
@@ -59,18 +59,18 @@ class Bytes {
     uint8_t front() const { return at(0); }
 
     size_type find(uint8_t byte) const;
-    size_type find(const BytesPiece& bytes) const;
+    size_type find(const BytesSlice& bytes) const;
     size_type rfind(uint8_t byte) const;
-    size_type rfind(const BytesPiece& bytes) const;
+    size_type rfind(const BytesSlice& bytes) const;
 
     void clear();
 
     bool empty() const;
 
-    BytesPiece substr(size_t index) const;
-    BytesPiece substr(size_t index, size_t size) const;
+    BytesSlice slice(size_t index) const;
+    BytesSlice slice(size_t index, size_t size) const;
 
-    void replace(size_t index, size_t num, const BytesPiece& bytes);
+    void replace(size_t index, size_t num, const BytesSlice& bytes);
 
     void reserve(size_t capacity);
 
@@ -97,7 +97,7 @@ class Bytes {
     Bytes& operator=(const Bytes&);
 };
 
-class BytesPiece {
+class BytesSlice {
   public:
     // STL container types and constants.
     typedef uint8_t value_type;
@@ -114,10 +114,10 @@ class BytesPiece {
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Constructors.
-    BytesPiece();
-    BytesPiece(const Bytes& bytes);
-    BytesPiece(const char* data);
-    BytesPiece(const uint8_t* data, size_t size);
+    BytesSlice();
+    BytesSlice(const Bytes& bytes);
+    BytesSlice(const char* data);
+    BytesSlice(const uint8_t* data, size_t size);
 
     const uint8_t* data() const;
     size_t size() const;
@@ -126,14 +126,14 @@ class BytesPiece {
     uint8_t front() const { return at(0); }
 
     size_type find(uint8_t byte) const;
-    size_type find(const BytesPiece& bytes) const;
+    size_type find(const BytesSlice& bytes) const;
     size_type rfind(uint8_t byte) const;
-    size_type rfind(const BytesPiece& bytes) const;
+    size_type rfind(const BytesSlice& bytes) const;
 
     bool empty() const;
 
-    BytesPiece substr(size_t index) const;
-    BytesPiece substr(size_t index, size_t size) const;
+    BytesSlice slice(size_t index) const;
+    BytesSlice slice(size_t index, size_t size) const;
 
     void shift(size_t size);
     void shift(uint8_t* data, size_t size);
@@ -143,7 +143,7 @@ class BytesPiece {
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
-    friend void swap(BytesPiece& a, BytesPiece& b);
+    friend void swap(BytesSlice& a, BytesSlice& b);
 
   private:
     const uint8_t* _data;
@@ -153,13 +153,13 @@ class BytesPiece {
 };
 
 inline void write_to(WriteTarget out, const Bytes& bytes) { out.push(bytes); }
-inline void write_to(WriteTarget out, const BytesPiece& bytes) { out.push(bytes); }
+inline void write_to(WriteTarget out, const BytesSlice& bytes) { out.push(bytes); }
 
 void swap(Bytes& x, Bytes& y);
-void swap(BytesPiece& x, BytesPiece& y);
+void swap(BytesSlice& x, BytesSlice& y);
 
 int compare(const Bytes& x, const Bytes& y);
-int compare(const BytesPiece& x, const BytesPiece& y);
+int compare(const BytesSlice& x, const BytesSlice& y);
 
 bool operator==(const Bytes& x, const Bytes& y);
 bool operator!=(const Bytes& x, const Bytes& y);
@@ -168,12 +168,12 @@ bool operator<=(const Bytes& x, const Bytes& y);
 bool operator> (const Bytes& x, const Bytes& y);
 bool operator>=(const Bytes& x, const Bytes& y);
 
-bool operator==(const BytesPiece& x, const BytesPiece& y);
-bool operator!=(const BytesPiece& x, const BytesPiece& y);
-bool operator< (const BytesPiece& x, const BytesPiece& y);
-bool operator<=(const BytesPiece& x, const BytesPiece& y);
-bool operator> (const BytesPiece& x, const BytesPiece& y);
-bool operator>=(const BytesPiece& x, const BytesPiece& y);
+bool operator==(const BytesSlice& x, const BytesSlice& y);
+bool operator!=(const BytesSlice& x, const BytesSlice& y);
+bool operator< (const BytesSlice& x, const BytesSlice& y);
+bool operator<=(const BytesSlice& x, const BytesSlice& y);
+bool operator> (const BytesSlice& x, const BytesSlice& y);
+bool operator>=(const BytesSlice& x, const BytesSlice& y);
 
 }  // namespace sfz
 

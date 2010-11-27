@@ -19,7 +19,7 @@ class ScopedFd {
     int get();
     int release();
 
-    void push(const BytesPiece& bytes);
+    void push(const BytesSlice& bytes);
     void push(size_t num, uint8_t byte);
 
   private:

@@ -37,20 +37,20 @@ TEST_F(StringTest, EmptyConst) {
     EXPECT_THAT(string.find('\0'), Eq(String::npos));
     EXPECT_THAT(string.rfind('\0'), Eq(String::npos));
 
-    EXPECT_THAT(string.find(StringPiece()), Eq<size_t>(0));
+    EXPECT_THAT(string.find(StringSlice()), Eq<size_t>(0));
     EXPECT_THAT(string.find("socks"), Eq<size_t>(String::npos));
-    EXPECT_THAT(string.rfind(StringPiece()), Eq<size_t>(0));
+    EXPECT_THAT(string.rfind(StringSlice()), Eq<size_t>(0));
     EXPECT_THAT(string.rfind("socks"), Eq<size_t>(String::npos));
 
     EXPECT_THAT(string, Eq(ByRef(string)));
-    EXPECT_THAT(string, Eq<StringPiece>(string));
-    EXPECT_THAT(string, Eq(StringPiece()));
+    EXPECT_THAT(string, Eq<StringSlice>(string));
+    EXPECT_THAT(string, Eq(StringSlice()));
 
-    EXPECT_THAT(string.substr(0), Eq(StringPiece()));
-    EXPECT_THAT(string.substr(0, 0), Eq(StringPiece()));
-    EXPECT_THROW(string.substr(1), Exception);
-    EXPECT_THROW(string.substr(0, 1), Exception);
-    EXPECT_THROW(string.substr(1, 0), Exception);
+    EXPECT_THAT(string.slice(0), Eq(StringSlice()));
+    EXPECT_THAT(string.slice(0, 0), Eq(StringSlice()));
+    EXPECT_THROW(string.slice(1), Exception);
+    EXPECT_THROW(string.slice(0, 1), Exception);
+    EXPECT_THROW(string.slice(1, 0), Exception);
 }
 
 // Test all of the 'const' methods of a non-empty String.
@@ -81,17 +81,17 @@ TEST_F(StringTest, HelloWorldConst) {
     EXPECT_THAT(string.rfind("orl"), Eq<size_t>(8));
 
     EXPECT_THAT(string, Eq(ByRef(string)));
-    EXPECT_THAT(string, Eq<StringPiece>(string));
-    EXPECT_THAT(string, Ne(StringPiece()));
+    EXPECT_THAT(string, Eq<StringSlice>(string));
+    EXPECT_THAT(string, Ne(StringSlice()));
 
-    EXPECT_THAT(string.substr(0), Eq<StringPiece>(string));
-    EXPECT_THAT(string.substr(0, 5), Eq("Hello"));
-    EXPECT_THAT(string.substr(7), Eq("world!"));
-    EXPECT_THAT(string.substr(13), Eq(StringPiece("")));
-    EXPECT_THAT(string.substr(13, 0), Eq(StringPiece("")));
-    EXPECT_THROW(string.substr(14), Exception);
-    EXPECT_THROW(string.substr(13, 1), Exception);
-    EXPECT_THROW(string.substr(14, 0), Exception);
+    EXPECT_THAT(string.slice(0), Eq<StringSlice>(string));
+    EXPECT_THAT(string.slice(0, 5), Eq("Hello"));
+    EXPECT_THAT(string.slice(7), Eq("world!"));
+    EXPECT_THAT(string.slice(13), Eq(StringSlice("")));
+    EXPECT_THAT(string.slice(13, 0), Eq(StringSlice("")));
+    EXPECT_THROW(string.slice(14), Exception);
+    EXPECT_THROW(string.slice(13, 1), Exception);
+    EXPECT_THROW(string.slice(14, 0), Exception);
 }
 
 // Test all five non-default overloads of String's constructor.
@@ -103,7 +103,7 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
         EXPECT_THAT(string, Eq(expected));
     }
     {
-        const StringPiece s(expected);
+        const StringSlice s(expected);
         const String string(s);
         EXPECT_THAT(string, Eq(expected));
     }
@@ -112,7 +112,7 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
         EXPECT_THAT(string, Eq(expected));
     }
     {
-        BytesPiece bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
+        BytesSlice bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
         const String string(ascii::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
     }
@@ -132,7 +132,7 @@ TEST_F(StringTest, AllAssignOverloads) {
         EXPECT_THAT(string, Eq(expected));
     }
     {
-        StringPiece s(expected);
+        StringSlice s(expected);
         String string("Hello, ");
         string.assign(s);
         EXPECT_THAT(string, Eq(expected));
@@ -143,7 +143,7 @@ TEST_F(StringTest, AllAssignOverloads) {
         EXPECT_THAT(string, Eq(expected));
     }
     {
-        BytesPiece bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
+        BytesSlice bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
         String string("Hello, ");
         string.assign(ascii::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
@@ -166,7 +166,7 @@ TEST_F(StringTest, AllAppendOverloads) {
         EXPECT_THAT(string, Eq(expected));
     }
     {
-        StringPiece s(append);
+        StringSlice s(append);
         String string("Hello, ");
         string.append(s);
         EXPECT_THAT(string, Eq(expected));
@@ -177,7 +177,7 @@ TEST_F(StringTest, AllAppendOverloads) {
         EXPECT_THAT(string, Eq(expected));
     }
     {
-        BytesPiece bytes(reinterpret_cast<const uint8_t*>("world!"), 6);
+        BytesSlice bytes(reinterpret_cast<const uint8_t*>("world!"), 6);
         String string("Hello, ");
         string.append(ascii::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
@@ -197,7 +197,7 @@ TEST_F(StringTest, ExtensionByOnes) {
         string.append(1, '!');
         EXPECT_THAT(string.size(), Eq<size_t>(i + 1));
         const String expected(i + 1, '!');
-        EXPECT_THAT(string, Eq<StringPiece>(expected));
+        EXPECT_THAT(string, Eq<StringSlice>(expected));
     }
 }
 
@@ -210,7 +210,7 @@ TEST_F(StringTest, ExtensionByPowersOfTwo) {
         string.append(1 << i, '!');
         EXPECT_THAT(string.size(), Eq<size_t>(2 << i));
         const String expected(2 << i, '!');
-        EXPECT_THAT(string, Eq<StringPiece>(expected));
+        EXPECT_THAT(string, Eq<StringSlice>(expected));
     }
 }
 
@@ -238,20 +238,20 @@ TEST_F(StringTest, ReplaceGreek) {
     const String antio(utf8::decode("Αντίο"));
     const String antio_kosme_bang(utf8::decode("Αντίο, κόσμε!"));
     string.replace(0, 8, antio);
-    EXPECT_THAT(string, Eq<StringPiece>(antio_kosme_bang));
+    EXPECT_THAT(string, Eq<StringSlice>(antio_kosme_bang));
 
     const String sklere(utf8::decode("σκλερέ "));
     const String antio_sklere_kosme_bang(utf8::decode("Αντίο, σκλερέ κόσμε!"));
     string.replace(7, 0, sklere);
-    EXPECT_THAT(string, Eq<StringPiece>(antio_sklere_kosme_bang));
+    EXPECT_THAT(string, Eq<StringSlice>(antio_sklere_kosme_bang));
 
     const String antio_sklere_kosme(utf8::decode("Αντίο, σκλερέ κόσμε"));
     string.replace(19, 1, "");
-    EXPECT_THAT(string, Eq<StringPiece>(antio_sklere_kosme));
+    EXPECT_THAT(string, Eq<StringSlice>(antio_sklere_kosme));
 
     const String sas_afino_simera(utf8::decode("Σας αφήνω σήμερα"));
     string.replace(0, 19, sas_afino_simera);
-    EXPECT_THAT(string, Eq<StringPiece>(sas_afino_simera));
+    EXPECT_THAT(string, Eq<StringSlice>(sas_afino_simera));
 }
 
 TEST_F(StringTest, ReplaceJapanese) {
@@ -261,20 +261,20 @@ TEST_F(StringTest, ReplaceJapanese) {
     const String sayonara(utf8::decode("さよなら"));
     const String sayonara_sekai_bang(utf8::decode("さよなら世界！"));
     string.replace(0, 5, sayonara);
-    EXPECT_THAT(string, Eq<StringPiece>(sayonara_sekai_bang));
+    EXPECT_THAT(string, Eq<StringSlice>(sayonara_sekai_bang));
 
     const String hidoi(utf8::decode("ひどい"));
     const String sayonara_hidoi_sekai_bang(utf8::decode("さよならひどい世界！"));
     string.replace(4, 0, hidoi);
-    EXPECT_THAT(string, Eq<StringPiece>(sayonara_hidoi_sekai_bang));
+    EXPECT_THAT(string, Eq<StringSlice>(sayonara_hidoi_sekai_bang));
 
     const String sayonara_hidoi_sekai(utf8::decode("さよならひどい世界"));
     string.replace(9, 1, "");
-    EXPECT_THAT(string, Eq<StringPiece>(sayonara_hidoi_sekai));
+    EXPECT_THAT(string, Eq<StringSlice>(sayonara_hidoi_sekai));
 
     const String kyouha_anatawo_nokositeimasu(utf8::decode("今日あなたを残しています"));
     string.replace(0, 9, kyouha_anatawo_nokositeimasu);
-    EXPECT_THAT(string, Eq<StringPiece>(kyouha_anatawo_nokositeimasu));
+    EXPECT_THAT(string, Eq<StringSlice>(kyouha_anatawo_nokositeimasu));
 }
 
 template <typename Left, typename Right>
@@ -303,8 +303,8 @@ void TestComparison() {
 
 TEST_F(StringTest, Comparison) {
     TestComparison<String,      String>();
-    TestComparison<String,      StringPiece>();
-    TestComparison<StringPiece, StringPiece>();
+    TestComparison<String,      StringSlice>();
+    TestComparison<StringSlice, StringSlice>();
 }
 
 }  // namespace

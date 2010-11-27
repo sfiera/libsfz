@@ -16,7 +16,7 @@ struct Io {
     int fd;
     void append(const char* string);
     void append(String& string);
-    void append(const StringPiece& string);
+    void append(const StringSlice& string);
     void append(size_t num, Rune rune);
 };
 

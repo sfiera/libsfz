@@ -39,14 +39,14 @@ void Sha1::reset() {
     _intermediate.digest[4] = 0xc3d2e1f0;
 }
 
-void Sha1::push(const BytesPiece& input) {
+void Sha1::push(const BytesSlice& input) {
     if (input.empty()) {
         return;
     }
     if (((numeric_limits<uint64_t>::max() - _size) / 8) < input.size()) {
         throw Exception("message is too long");
     }
-    BytesPiece remainder = input;
+    BytesSlice remainder = input;
     while (_message_block_index + remainder.size() >= 64) {
         const int size = 64 - _message_block_index;
         remainder.shift(_message_block + _message_block_index, size);
@@ -104,7 +104,7 @@ void Sha1::process_message_block() {
     static const uint32_t k[] = { 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6, };
 
     uint32_t w[80];
-    BytesPiece block(_message_block, 64);
+    BytesSlice block(_message_block, 64);
     read(&block, w, 16);
     for (int i = 16; i < 80; ++i) {
         w[i] = left_rotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
@@ -151,14 +151,14 @@ void print_to(PrintTarget out, const Sha1::Digest& digest) {
     }
 }
 
-Sha1::Digest file_digest(const StringPiece& path) {
+Sha1::Digest file_digest(const StringSlice& path) {
     MappedFile file(path);
     Sha1 sha;
     sha.push(file.data());
     return sha.digest();
 }
 
-Sha1::Digest tree_digest(const StringPiece& path) {
+Sha1::Digest tree_digest(const StringSlice& path) {
     if (!path::isdir(path)) {
         return file_digest(path);
     }
@@ -166,8 +166,8 @@ Sha1::Digest tree_digest(const StringPiece& path) {
         // For files, hash the size and bytes of their UTF-8-encoded path, followed by the size and
         // bytes of the file content.  We don't worry about the mode or owner of the file, just as
         // we wouldn't if taking the digest of a file.
-        void file(const StringPiece& path, const Stat&) {
-            Bytes path_bytes(utf8::encode(path.substr(prefix_size)));
+        void file(const StringSlice& path, const Stat&) {
+            Bytes path_bytes(utf8::encode(path.slice(prefix_size)));
             write<uint64_t>(&sha, path_bytes.size());
             sha.push(path_bytes);
 
@@ -178,23 +178,23 @@ Sha1::Digest tree_digest(const StringPiece& path) {
 
         // Ignore empty directories.  Directories which are not empty will be included in the
         // resulting digest by virtue of the inclusion of their files.
-        void pre_directory(const StringPiece& path, const Stat&) { }
-        void post_directory(const StringPiece& path, const Stat&) { }
+        void pre_directory(const StringSlice& path, const Stat&) { }
+        void post_directory(const StringSlice& path, const Stat&) { }
 
         // Throw exceptions on anything that might break our logical view of a tree as a
         // hierarchical listing of of regular files.
-        void cycle_directory(const StringPiece& path, const Stat&) {
+        void cycle_directory(const StringSlice& path, const Stat&) {
             throw Exception(format("Found directory cycle: {0}.", path));
         }
-        void other(const StringPiece& path, const Stat&) {
+        void other(const StringSlice& path, const Stat&) {
             throw Exception(format("Found non-regular file: {0}", path));
         }
 
         // Ignore broken symlinks; they effectively don't exist.
-        void broken_symlink(const StringPiece& path, const Stat&) { }
+        void broken_symlink(const StringSlice& path, const Stat&) { }
 
         // Can't happen during WALK_LOGICAL.
-        void symlink(const StringPiece& path, const Stat&) { }
+        void symlink(const StringSlice& path, const Stat&) { }
 
         Sha1 sha;
 

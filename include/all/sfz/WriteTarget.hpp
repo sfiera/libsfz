@@ -11,19 +11,19 @@
 
 namespace sfz {
 
-class StringPiece;
-class BytesPiece;
+class StringSlice;
+class BytesSlice;
 
 class WriteTarget {
   public:
     template <typename T> WriteTarget(T* target);
 
-    inline void push(const BytesPiece& bytes);
+    inline void push(const BytesSlice& bytes);
     inline void push(size_t num, uint8_t byte);
 
   private:
     struct DispatchTable {
-        void (*push_bytes)(void* target, const BytesPiece& bytes);
+        void (*push_bytes)(void* target, const BytesSlice& bytes);
         void (*push_repeated_bytes)(void* target, size_t num, uint8_t byte);
     };
 
@@ -37,7 +37,7 @@ class WriteTarget {
 
 template <typename T>
 struct WriteTarget::Dispatch {
-    static void push_bytes(void* target, const BytesPiece& bytes) {
+    static void push_bytes(void* target, const BytesSlice& bytes) {
         reinterpret_cast<T*>(target)->push(bytes);
     }
     static void push_repeated_bytes(void* target, size_t num, uint8_t byte) {
@@ -57,7 +57,7 @@ WriteTarget::WriteTarget(T* t)
     : _target(t),
       _dispatch_table(&Dispatch<T>::table) { }
 
-inline void WriteTarget::push(const BytesPiece& bytes) {
+inline void WriteTarget::push(const BytesSlice& bytes) {
     _dispatch_table->push_bytes(_target, bytes);
 }
 

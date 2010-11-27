@@ -15,22 +15,22 @@ namespace sfz {
 // Maps a file into memory in read-only mode.
 //
 // Uses the mmap(2) and munmap(2) system calls to map a file on disk into memory.  The file's
-// content can be accessed as a BytesPiece.
+// content can be accessed as a BytesSlice.
 class MappedFile {
   public:
     // Maps the given file into memory.
     //
     // @param [in] path     The path to the file, relative or absolute.
-    explicit MappedFile(const StringPiece& path);
+    explicit MappedFile(const StringSlice& path);
 
     // Unmaps the file.
     ~MappedFile();
 
     // @returns             The path to the mapped file.
-    StringPiece path() const;
+    StringSlice path() const;
 
     // @returns             The block of data containing the file's contents.
-    BytesPiece data() const;
+    BytesSlice data() const;
 
   private:
     // The file descriptor of the open file.

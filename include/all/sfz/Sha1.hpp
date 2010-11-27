@@ -15,7 +15,7 @@
 namespace sfz {
 
 class Bytes;
-class BytesPiece;
+class BytesSlice;
 
 // Computes the SHA-1 digest of some sequence of bytes.
 //
@@ -41,7 +41,7 @@ class Sha1 {
     // Adds data in `input` to the current content.  It is more efficient, though semantically
     // identical, to add data in larger chunks.
     // @param [in] input    The data to add to the digest.
-    void push(const BytesPiece& input);
+    void push(const BytesSlice& input);
     void push(size_t num, uint8_t byte);
 
     // Returns a digest computed from the current content.  This method does non-trivial work, so
@@ -84,10 +84,10 @@ void write_to(WriteTarget out, const Sha1::Digest& digest);
 void print_to(PrintTarget out, const Sha1::Digest& digest);
 
 // Hashes a regular file.
-Sha1::Digest file_digest(const StringPiece& path);
+Sha1::Digest file_digest(const StringSlice& path);
 
 // Hashes a tree containing regular files (or symlinks).
-Sha1::Digest tree_digest(const StringPiece& path);
+Sha1::Digest tree_digest(const StringSlice& path);
 
 }  // namespace sfz
 

@@ -14,7 +14,7 @@
 using sfz::Bytes;
 using sfz::Rune;
 using sfz::String;
-using sfz::StringPiece;
+using sfz::StringSlice;
 
 namespace utf8 = sfz::utf8;
 
@@ -28,16 +28,16 @@ Io fds[] = {{0}, {1}, {2}};
 }  // namespace
 
 void Io::append(const char* string) {
-    append(StringPiece(string));
+    append(StringSlice(string));
 }
 
 void Io::append(String& string) {
-    append(StringPiece(string));
+    append(StringSlice(string));
 }
 
-void Io::append(const StringPiece& string) {
+void Io::append(const StringSlice& string) {
     Bytes bytes(utf8::encode(string));
-    BytesPiece remainder(bytes);
+    BytesSlice remainder(bytes);
     while (!remainder.empty()) {
         ssize_t result = ::write(fd, remainder.data(), remainder.size());
         if (result < 0) {
@@ -50,7 +50,7 @@ void Io::append(const StringPiece& string) {
 
 void Io::append(size_t num, Rune rune) {
     String string(num, rune);
-    append(StringPiece(string));
+    append(StringSlice(string));
 }
 
 Io* in = &fds[0];

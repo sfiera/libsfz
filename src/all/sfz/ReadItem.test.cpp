@@ -51,14 +51,14 @@ namespace sfz {
 namespace {
 
 template <int size>
-BytesPiece char_bytes(const char (&data)[size]) {
-    return BytesPiece(reinterpret_cast<const uint8_t*>(data), size - 1);
+BytesSlice char_bytes(const char (&data)[size]) {
+    return BytesSlice(reinterpret_cast<const uint8_t*>(data), size - 1);
 }
 
 typedef Test ReadItemTest;
 
 TEST_F(ReadItemTest, ReadBool) {
-    BytesPiece bytes = char_bytes("\001\000\027\001\000\027");
+    BytesSlice bytes = char_bytes("\001\000\027\001\000\027");
     EXPECT_THAT(read<bool>(&bytes), Eq(true));
     EXPECT_THAT(read<bool>(&bytes), Eq(false));
     EXPECT_THAT(read<bool>(&bytes), Eq(true));
@@ -70,7 +70,7 @@ TEST_F(ReadItemTest, ReadBool) {
 }
 
 TEST_F(ReadItemTest, ReadChar) {
-    BytesPiece bytes = char_bytes("\0000cw\0000t");
+    BytesSlice bytes = char_bytes("\0000cw\0000t");
     EXPECT_THAT(read<char>(&bytes), Eq('\0'));
     EXPECT_THAT(read<char>(&bytes), Eq('0'));
     EXPECT_THAT(read<char>(&bytes), Eq('c'));
@@ -83,7 +83,7 @@ TEST_F(ReadItemTest, ReadChar) {
 }
 
 TEST_F(ReadItemTest, ReadInt8) {
-    BytesPiece bytes = char_bytes("\000\377\001\177\200\000\377\001\177\200");
+    BytesSlice bytes = char_bytes("\000\377\001\177\200\000\377\001\177\200");
     EXPECT_THAT(read<int8_t>(&bytes), Eq(0));
     EXPECT_THAT(read<int8_t>(&bytes), Eq(-1));
     EXPECT_THAT(read<int8_t>(&bytes), Eq(1));
@@ -99,7 +99,7 @@ TEST_F(ReadItemTest, ReadInt8) {
 }
 
 TEST_F(ReadItemTest, ReadUint8) {
-    BytesPiece bytes = char_bytes("\000\001\177\377\000\001\177\377");
+    BytesSlice bytes = char_bytes("\000\001\177\377\000\001\177\377");
     EXPECT_THAT(read<uint8_t>(&bytes), Eq(0));
     EXPECT_THAT(read<uint8_t>(&bytes), Eq(1));
     EXPECT_THAT(read<uint8_t>(&bytes), Eq(127));
@@ -113,7 +113,7 @@ TEST_F(ReadItemTest, ReadUint8) {
 }
 
 TEST_F(ReadItemTest, ReadLargerInts) {
-    BytesPiece bytes = char_bytes(
+    BytesSlice bytes = char_bytes(
                     "\000\001" "\000\000\000\002" "\000\000\000\000\000\000\000\003"
                     "\000\144" "\047\020"
                     "\000\000\047\020" "\073\232\312\000"
@@ -136,7 +136,7 @@ TEST_F(ReadItemTest, ReadLargerInts) {
 }
 
 TEST_F(ReadItemTest, ReadExternalEnum) {
-    BytesPiece bytes = char_bytes("\000\003\001\003");
+    BytesSlice bytes = char_bytes("\000\003\001\003");
     EXPECT_THAT(read<other::Grapheme>(&bytes), Eq(other::AESC));
     EXPECT_THAT(read<other::Grapheme>(&bytes), Eq(other::WYNN));
     other::Grapheme values[2];
@@ -146,7 +146,7 @@ TEST_F(ReadItemTest, ReadExternalEnum) {
 }
 
 TEST_F(ReadItemTest, ReadExternalStruct) {
-    BytesPiece bytes = char_bytes(
+    BytesSlice bytes = char_bytes(
             "\000\000\000\000\346"
             "\001\000\000\000\360"
             "\002\000\000\000\376"

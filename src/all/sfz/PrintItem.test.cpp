@@ -61,7 +61,7 @@ struct TestData {
     typedef _StorageType StorageType;
     typedef _TestType TestType;
     StorageType value;
-    StringPiece expected;
+    StringSlice expected;
 };
 
 template <typename _TestType, typename _StorageType = _TestType>
@@ -70,7 +70,7 @@ struct BaseTestData {
     typedef _StorageType StorageType;
     StorageType value;
     int base;
-    StringPiece expected;
+    StringSlice expected;
 };
 
 bool k32Bit = (sizeof(void*) == 4);
@@ -83,7 +83,7 @@ class PrintItemTest : public Test {
     }
 
     template <typename T, int i>
-    void Run(const StringPiece& prefix, const T (&data)[i]) {
+    void Run(const StringSlice& prefix, const T (&data)[i]) {
         foreach (it, range(data, data + i)) {
             typename T::TestType value(it->value);
             String s(prefix);
@@ -97,7 +97,7 @@ class PrintItemTest : public Test {
 TEST_F(PrintItemTest, EmptyItem) {
     String s("empty: ");
     PrintItem().print_to(&s);
-    EXPECT_THAT(s, Eq<StringPiece>("empty: "));
+    EXPECT_THAT(s, Eq<StringSlice>("empty: "));
 }
 
 TEST_F(PrintItemTest, CStringItem) {
@@ -113,12 +113,12 @@ TEST_F(PrintItemTest, CStringLiteralItem) {
     {
         String s("const char[1]: ");
         print(&s, "");
-        EXPECT_THAT(s, Eq<StringPiece>("const char[1]: "));
+        EXPECT_THAT(s, Eq<StringSlice>("const char[1]: "));
     }
     {
         String s("const char[14]: ");
         print(&s, "quoted string");
-        EXPECT_THAT(s, Eq<StringPiece>("const char[14]: quoted string"));
+        EXPECT_THAT(s, Eq<StringSlice>("const char[14]: quoted string"));
     }
 }
 
@@ -257,7 +257,7 @@ TEST_F(PrintItemTest, ExternalPointerItem) {
 }
 
 TEST_F(PrintItemTest, StringItem) {
-    const TestData<String, StringPiece> data[] = {
+    const TestData<String, StringSlice> data[] = {
         { "",                    "string: " },
         { "s",                   "string: s" },
         { "long and\nmultiline", "string: long and\nmultiline" },
@@ -265,8 +265,8 @@ TEST_F(PrintItemTest, StringItem) {
     Run("string: ", data);
 }
 
-TEST_F(PrintItemTest, StringPieceItem) {
-    const TestData<StringPiece> data[] = {
+TEST_F(PrintItemTest, StringSliceItem) {
+    const TestData<StringSlice> data[] = {
         { "",                    "string: " },
         { "s",                   "string: s" },
         { "long and\nmultiline", "string: long and\nmultiline" },

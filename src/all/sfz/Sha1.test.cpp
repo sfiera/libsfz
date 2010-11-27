@@ -30,8 +30,8 @@ namespace {
 
 typedef Test Sha1Test;
 
-BytesPiece string_bytes(const char* string) {
-    return BytesPiece(reinterpret_cast<const uint8_t*>(string), strlen(string));
+BytesSlice string_bytes(const char* string) {
+    return BytesSlice(reinterpret_cast<const uint8_t*>(string), strlen(string));
 }
 
 const Sha1::Digest kEmptyDigest = { 0xda39a3ee, 0x5e6b4b0d, 0x3255bfef, 0x95601890, 0xafd80709 };
@@ -206,10 +206,10 @@ TEST_F(Sha1Test, IncrementalDigest) {
 }
 
 TEST_F(Sha1Test, ReadWrite) {
-    const BytesPiece written(
+    const BytesSlice written(
             "\xda\x39\xa3\xee\x5e\x6b\x4b\x0d\x32\x55\xbf\xef\x95\x60\x18\x90\xaf\xd8\x07\x09");
 
-    BytesPiece in(written);
+    BytesSlice in(written);
     Sha1::Digest digest;
     read(&in, &digest);
     EXPECT_THAT(digest, Eq(kEmptyDigest));
@@ -220,7 +220,7 @@ TEST_F(Sha1Test, ReadWrite) {
 }
 
 TEST_F(Sha1Test, Print) {
-    StringPiece printed("da39a3ee5e6b4b0d3255bfef95601890afd80709");
+    StringSlice printed("da39a3ee5e6b4b0d3255bfef95601890afd80709");
 
     String out;
     print(&out, kEmptyDigest);

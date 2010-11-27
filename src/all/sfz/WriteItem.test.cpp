@@ -45,8 +45,8 @@ namespace sfz {
 namespace {
 
 template <int size>
-BytesPiece char_bytes(const char (&data)[size]) {
-    return BytesPiece(reinterpret_cast<const uint8_t*>(data), size - 1);
+BytesSlice char_bytes(const char (&data)[size]) {
+    return BytesSlice(reinterpret_cast<const uint8_t*>(data), size - 1);
 }
 
 typedef Test WriteItemTest;

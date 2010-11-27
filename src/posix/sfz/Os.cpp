@@ -16,67 +16,67 @@ namespace sfz {
 
 namespace path {
 
-bool exists(const StringPiece& path) {
+bool exists(const StringSlice& path) {
     CString c_str(path);
     Stat st;
     return (stat(c_str.data(), &st) == 0);
 }
 
-bool isdir(const StringPiece& path) {
+bool isdir(const StringSlice& path) {
     CString c_str(path);
     Stat st;
     return (stat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFDIR);
 }
 
-bool isfile(const StringPiece& path) {
+bool isfile(const StringSlice& path) {
     CString c_str(path);
     Stat st;
     return (stat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFREG);
 }
 
-bool islink(const StringPiece& path) {
+bool islink(const StringSlice& path) {
     CString c_str(path);
     Stat st;
     return (lstat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFLNK);
 }
 
-StringPiece basename(const StringPiece& path) {
+StringSlice basename(const StringSlice& path) {
     if (path == "/") {
         return path;
     }
     size_t pos = path.rfind('/', path.size() - 1);
-    if (pos == StringPiece::npos) {
+    if (pos == StringSlice::npos) {
         return path;
     } else if (pos == path.size() - 1) {
-        return basename(path.substr(0, path.size() - 1));
+        return basename(path.slice(0, path.size() - 1));
     } else {
-        return path.substr(pos + 1);
+        return path.slice(pos + 1);
     }
 }
 
-StringPiece dirname(const StringPiece& path) {
+StringSlice dirname(const StringSlice& path) {
     size_t pos = path.rfind('/', path.size() - 1);
     if (pos == 0) {
         return "/";
-    } else if (pos == StringPiece::npos) {
+    } else if (pos == StringSlice::npos) {
         return ".";
     } else if (pos == path.size() - 1) {
-        return dirname(path.substr(0, path.size() - 1));
+        return dirname(path.slice(0, path.size() - 1));
     } else {
-        return path.substr(0, pos);
+        return path.slice(0, pos);
     }
 }
 
 }  // namespace path
 
-void chdir(const StringPiece& path) {
+void chdir(const StringSlice& path) {
     CString c_str(path);
     if (::chdir(c_str.data()) < 0) {
         throw Exception(format("chdir: {0}: {1}", path, posix_strerror()));
     }
 }
 
-void symlink(const StringPiece& content, const StringPiece& container) {
+void symlink(const StringSlice& content, const StringSlice& container) {
     CString content_c_str(content);
     CString container_c_str(container);
     if (::symlink(content_c_str.data(), container_c_str.data()) < 0) {
@@ -84,7 +84,7 @@ void symlink(const StringPiece& content, const StringPiece& container) {
     }
 }
 
-int open(const StringPiece& path, int oflag, mode_t mode) {
+int open(const StringSlice& path, int oflag, mode_t mode) {
     CString c_str(path);
     int fd = ::open(c_str.data(), oflag, mode);
     if (fd < 0) {
@@ -93,61 +93,61 @@ int open(const StringPiece& path, int oflag, mode_t mode) {
     return fd;
 }
 
-void mkdir(const StringPiece& path, mode_t mode) {
+void mkdir(const StringSlice& path, mode_t mode) {
     CString c_str(path);
     if (::mkdir(c_str.data(), mode) != 0) {
         throw Exception(format("mkdir: {0}: {1}", path, posix_strerror()));
     }
 }
 
-void mkfifo(const StringPiece& path, mode_t mode) {
+void mkfifo(const StringSlice& path, mode_t mode) {
     CString c_str(path);
     if (::mkfifo(c_str.data(), mode) != 0) {
         throw Exception(format("mkfifo: {0}: {1}", path, posix_strerror()));
     }
 }
 
-void makedirs(const StringPiece& path, mode_t mode) {
+void makedirs(const StringSlice& path, mode_t mode) {
     if (!path::isdir(path)) {
         makedirs(path::dirname(path), mode);
         mkdir(path, mode);
     }
 }
 
-void unlink(const StringPiece& path) {
+void unlink(const StringSlice& path) {
     CString c_str(path);
     if (::unlink(c_str.data()) < 0) {
         throw Exception(format("unlink: {0}: {1}", path, posix_strerror()));
     }
 }
 
-void rmdir(const StringPiece& path) {
+void rmdir(const StringSlice& path) {
     CString c_str(path);
     if (::rmdir(c_str.data()) < 0) {
         throw Exception(format("rmdir: {0}: {1}", path, posix_strerror()));
     }
 }
 
-void rmtree(const StringPiece& path) {
+void rmtree(const StringSlice& path) {
     if (path::exists(path)) {
         class RmtreeVisitor : public TreeWalker {
           public:
-            void pre_directory(    const StringPiece& path, const Stat&) { }
-            void cycle_directory(  const StringPiece& path, const Stat&) { }
+            void pre_directory(    const StringSlice& path, const Stat&) { }
+            void cycle_directory(  const StringSlice& path, const Stat&) { }
 
-            void post_directory(   const StringPiece& path, const Stat&) { rmdir(path); }
+            void post_directory(   const StringSlice& path, const Stat&) { rmdir(path); }
 
-            void file(             const StringPiece& path, const Stat&) { unlink(path); }
-            void symlink(          const StringPiece& path, const Stat&) { unlink(path); }
-            void broken_symlink(   const StringPiece& path, const Stat&) { unlink(path); }
-            void other(            const StringPiece& path, const Stat&) { unlink(path); }
+            void file(             const StringSlice& path, const Stat&) { unlink(path); }
+            void symlink(          const StringSlice& path, const Stat&) { unlink(path); }
+            void broken_symlink(   const StringSlice& path, const Stat&) { unlink(path); }
+            void other(            const StringSlice& path, const Stat&) { unlink(path); }
         };
         RmtreeVisitor visitor;
         walk(path, WALK_PHYSICAL, &visitor);
     }
 }
 
-TemporaryDirectory::TemporaryDirectory(const StringPiece& prefix) {
+TemporaryDirectory::TemporaryDirectory(const StringSlice& prefix) {
     String str(format("/tmp/{0}XXXXXX", prefix));
     CString c_str(str);
     mkdtemp(c_str.mutable_data());
@@ -179,7 +179,7 @@ int compare_ftsent(const FTSENT** lhs, const FTSENT** rhs) {
 
 }  // namespace
 
-void walk(const StringPiece& root, WalkType type, TreeWalker* visitor) {
+void walk(const StringSlice& root, WalkType type, TreeWalker* visitor) {
     CString c_str(root);
     char* const pathv[] = { c_str.mutable_data(), NULL };
     int options = FTS_NOCHDIR;

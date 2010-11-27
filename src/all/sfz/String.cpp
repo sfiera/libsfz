@@ -27,7 +27,7 @@ const size_t kDefaultStringSize = 16;
 }  // namespace
 
 const size_t String::npos = -1;
-const size_t StringPiece::npos = -1;
+const size_t StringSlice::npos = -1;
 
 // String implementation.
 
@@ -71,7 +71,7 @@ void String::assign(size_t num, Rune rune) {
     append(num, rune);
 }
 
-void String::push(const StringPiece& string) {
+void String::push(const StringSlice& string) {
     reserve(_size + string._size);
     foreach (it, string) {
         append(1, *it);
@@ -114,47 +114,47 @@ void String::resize(size_t size, Rune rune) {
     _size = size;
 }
 
-void String::replace(size_t index, size_t num, const StringPiece& string) {
-    String tail(StringPiece(*this).substr(index + num));
+void String::replace(size_t index, size_t num, const StringSlice& string) {
+    String tail(slice(index + num));
     resize(index);
     append(string);
     append(tail);
 }
 
 size_t String::size() const {
-    return StringPiece(*this).size();
+    return StringSlice(*this).size();
 }
 
 Rune String::at(size_t loc) const {
-    return StringPiece(*this).at(loc);
+    return StringSlice(*this).at(loc);
 }
 
 bool String::empty() const {
-    return StringPiece(*this).empty();
+    return StringSlice(*this).empty();
 }
 
 size_t String::find(Rune rune, size_t index) const {
-    return StringPiece(*this).find(rune, index);
+    return StringSlice(*this).find(rune, index);
 }
 
-size_t String::find(const StringPiece& string, size_t index) const {
-    return StringPiece(*this).find(string, index);
+size_t String::find(const StringSlice& string, size_t index) const {
+    return StringSlice(*this).find(string, index);
 }
 
 size_t String::rfind(Rune rune, size_t index) const {
-    return StringPiece(*this).rfind(rune, index);
+    return StringSlice(*this).rfind(rune, index);
 }
 
-size_t String::rfind(const StringPiece& string, size_t index) const {
-    return StringPiece(*this).rfind(string, index);
+size_t String::rfind(const StringSlice& string, size_t index) const {
+    return StringSlice(*this).rfind(string, index);
 }
 
-StringPiece String::substr(size_t loc) const {
-    return StringPiece(*this).substr(loc);
+StringSlice String::slice(size_t loc) const {
+    return StringSlice(*this).slice(loc);
 }
 
-StringPiece String::substr(size_t loc, size_t size) const {
-    return StringPiece(*this).substr(loc, size);
+StringSlice String::slice(size_t loc, size_t size) const {
+    return StringSlice(*this).slice(loc, size);
 }
 
 void String::initialize(size_t capacity) {
@@ -164,20 +164,20 @@ void String::initialize(size_t capacity) {
     _capacity = capacity;
 }
 
-// StringPiece implementation.
+// StringSlice implementation.
 
-StringPiece::StringPiece()
+StringSlice::StringSlice()
         : _data(NULL),
           _encoding(sizeof(uint8_t)),
           _size(0) { }
 
-StringPiece::StringPiece(const String& string)
+StringSlice::StringSlice(const String& string)
         : _data(reinterpret_cast<uint8_t*>(string._data.get())),
           _encoding(sizeof(Rune)),
           _size(string._size) { }
 
-StringPiece::StringPiece(const char* ascii_string) {
-    BytesPiece bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
+StringSlice::StringSlice(const char* ascii_string) {
+    BytesSlice bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
     foreach (it, bytes) {
         if ((*it) & 0x80) {
             throw Exception("string is not ASCII");
@@ -188,11 +188,11 @@ StringPiece::StringPiece(const char* ascii_string) {
     _size = bytes.size();
 }
 
-size_t StringPiece::size() const {
+size_t StringSlice::size() const {
     return _size;
 }
 
-Rune StringPiece::at(size_t loc) const {
+Rune StringSlice::at(size_t loc) const {
     if (loc >= _size) {
         throw Exception("out-of-bounds");
     }
@@ -207,11 +207,11 @@ Rune StringPiece::at(size_t loc) const {
     return '\0';
 }
 
-bool StringPiece::empty() const {
+bool StringSlice::empty() const {
     return _size == 0;
 }
 
-size_t StringPiece::find(Rune rune, size_t index) const {
+size_t StringSlice::find(Rune rune, size_t index) const {
     foreach (i, range(index, _size)) {
         if (at(i) == rune) {
             return i;
@@ -220,19 +220,19 @@ size_t StringPiece::find(Rune rune, size_t index) const {
     return npos;
 }
 
-size_t StringPiece::find(const StringPiece& string, size_t index) const {
+size_t StringSlice::find(const StringSlice& string, size_t index) const {
     if (index + string._size > _size) {
         return npos;
     }
     foreach (i, range(index, _size - string._size + 1)) {
-        if (StringPiece(*this).substr(i, string._size) == string) {
+        if (StringSlice(*this).slice(i, string._size) == string) {
             return i;
         }
     }
     return npos;
 }
 
-size_t StringPiece::rfind(Rune rune, size_t index) const {
+size_t StringSlice::rfind(Rune rune, size_t index) const {
     if (index == npos) {
         index = _size - 1;
     }
@@ -244,7 +244,7 @@ size_t StringPiece::rfind(Rune rune, size_t index) const {
     return npos;
 }
 
-size_t StringPiece::rfind(const StringPiece& string, size_t index) const {
+size_t StringSlice::rfind(const StringSlice& string, size_t index) const {
     if (string._size > _size) {
         return npos;
     }
@@ -255,49 +255,49 @@ size_t StringPiece::rfind(const StringPiece& string, size_t index) const {
         index = _size - string._size;
     }
     foreach (i, range(index - string._size + 1)) {
-        if (StringPiece(*this).substr(index - i, string._size) == string) {
+        if (StringSlice(*this).slice(index - i, string._size) == string) {
             return index - i;
         }
     }
     return npos;
 }
 
-StringPiece StringPiece::substr(size_t loc) const {
+StringSlice StringSlice::slice(size_t loc) const {
     if (loc > _size) {
-        throw Exception("substr out of range");
+        throw Exception("slice out of range");
     }
-    return substr(loc, _size - loc);
+    return slice(loc, _size - loc);
 }
 
-StringPiece StringPiece::substr(size_t loc, size_t size) const {
+StringSlice StringSlice::slice(size_t loc, size_t size) const {
     if (loc + size > _size) {
-        throw Exception("substr out of range");
+        throw Exception("slice out of range");
     }
-    return StringPiece(_data + (loc * _encoding), size, _encoding);
+    return StringSlice(_data + (loc * _encoding), size, _encoding);
 }
 
-StringPiece::const_iterator StringPiece::begin() const {
+StringSlice::const_iterator StringSlice::begin() const {
     return const_iterator(_data, _encoding);
 }
 
-StringPiece::const_iterator StringPiece::end() const {
+StringSlice::const_iterator StringSlice::end() const {
     return const_iterator(_data + (_size * _encoding), _encoding);
 }
 
-StringPiece::StringPiece(const uint8_t* data, size_t size, int encoding)
+StringSlice::StringSlice(const uint8_t* data, size_t size, int encoding)
         : _data(data),
           _encoding(encoding),
           _size(size) { }
 
-// StringPiece::const_iterator implementation.
+// StringSlice::const_iterator implementation.
 
-StringPiece::iterator::iterator() { }
+StringSlice::iterator::iterator() { }
 
-StringPiece::iterator::iterator(const uint8_t* it, int encoding)
+StringSlice::iterator::iterator(const uint8_t* it, int encoding)
         : _it(it),
           _encoding(encoding) { }
 
-StringPiece::iterator::value_type StringPiece::iterator::operator*() const {
+StringSlice::iterator::value_type StringSlice::iterator::operator*() const {
     switch (_encoding) {
       case sizeof(uint8_t):
         return *_it;
@@ -309,47 +309,47 @@ StringPiece::iterator::value_type StringPiece::iterator::operator*() const {
     return 0;
 }
 
-StringPiece::iterator& StringPiece::iterator::operator++() {
+StringSlice::iterator& StringSlice::iterator::operator++() {
     _it += _encoding;
     return *this;
 }
 
-StringPiece::iterator StringPiece::iterator::operator++(int) {
+StringSlice::iterator StringSlice::iterator::operator++(int) {
     const uint8_t* const old = _it;
     _it += _encoding;
     return iterator(old, _encoding);
 }
 
-StringPiece::iterator& StringPiece::iterator::operator--() {
+StringSlice::iterator& StringSlice::iterator::operator--() {
     _it -= _encoding;
     return *this;
 }
 
-StringPiece::iterator StringPiece::iterator::operator--(int) {
+StringSlice::iterator StringSlice::iterator::operator--(int) {
     const uint8_t* const old = _it;
     _it -= _encoding;
     return iterator(old, _encoding);
 }
 
-StringPiece::iterator& StringPiece::iterator::operator+=(int n) {
+StringSlice::iterator& StringSlice::iterator::operator+=(int n) {
     _it += _encoding * n;
     return *this;
 }
 
-StringPiece::iterator StringPiece::iterator::operator+(int n) const {
+StringSlice::iterator StringSlice::iterator::operator+(int n) const {
     return iterator(_it + (_encoding * n), _encoding);
 }
 
-StringPiece::iterator& StringPiece::iterator::operator-=(int n) {
+StringSlice::iterator& StringSlice::iterator::operator-=(int n) {
     _it -= _encoding * n;
     return *this;
 }
 
-StringPiece::iterator StringPiece::iterator::operator-(int n) const {
+StringSlice::iterator StringSlice::iterator::operator-(int n) const {
     return iterator(_it - (_encoding * n), _encoding);
 }
 
-StringPiece::difference_type StringPiece::iterator::operator-(const iterator& it) const {
+StringSlice::difference_type StringSlice::iterator::operator-(const iterator& it) const {
     return (_it - it._it) / _encoding;
 }
 
@@ -359,17 +359,17 @@ void swap(String& x, String& y) {
     swap(x._capacity, y._capacity);
 }
 
-void swap(StringPiece& x, StringPiece& y) {
+void swap(StringSlice& x, StringSlice& y) {
     swap(x._data, y._data);
     swap(x._size, y._size);
 }
 
 int compare(const String& x, const String& y) {
-    return compare(StringPiece(x), StringPiece(y));
+    return compare(StringSlice(x), StringSlice(y));
 }
 
-int compare(const StringPiece& x, const StringPiece& y) {
-    for (StringPiece::iterator xit = x.begin(), yit = y.begin(), xend = x.end(), yend = y.end();
+int compare(const StringSlice& x, const StringSlice& y) {
+    for (StringSlice::iterator xit = x.begin(), yit = y.begin(), xend = x.end(), yend = y.end();
             true; ++xit, ++yit) {
         if ((xit == xend) && (yit == yend)) {
             return 0;
@@ -385,7 +385,7 @@ int compare(const StringPiece& x, const StringPiece& y) {
     }
 }
 
-int compare(const StringPiece::iterator& x, const StringPiece::iterator& y) {
+int compare(const StringSlice::iterator& x, const StringSlice::iterator& y) {
     return x._it - y._it;
 }
 
@@ -398,7 +398,7 @@ int compare(const StringPiece::iterator& x, const StringPiece::iterator& y) {
     bool operator>=(const TYPE& x, const TYPE& y) { return compare(x, y) >= 0; }
 
 DEFINE_OPERATORS(String)
-DEFINE_OPERATORS(StringPiece)
-DEFINE_OPERATORS(StringPiece::iterator)
+DEFINE_OPERATORS(StringSlice)
+DEFINE_OPERATORS(StringSlice::iterator)
 
 }  // namespace sfz

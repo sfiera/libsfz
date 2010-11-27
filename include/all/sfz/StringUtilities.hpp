@@ -10,10 +10,10 @@
 
 namespace sfz {
 
-class StringPiece;
+class StringSlice;
 
 template <typename T>
-bool string_to_int(const StringPiece& s, T* out, int base = 10);
+bool string_to_int(const StringSlice& s, T* out, int base = 10);
 
 }  // namespace sfz
 

@@ -43,7 +43,7 @@ template <> bool is_signed<uint64_t>() { return false; }
 }  // namespace
 
 template <typename T>
-bool string_to_int(const StringPiece& s, T* out, int base) {
+bool string_to_int(const StringSlice& s, T* out, int base) {
     bool positive = true;
     T value = 0;
 
@@ -85,13 +85,13 @@ bool string_to_int(const StringPiece& s, T* out, int base) {
     return true;
 }
 
-template bool string_to_int<int8_t>(const StringPiece& s, int8_t* out, int base);
-template bool string_to_int<uint8_t>(const StringPiece& s, uint8_t* out, int base);
-template bool string_to_int<int16_t>(const StringPiece& s, int16_t* out, int base);
-template bool string_to_int<uint16_t>(const StringPiece& s, uint16_t* out, int base);
-template bool string_to_int<int32_t>(const StringPiece& s, int32_t* out, int base);
-template bool string_to_int<uint32_t>(const StringPiece& s, uint32_t* out, int base);
-template bool string_to_int<int64_t>(const StringPiece& s, int64_t* out, int base);
-template bool string_to_int<uint64_t>(const StringPiece& s, uint64_t* out, int base);
+template bool string_to_int<int8_t>(const StringSlice& s, int8_t* out, int base);
+template bool string_to_int<uint8_t>(const StringSlice& s, uint8_t* out, int base);
+template bool string_to_int<int16_t>(const StringSlice& s, int16_t* out, int base);
+template bool string_to_int<uint16_t>(const StringSlice& s, uint16_t* out, int base);
+template bool string_to_int<int32_t>(const StringSlice& s, int32_t* out, int base);
+template bool string_to_int<uint32_t>(const StringSlice& s, uint32_t* out, int base);
+template bool string_to_int<int64_t>(const StringSlice& s, int64_t* out, int base);
+template bool string_to_int<uint64_t>(const StringSlice& s, uint64_t* out, int base);
 
 }  // namespace sfz

@@ -18,7 +18,7 @@
 
 namespace sfz {
 
-MappedFile::MappedFile(const StringPiece& path)
+MappedFile::MappedFile(const StringSlice& path)
         : _path(path),
           _size(0),
           _data(NULL) {
@@ -51,12 +51,12 @@ MappedFile::~MappedFile() {
     close(_fd);
 }
 
-StringPiece MappedFile::path() const {
+StringSlice MappedFile::path() const {
     return _path;
 }
 
-BytesPiece MappedFile::data() const {
-    return BytesPiece(_data, _size);
+BytesSlice MappedFile::data() const {
+    return BytesSlice(_data, _size);
 }
 
 }  // namespace sfz

@@ -15,47 +15,47 @@ namespace sfz {
 namespace {
 
 void span_complement(
-        const StringPiece& input, const StringPiece& chars,
-        StringPiece* span, StringPiece* remainder) {
+        const StringSlice& input, const StringSlice& chars,
+        StringSlice* span, StringSlice* remainder) {
     foreach (i, range(input.size())) {
         if (chars.find(input.at(i)) != String::npos) {
-            *span = input.substr(0, i);
-            *remainder = input.substr(i);
+            *span = input.slice(0, i);
+            *remainder = input.slice(i);
             return;
         }
     }
     *span = input;
-    *remainder = StringPiece();
+    *remainder = StringSlice();
 }
 
 }  // namespace
 
 void print_format_to(
         PrintTarget out, const char* format_string, const PrintItem* const* items, size_t size) {
-    static const StringPiece kBraces = "{}";
-    static const StringPiece kCloseBrace = "}";
+    static const StringSlice kBraces = "{}";
+    static const StringSlice kCloseBrace = "}";
 
-    StringPiece f = format_string;
+    StringSlice f = format_string;
 
     while (f.size() > 0) {
-        StringPiece span;
-        StringPiece remainder;
+        StringSlice span;
+        StringSlice remainder;
         span_complement(f, kBraces, &span, &remainder);
         if (remainder.size() == 1) {
             span = f;
-            remainder = StringPiece();
+            remainder = StringSlice();
         }
         out.push(span);
         f = remainder;
         if (f.size() > 0) {
             if (f.at(0) == f.at(1)) {
                 out.push(1, f.at(0));
-                f = f.substr(2);
+                f = f.slice(2);
             } else if (f.at(0) == '}') {
                 out.push(1, '}');
-                f = f.substr(1);
+                f = f.slice(1);
             } else {
-                f = f.substr(1);
+                f = f.slice(1);
                 span_complement(f, kCloseBrace, &span, &remainder);
 
                 uint32_t index;
@@ -68,7 +68,7 @@ void print_format_to(
                 if (remainder.empty()) {
                     f = remainder;
                 } else {
-                    f = remainder.substr(1);
+                    f = remainder.slice(1);
                 }
             }
         }

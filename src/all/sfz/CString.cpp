@@ -10,8 +10,8 @@
 
 namespace sfz {
 
-CString::CString(const StringPiece& string) {
-    if (string.find('\0') != StringPiece::npos) {
+CString::CString(const StringSlice& string) {
+    if (string.find('\0') != StringSlice::npos) {
         throw Exception("Tried to create CString from string with embedded NUL");
     }
     _bytes.append(utf8::encode(string));
