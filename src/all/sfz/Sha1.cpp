@@ -39,7 +39,7 @@ void Sha1::reset() {
     _intermediate.digest[4] = 0xc3d2e1f0;
 }
 
-void Sha1::append(const BytesPiece& input) {
+void Sha1::push(const BytesPiece& input) {
     if (input.empty()) {
         return;
     }
@@ -57,9 +57,9 @@ void Sha1::append(const BytesPiece& input) {
     _size += 8 * input.size();
 }
 
-void Sha1::append(size_t num, uint8_t byte) {
+void Sha1::push(size_t num, uint8_t byte) {
     Bytes bytes(num, byte);
-    append(bytes);
+    push(bytes);
 }
 
 Sha1::Digest Sha1::digest() const {
@@ -154,7 +154,7 @@ void print_to(PrintTarget out, const Sha1::Digest& digest) {
 Sha1::Digest file_digest(const StringPiece& path) {
     MappedFile file(path);
     Sha1 sha;
-    sha.append(file.data());
+    sha.push(file.data());
     return sha.digest();
 }
 
@@ -169,11 +169,11 @@ Sha1::Digest tree_digest(const StringPiece& path) {
         void file(const StringPiece& path, const Stat&) {
             Bytes path_bytes(utf8::encode(path.substr(prefix_size)));
             write<uint64_t>(&sha, path_bytes.size());
-            sha.append(path_bytes);
+            sha.push(path_bytes);
 
             MappedFile file(path);
             write<uint64_t>(&sha, file.data().size());
-            sha.append(file.data());
+            sha.push(file.data());
         }
 
         // Ignore empty directories.  Directories which are not empty will be included in the

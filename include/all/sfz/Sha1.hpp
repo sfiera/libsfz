@@ -41,8 +41,8 @@ class Sha1 {
     // Adds data in `input` to the current content.  It is more efficient, though semantically
     // identical, to add data in larger chunks.
     // @param [in] input    The data to add to the digest.
-    void append(const BytesPiece& input);
-    void append(size_t num, uint8_t byte);
+    void push(const BytesPiece& input);
+    void push(size_t num, uint8_t byte);
 
     // Returns a digest computed from the current content.  This method does non-trivial work, so
     // if the digest is to be used multiple times, it should be called once, and the retrieved

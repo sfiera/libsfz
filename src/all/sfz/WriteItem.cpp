@@ -15,14 +15,14 @@ namespace sfz {
 namespace {
 
 inline void write_bytes_to(const void* target, WriteTarget out, size_t count) {
-    out.append(BytesPiece(reinterpret_cast<const uint8_t*>(target), count));
+    out.push(BytesPiece(reinterpret_cast<const uint8_t*>(target), count));
 }
 
 template <typename T>
 inline void write_integers_to(const void* target, WriteTarget out, size_t count) {
     foreach (i, range(count)) {
         NetworkBytes<T> bytes(reinterpret_cast<const T*>(target)[i]);
-        out.append(BytesPiece(bytes.data(), bytes.size()));
+        out.push(BytesPiece(bytes.data(), bytes.size()));
     }
 }
 
@@ -32,9 +32,9 @@ template <>
 void WriteItem::Dispatch<bool>::write_to(const void* target, WriteTarget out, size_t count) {
     foreach (i, range(count)) {
         if (reinterpret_cast<const bool*>(target)[i]) {
-            out.append(1, 0x01);
+            out.push(1, 0x01);
         } else {
-            out.append(1, 0x00);
+            out.push(1, 0x00);
         }
     }
 }

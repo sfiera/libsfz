@@ -42,9 +42,9 @@ namespace ascii {
 void Ascii::encode_to(WriteTarget out, const StringPiece& string) {
     foreach (it, string) {
         if (*it > 0x7f) {
-            out.append(1, kAsciiUnknownCodePoint);
+            out.push(1, kAsciiUnknownCodePoint);
         } else {
-            out.append(1, *it);
+            out.push(1, *it);
         }
     }
 }
@@ -53,9 +53,9 @@ void Ascii::decode_to(PrintTarget out, const BytesPiece& bytes) {
     foreach (it, bytes) {
         uint8_t c = *it;
         if (c & 0x80) {
-            out.append(1, kUnknownCodePoint);
+            out.push(1, kUnknownCodePoint);
         } else {
-            out.append(1, c);
+            out.push(1, c);
         }
     }
 }
@@ -67,16 +67,16 @@ namespace latin1 {
 void Latin1::encode_to(WriteTarget out, const StringPiece& string) {
     foreach (it, string) {
         if (*it > 0xff) {
-            out.append(1, kAsciiUnknownCodePoint);
+            out.push(1, kAsciiUnknownCodePoint);
         } else {
-            out.append(1, *it);
+            out.push(1, *it);
         }
     }
 }
 
 void Latin1::decode_to(PrintTarget out, const BytesPiece& bytes) {
     foreach (it, bytes) {
-        out.append(1, *it);
+        out.push(1, *it);
     }
 }
 
@@ -124,19 +124,19 @@ void Utf8::encode_to(WriteTarget out, const StringPiece& string) {
     foreach (it, string) {
         const Rune rune = *it;
         if (rune < kUtf8Max[0]) {
-            out.append(1, rune);
+            out.push(1, rune);
         } else if (rune < kUtf8Max[1]) {
-            out.append(1, left(2, 0xff) | (rune >> 6));
-            out.append(1, left(1, 0xff) | right(6, rune >> 0));
+            out.push(1, left(2, 0xff) | (rune >> 6));
+            out.push(1, left(1, 0xff) | right(6, rune >> 0));
         } else if (rune < kUtf8Max[2]) {
-            out.append(1, left(3, 0xff) | (rune >> 12));
-            out.append(1, left(1, 0xff) | right(6, rune >> 6));
-            out.append(1, left(1, 0xff) | right(6, rune >> 0));
+            out.push(1, left(3, 0xff) | (rune >> 12));
+            out.push(1, left(1, 0xff) | right(6, rune >> 6));
+            out.push(1, left(1, 0xff) | right(6, rune >> 0));
         } else {
-            out.append(1, left(4, 0xff) | (rune >> 18));
-            out.append(1, left(1, 0xff) | right(6, rune >> 12));
-            out.append(1, left(1, 0xff) | right(6, rune >> 6));
-            out.append(1, left(1, 0xff) | right(6, rune >> 0));
+            out.push(1, left(4, 0xff) | (rune >> 18));
+            out.push(1, left(1, 0xff) | right(6, rune >> 12));
+            out.push(1, left(1, 0xff) | right(6, rune >> 6));
+            out.push(1, left(1, 0xff) | right(6, rune >> 0));
         }
     }
 }
@@ -154,20 +154,20 @@ void Utf8::decode_to(PrintTarget out, const BytesPiece& bytes) {
                 ++multibytes_seen;
                 if (multibytes_expected == 0) {
                     if (is_valid_code_point(rune) && (rune >= kUtf8Max[multibytes_seen - 2])) {
-                        out.append(1, rune);
+                        out.push(1, rune);
                     } else {
-                        out.append(multibytes_seen, kUnknownCodePoint);
+                        out.push(multibytes_seen, kUnknownCodePoint);
                     }
                 }
                 goto next_byte;
             } else {
                 multibytes_expected = 0;
-                out.append(multibytes_seen, kUnknownCodePoint);
+                out.push(multibytes_seen, kUnknownCodePoint);
             }
         }
 
         if (is_ascii(*it)) {
-            out.append(1, *it);
+            out.push(1, *it);
             goto next_byte;
         }
         for (int count = 2; count <= 4; ++count) {
@@ -178,13 +178,13 @@ void Utf8::decode_to(PrintTarget out, const BytesPiece& bytes) {
                 goto next_byte;
             }
         }
-        out.append(1, kUnknownCodePoint);
+        out.push(1, kUnknownCodePoint);
 next_byte:
         continue;
     }
 
     if (multibytes_expected) {
-        out.append(multibytes_seen, kUnknownCodePoint);
+        out.push(multibytes_seen, kUnknownCodePoint);
     }
 }
 
@@ -330,15 +330,15 @@ uint16_t kMacRomanSupplement[0x80] = {
 void MacRoman::encode_to(WriteTarget out, const StringPiece& string) {
     foreach (it, string) {
         if (*it <= 0x7f) {
-            out.append(1, *it);
+            out.push(1, *it);
         } else {
             foreach (jt, array_range(kMacRomanSupplement)) {
                 if (*it == *jt) {
-                    out.append(1, jt - kMacRomanSupplement + 0x80);
+                    out.push(1, jt - kMacRomanSupplement + 0x80);
                     goto next_rune;
                 }
             }
-            out.append(1, kAsciiUnknownCodePoint);
+            out.push(1, kAsciiUnknownCodePoint);
         }
 next_rune:
         continue;
@@ -348,9 +348,9 @@ next_rune:
 void MacRoman::decode_to(PrintTarget out, const BytesPiece& bytes) {
     foreach (it, bytes) {
         if (*it < 0x80) {
-            out.append(1, *it);
+            out.push(1, *it);
         } else {
-            out.append(1, kMacRomanSupplement[*it - 0x80]);
+            out.push(1, kMacRomanSupplement[*it - 0x80]);
         }
     }
 }

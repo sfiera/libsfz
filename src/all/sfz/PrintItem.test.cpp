@@ -36,18 +36,18 @@ struct Mapping {
 
 void print_to(sfz::PrintTarget out, Grapheme grapheme) {
     switch (grapheme) {
-      case AESC: out.append("AESC"); break;
-      case ETH: out.append("ETH"); break;
-      case THORN: out.append("THORN"); break;
-      case WYNN: out.append("WYNN"); break;
-      case YOGH: out.append("YOGH"); break;
-      default: out.append("UNKNOWN"); break;
+      case AESC: out.push("AESC"); break;
+      case ETH: out.push("ETH"); break;
+      case THORN: out.push("THORN"); break;
+      case WYNN: out.push("WYNN"); break;
+      case YOGH: out.push("YOGH"); break;
+      default: out.push("UNKNOWN"); break;
     }
 }
 
 void print_to(sfz::PrintTarget out, const Mapping& mapping) {
     print_to(out, mapping.grapheme);
-    out.append(" U+");
+    out.push(" U+");
     sfz::PrintItem(sfz::hex(mapping.code_point, 4)).print_to(out);
 }
 

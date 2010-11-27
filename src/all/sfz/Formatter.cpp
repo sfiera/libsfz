@@ -27,10 +27,10 @@ void print_to(PrintTarget out, const FormattedInt& value) {
     }
 
     if (value.value.negative()) {
-        out.append(1, '-');
+        out.push(1, '-');
     }
     if (size < value.min_width) {
-        out.append(value.min_width - size, '0');
+        out.push(value.min_width - size, '0');
     }
     print(out, ascii::decode(BytesPiece(data, size)));
 }
@@ -56,21 +56,21 @@ void print_to(PrintTarget out, const EscapedString& value) {
     foreach (it, value.string) {
         Rune rune = *it;
         if (rune < ' ') {
-            out.append(kEscaped[rune]);
+            out.push(kEscaped[rune]);
         } else if (rune == '\'' || rune == '\"' || rune == '\\') {
-            out.append(1, '\\');
-            out.append(1, rune);
+            out.push(1, '\\');
+            out.push(1, rune);
         } else {
-            out.append(1, rune);
+            out.push(1, rune);
         }
     }
 }
 
 void print_to(PrintTarget out, const QuotedString& value) {
-    out.append(1, '"');
+    out.push(1, '"');
     EscapedString item = { value.string };
     print_to(out, item);
-    out.append(1, '"');
+    out.push(1, '"');
 }
 
 }  // namespace sfz

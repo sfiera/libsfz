@@ -55,7 +55,7 @@ TEST_F(Sha1Test, Short) {
 // input size to the end.
 TEST_F(Sha1Test, ForceSecondBlock) {
     Sha1 sha;
-    sha.append("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+    write(&sha, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     const Sha1::Digest expected = { 0x84983e44, 0x1c3bd26e, 0xbaae4aa1, 0xf95129e5, 0xe54670f1 };
     EXPECT_THAT(sha.digest(), Eq(expected));
 }
@@ -70,7 +70,7 @@ TEST_F(Sha1Test, Long) {
 
     Sha1 sha;
     foreach (i, range(1000)) {
-        sha.append(input);
+        write(&sha, input);
     }
 
     const Sha1::Digest expected = { 0x2287c79b, 0xe65d2e85, 0x104e4c8e, 0xa704680a, 0x6ba68a75 };

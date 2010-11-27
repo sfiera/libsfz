@@ -44,7 +44,7 @@ class String {
     // Initializes the String to the empty string.
     String();
 
-    // Copies the content of another String or StringPiece.
+    // Copies the content of another String.
     //
     // The content of `string` either is used to initialize the String, is appended to the String,
     // or replaces the current content of the String, depending on the method which is used.  The
@@ -52,22 +52,6 @@ class String {
     //
     // @param [in] string   The string to copy.
     explicit String(const String& string);
-    explicit String(const StringPiece& string);
-    void append(const String& string);
-    void append(const StringPiece& string);
-    void assign(const String& string);
-    void assign(const StringPiece& string);
-
-    // Copies the content of an ASCII-encoded, NUL-terminated byte sequence.
-    //
-    // The decoded content of `data` either is used to initialize the String, is appended to the
-    // String, or replaces the current content of the String, depending on the method which is
-    // used.
-    //
-    // @param [in] data     A NUL-terminated byte sequence with ASCII-encoded code points.
-    explicit String(const char* data);
-    void append(const char* data);
-    void assign(const char* data);
 
     // Copies the content of a printable object.
     //
@@ -90,6 +74,9 @@ class String {
     String(size_t num, Rune rune);
     void append(size_t num, Rune rune);
     void assign(size_t num, Rune rune);
+
+    void push(const StringPiece& string);
+    void push(size_t num, Rune rune);
 
     // Destroys the String.
     ~String();
@@ -276,8 +263,8 @@ class StringPiece {
     // ALLOW_COPY_AND_ASSIGN
 };
 
-inline void print_to(PrintTarget out, const String& s) { out.append(s); }
-inline void print_to(PrintTarget out, const StringPiece& s) { out.append(s); }
+inline void print_to(PrintTarget out, const String& s) { out.push(s); }
+inline void print_to(PrintTarget out, const StringPiece& s) { out.push(s); }
 
 void swap(String& x, String& y);
 void swap(StringPiece& x, StringPiece& y);

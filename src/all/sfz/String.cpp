@@ -37,47 +37,7 @@ String::String() {
 
 String::String(const String& string) {
     initialize(string._capacity);
-    append(StringPiece(string));
-}
-
-String::String(const StringPiece& string) {
-    initialize(string._size);
-    append(string);
-}
-
-void String::append(const String& string) {
-    append(StringPiece(string));
-}
-
-void String::append(const StringPiece& string) {
-    reserve(_size + string._size);
-    foreach (it, string) {
-        append(1, *it);
-    }
-}
-
-void String::assign(const String& string) {
-    clear();
-    append(StringPiece(string));
-}
-
-void String::assign(const StringPiece& string) {
-    clear();
-    append(string);
-}
-
-String::String(const char* string) {
-    initialize(0);
-    append(StringPiece(string));
-}
-
-void String::append(const char* string) {
-    append(StringPiece(string));
-}
-
-void String::assign(const char* string) {
-    clear();
-    append(StringPiece(string));
+    append(PrintItem(string));
 }
 
 String::String(const PrintItem& item) {
@@ -109,6 +69,20 @@ void String::append(size_t num, Rune rune) {
 void String::assign(size_t num, Rune rune) {
     clear();
     append(num, rune);
+}
+
+void String::push(const StringPiece& string) {
+    reserve(_size + string._size);
+    foreach (it, string) {
+        append(1, *it);
+    }
+}
+
+void String::push(size_t num, Rune rune) {
+    if (!is_valid_code_point(rune)) {
+        throw Exception(format("invalid code point {0}", rune));
+    }
+    resize(_size + num, rune);
 }
 
 String::~String() { }

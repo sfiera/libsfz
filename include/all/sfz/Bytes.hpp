@@ -35,10 +35,8 @@ class Bytes {
 
     Bytes();
     explicit Bytes(const Bytes& bytes);
-    explicit Bytes(const BytesPiece& bytes);
-    explicit Bytes(const char* data);
-    Bytes(const uint8_t* data, size_t size);
     explicit Bytes(WriteItem item);
+    Bytes(const uint8_t* data, size_t size);
     Bytes(size_t num, uint8_t byte);
     ~Bytes();
 
@@ -46,18 +44,15 @@ class Bytes {
     uint8_t* mutable_data() const;
     size_t size() const;
 
-    void append(const Bytes& bytes);
-    void append(const BytesPiece& bytes);
-    void append(const char* data);
-    void append(const uint8_t* data, size_t size);
+    void push(const BytesPiece& bytes);
+    void push(size_t num, uint8_t byte);
+
     void append(WriteItem item);
+    void append(const uint8_t* data, size_t size);
     void append(size_t num, uint8_t byte);
 
-    void assign(const Bytes& bytes);
-    void assign(const BytesPiece& bytes);
-    void assign(const char* data);
-    void assign(const uint8_t* data, size_t size);
     void assign(WriteItem item);
+    void assign(const uint8_t* data, size_t size);
     void assign(size_t num, uint8_t byte);
 
     uint8_t at(size_t loc) const;
@@ -157,8 +152,8 @@ class BytesPiece {
     // ALLOW_COPY_AND_ASSIGN
 };
 
-inline void write_to(WriteTarget out, const Bytes& bytes) { out.append(bytes); }
-inline void write_to(WriteTarget out, const BytesPiece& bytes) { out.append(bytes); }
+inline void write_to(WriteTarget out, const Bytes& bytes) { out.push(bytes); }
+inline void write_to(WriteTarget out, const BytesPiece& bytes) { out.push(bytes); }
 
 void swap(Bytes& x, Bytes& y);
 void swap(BytesPiece& x, BytesPiece& y);

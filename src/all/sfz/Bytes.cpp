@@ -37,18 +37,11 @@ Bytes::Bytes(const Bytes& bytes)
     memcpy(_data.get(), bytes._data.get(), _size);
 }
 
-Bytes::Bytes(const BytesPiece& bytes)
-    : _data(new uint8_t[max(bytes.size(), kDefaultBytesSize)]),
-      _size(bytes.size()),
-      _capacity(max(bytes.size(), kDefaultBytesSize)) {
-    memcpy(_data.get(), bytes.data(), _size);
-}
-
-Bytes::Bytes(const char* data)
-    : _data(new uint8_t[max(strlen(data), kDefaultBytesSize)]),
-      _size(strlen(data)),
-      _capacity(max(strlen(data), kDefaultBytesSize)) {
-    memcpy(_data.get(), data, _size);
+Bytes::Bytes(WriteItem item)
+    : _data(new uint8_t[kDefaultBytesSize]),
+      _size(0),
+      _capacity(kDefaultBytesSize) {
+    item.write_to(this);
 }
 
 Bytes::Bytes(const uint8_t* data, size_t size)
@@ -56,13 +49,6 @@ Bytes::Bytes(const uint8_t* data, size_t size)
       _size(size),
       _capacity(max(size, kDefaultBytesSize)) {
     memcpy(_data.get(), data, size);
-}
-
-Bytes::Bytes(WriteItem item)
-    : _data(new uint8_t[kDefaultBytesSize]),
-      _size(0),
-      _capacity(kDefaultBytesSize) {
-    item.write_to(this);
 }
 
 Bytes::Bytes(size_t num, uint8_t byte)
@@ -86,16 +72,16 @@ size_t Bytes::size() const {
     return _size;
 }
 
-void Bytes::append(const Bytes& bytes) {
+void Bytes::push(const BytesPiece& bytes) {
     append(bytes.data(), bytes.size());
 }
 
-void Bytes::append(const BytesPiece& bytes) {
-    append(bytes.data(), bytes.size());
+void Bytes::push(size_t num, uint8_t byte) {
+    append(num, byte);
 }
 
-void Bytes::append(const char* data) {
-    append(reinterpret_cast<const uint8_t*>(data), strlen(data));
+void Bytes::append(WriteItem item) {
+    item.write_to(this);
 }
 
 void Bytes::append(const uint8_t* data, size_t size) {
@@ -104,37 +90,21 @@ void Bytes::append(const uint8_t* data, size_t size) {
     _size += size;
 }
 
-void Bytes::append(WriteItem item) {
-    item.write_to(this);
-}
-
 void Bytes::append(size_t num, uint8_t byte) {
     reserve(num + _size);
     memset(_data.get() + _size, byte, num);
     _size += num;
 }
 
-void Bytes::assign(const Bytes& bytes) {
-    assign(bytes.data(), bytes.size());
-}
-
-void Bytes::assign(const BytesPiece& bytes) {
-    assign(bytes.data(), bytes.size());
-}
-
-void Bytes::assign(const char* data) {
-    assign(reinterpret_cast<const uint8_t*>(data), strlen(data));
+void Bytes::assign(WriteItem item) {
+    clear();
+    item.write_to(this);
 }
 
 void Bytes::assign(const uint8_t* data, size_t size) {
     reserve(size);
     memcpy(_data.get(), data, size);
     _size = size;
-}
-
-void Bytes::assign(WriteItem item) {
-    clear();
-    item.write_to(this);
 }
 
 void Bytes::assign(size_t num, uint8_t byte) {

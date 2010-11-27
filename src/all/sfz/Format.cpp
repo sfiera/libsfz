@@ -45,14 +45,14 @@ void print_format_to(
             span = f;
             remainder = StringPiece();
         }
-        out.append(span);
+        out.push(span);
         f = remainder;
         if (f.size() > 0) {
             if (f.at(0) == f.at(1)) {
-                out.append(1, f.at(0));
+                out.push(1, f.at(0));
                 f = f.substr(2);
             } else if (f.at(0) == '}') {
-                out.append(1, '}');
+                out.push(1, '}');
                 f = f.substr(1);
             } else {
                 f = f.substr(1);

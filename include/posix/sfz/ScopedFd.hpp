@@ -19,8 +19,8 @@ class ScopedFd {
     int get();
     int release();
 
-    void append(const BytesPiece& bytes);
-    void append(size_t num, uint8_t byte);
+    void push(const BytesPiece& bytes);
+    void push(size_t num, uint8_t byte);
 
   private:
     int _fd;

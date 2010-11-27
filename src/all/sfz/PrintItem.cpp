@@ -16,15 +16,15 @@ void PrintItem::Dispatch<void>::print_to(const void* target, PrintTarget out) {
 template <>
 void PrintItem::Dispatch<bool>::print_to(const void* target, PrintTarget out) {
     if (*reinterpret_cast<const bool*>(target)) {
-        out.append("true");
+        out.push("true");
     } else {
-        out.append("false");
+        out.push("false");
     }
 }
 
 template <>
 void PrintItem::Dispatch<char>::print_to(const void* target, PrintTarget out) {
-    out.append(1, *reinterpret_cast<const char*>(target));
+    out.push(1, *reinterpret_cast<const char*>(target));
 }
 
 template <>
@@ -94,7 +94,7 @@ void PrintItem::Dispatch<float>::print_to(const void* target, PrintTarget out) {
     if (asprintf(&string, "%f", value) < 0) {
         fprintf(stderr, "asprintf failed");
     } else {
-        out.append(string);
+        out.push(string);
         free(string);
     }
 }
@@ -106,19 +106,19 @@ void PrintItem::Dispatch<double>::print_to(const void* target, PrintTarget out) 
     if (asprintf(&string, "%lf", value) < 0) {
         fprintf(stderr, "asprintf failed");
     } else {
-        out.append(string);
+        out.push(string);
         free(string);
     }
 }
 
 template <>
 void PrintItem::Dispatch<const char*>::print_to(const void* target, PrintTarget out) {
-    out.append(*reinterpret_cast<const char* const*>(target));
+    out.push(*reinterpret_cast<const char* const*>(target));
 }
 
 template <>
 void PrintItem::Dispatch<const char[]>::print_to(const void* target, PrintTarget out) {
-    out.append(reinterpret_cast<const char*>(target));
+    out.push(reinterpret_cast<const char*>(target));
 }
 
 template <>

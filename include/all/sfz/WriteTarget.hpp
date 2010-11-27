@@ -18,13 +18,13 @@ class WriteTarget {
   public:
     template <typename T> WriteTarget(T* target);
 
-    inline void append(const BytesPiece& bytes);
-    inline void append(size_t num, uint8_t byte);
+    inline void push(const BytesPiece& bytes);
+    inline void push(size_t num, uint8_t byte);
 
   private:
     struct DispatchTable {
-        void (*append_bytes)(void* target, const BytesPiece& bytes);
-        void (*append_repeated_bytes)(void* target, size_t num, uint8_t byte);
+        void (*push_bytes)(void* target, const BytesPiece& bytes);
+        void (*push_repeated_bytes)(void* target, size_t num, uint8_t byte);
     };
 
     template <typename T> struct Dispatch;
@@ -37,19 +37,19 @@ class WriteTarget {
 
 template <typename T>
 struct WriteTarget::Dispatch {
-    static void append_bytes(void* target, const BytesPiece& bytes) {
-        reinterpret_cast<T*>(target)->append(bytes);
+    static void push_bytes(void* target, const BytesPiece& bytes) {
+        reinterpret_cast<T*>(target)->push(bytes);
     }
-    static void append_repeated_bytes(void* target, size_t num, uint8_t byte) {
-        reinterpret_cast<T*>(target)->append(num, byte);
+    static void push_repeated_bytes(void* target, size_t num, uint8_t byte) {
+        reinterpret_cast<T*>(target)->push(num, byte);
     }
     static const DispatchTable table;
 };
 
 template <typename T>
 const WriteTarget::DispatchTable WriteTarget::Dispatch<T>::table = {
-    append_bytes,
-    append_repeated_bytes,
+    push_bytes,
+    push_repeated_bytes,
 };
 
 template <typename T>
@@ -57,12 +57,12 @@ WriteTarget::WriteTarget(T* t)
     : _target(t),
       _dispatch_table(&Dispatch<T>::table) { }
 
-inline void WriteTarget::append(const BytesPiece& bytes) {
-    _dispatch_table->append_bytes(_target, bytes);
+inline void WriteTarget::push(const BytesPiece& bytes) {
+    _dispatch_table->push_bytes(_target, bytes);
 }
 
-inline void WriteTarget::append(size_t num, uint8_t byte) {
-    _dispatch_table->append_repeated_bytes(_target, num, byte);
+inline void WriteTarget::push(size_t num, uint8_t byte) {
+    _dispatch_table->push_repeated_bytes(_target, num, byte);
 }
 
 }  // namespace sfz

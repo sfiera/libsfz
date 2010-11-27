@@ -31,7 +31,7 @@ int ScopedFd::release() {
     return fd;
 }
 
-void ScopedFd::append(const BytesPiece& bytes) {
+void ScopedFd::push(const BytesPiece& bytes) {
     BytesPiece remainder(bytes);
     while (!remainder.empty()) {
         ssize_t written = ::write(_fd, remainder.data(), remainder.size());
@@ -45,9 +45,9 @@ void ScopedFd::append(const BytesPiece& bytes) {
     }
 }
 
-void ScopedFd::append(size_t num, uint8_t byte) {
+void ScopedFd::push(size_t num, uint8_t byte) {
     foreach (it, range(num)) {
-        append(BytesPiece(&byte, 1));
+        push(BytesPiece(&byte, 1));
     }
 }
 
