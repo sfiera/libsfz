@@ -22,8 +22,8 @@ const size_t kDefaultBytesSize = 16;
 
 }  // namespace
 
-const size_t Bytes::npos = -1;
-const size_t BytesSlice::npos = -1;
+const size_t Bytes::npos;
+const size_t BytesSlice::npos;
 
 Bytes::Bytes()
     : _data(new uint8_t[kDefaultBytesSize]),

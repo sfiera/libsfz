@@ -26,8 +26,8 @@ const size_t kDefaultStringSize = 16;
 
 }  // namespace
 
-const size_t String::npos = -1;
-const size_t StringSlice::npos = -1;
+const size_t String::npos;
+const size_t StringSlice::npos;
 
 // String implementation.
 

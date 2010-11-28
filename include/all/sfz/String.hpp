@@ -28,18 +28,21 @@ class StringSlice;
 class String {
   public:
     // STL container types and constants.
-    typedef uint32_t value_type;
-    typedef uint32_t* pointer;
-    typedef uint32_t& reference;
-    typedef const uint32_t& const_reference;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
-    static const size_type npos;
+    typedef Rune                                    value_type;
+    typedef Rune*                                   pointer;
+    typedef const Rune*                             const_pointer;
+    typedef Rune&                                   reference;
+    typedef const Rune&                             const_reference;
 
-    typedef uint32_t* iterator;
-    typedef const uint32_t* const_iterator;
-    typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef size_t                                  size_type;
+    typedef ptrdiff_t                               difference_type;
+
+    typedef pointer                                 iterator;
+    typedef const_pointer                           const_iterator;
+    typedef std::reverse_iterator<iterator>         reverse_iterator;
+    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+
+    static const size_type npos = -1;
 
     // Initializes the String to the empty string.
     String();
@@ -146,18 +149,21 @@ class String {
 class StringSlice {
   public:
     // STL container types and constants.
-    typedef uint32_t value_type;
-    typedef uint32_t* pointer;
-    typedef uint32_t& reference;
-    typedef const uint32_t& const_reference;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
-    static const size_type npos;
+    typedef Rune                                    value_type;
+    typedef Rune*                                   pointer;
+    typedef const Rune*                             const_pointer;
+    typedef Rune&                                   reference;
+    typedef const Rune&                             const_reference;
+
+    typedef size_t                                  size_type;
+    typedef ptrdiff_t                               difference_type;
 
     class iterator;
-    typedef iterator const_iterator;
-    typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef iterator                                const_iterator;
+    typedef std::reverse_iterator<iterator>         reverse_iterator;
+    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+
+    static const size_type npos = -1;
 
     // Initializes the StringSlice to the empty string.
     StringSlice();
