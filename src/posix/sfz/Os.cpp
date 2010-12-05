@@ -150,7 +150,7 @@ void rmtree(const StringSlice& path) {
 TemporaryDirectory::TemporaryDirectory(const StringSlice& prefix) {
     String str(format("/tmp/{0}XXXXXX", prefix));
     CString c_str(str);
-    mkdtemp(c_str.mutable_data());
+    mkdtemp(c_str.data());
     _path.assign(utf8::decode(c_str.data()));
 }
 
@@ -181,7 +181,7 @@ int compare_ftsent(const FTSENT** lhs, const FTSENT** rhs) {
 
 void walk(const StringSlice& root, WalkType type, TreeWalker* visitor) {
     CString c_str(root);
-    char* const pathv[] = { c_str.mutable_data(), NULL };
+    char* const pathv[] = { c_str.data(), NULL };
     int options = FTS_NOCHDIR;
     if (type == WALK_PHYSICAL) {
         options |= FTS_PHYSICAL;

@@ -61,11 +61,11 @@ Bytes::Bytes(size_t num, uint8_t byte)
 
 Bytes::~Bytes() { }
 
-const uint8_t* Bytes::data() const {
+uint8_t* Bytes::data() {
     return _data.get();
 }
 
-uint8_t* Bytes::mutable_data() const {
+const uint8_t* Bytes::data() const {
     return _data.get();
 }
 

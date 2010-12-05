@@ -22,7 +22,7 @@ template <typename T>
 inline void read_integers_from(void* target, ReadSource in, size_t count) {
     foreach (i, range(count)) {
         NetworkBytes<T> bytes;
-        in.shift(bytes.mutable_data(), bytes.size());
+        in.shift(bytes.data(), bytes.size());
         reinterpret_cast<T*>(target)[i] = bytes.value();
     }
 }

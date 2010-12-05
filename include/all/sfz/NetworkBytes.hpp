@@ -24,8 +24,8 @@ class NetworkBytes {
     explicit NetworkBytes(T t);
 
     size_t size() const;
+    uint8_t* data();
     const uint8_t* data() const;
-    uint8_t* mutable_data();
 
     T value() const;
     void set_value(T t);

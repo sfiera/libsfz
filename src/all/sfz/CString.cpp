@@ -18,12 +18,12 @@ CString::CString(const StringSlice& string) {
     _bytes.append(1, '\0');
 }
 
-const char* CString::data() const {
-    return reinterpret_cast<const char*>(_bytes.data());
+char* CString::data() {
+    return reinterpret_cast<char*>(_bytes.data());
 }
 
-char* CString::mutable_data() {
-    return const_cast<char*>(data());
+const char* CString::data() const {
+    return reinterpret_cast<const char*>(_bytes.data());
 }
 
 size_t CString::size() const {

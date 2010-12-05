@@ -43,8 +43,8 @@ class Bytes {
     Bytes(size_t num, uint8_t byte);
     ~Bytes();
 
+    uint8_t* data();
     const uint8_t* data() const;
-    uint8_t* mutable_data() const;
     size_t size() const;
 
     void push(const BytesSlice& bytes);

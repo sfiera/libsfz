@@ -59,12 +59,12 @@ size_t NetworkBytes<T>::size() const {
 }
 
 template <typename T>
-const uint8_t* NetworkBytes<T>::data() const {
+uint8_t* NetworkBytes<T>::data() {
     return _data;
 }
 
 template <typename T>
-uint8_t* NetworkBytes<T>::mutable_data() {
+const uint8_t* NetworkBytes<T>::data() const {
     return _data;
 }
 
