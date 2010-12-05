@@ -276,7 +276,7 @@ const Sha1::Digest kTreeDigest = { 0x9ff59f85, 0x3ca5ef83, 0x62cf1fcd, 0x3f29371
 TEST_F(Sha1Test, TreeDigest) {
     TemporaryDirectory dir("sha1-test");
 
-    foreach (it, array_range(kTreeData)) {
+    foreach (it, kTreeData) {
         String path(format("{0}/{1}", dir.path(), utf8::decode(it->path)));
         String data(utf8::decode(it->data));
 

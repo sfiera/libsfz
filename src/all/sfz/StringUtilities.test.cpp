@@ -33,7 +33,7 @@ class StringUtilitiesTest : public Test {
   protected:
     template <typename T, int size>
     void Run(const TestData<T> (&inputs)[size]) {
-        foreach (it, array_range(inputs)) {
+        foreach (it, inputs) {
             T actual;
             if (it->good) {
                 EXPECT_THAT(string_to_int(it->string, &actual), Eq(true))

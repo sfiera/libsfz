@@ -332,7 +332,7 @@ void MacRoman::encode_to(WriteTarget out, const StringSlice& string) {
         if (*it <= 0x7f) {
             out.push(1, *it);
         } else {
-            foreach (jt, array_range(kMacRomanSupplement)) {
+            foreach (jt, kMacRomanSupplement) {
                 if (*it == *jt) {
                     out.push(1, jt - kMacRomanSupplement + 0x80);
                     goto next_rune;

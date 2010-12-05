@@ -345,7 +345,7 @@ TEST_F(Utf8EncodingTest, DecodeInvalid) {
         "\367\277\277\277",  // => 0x1fffff
     };
 
-    foreach (it, array_range(kInvalid)) {
+    foreach (it, kInvalid) {
         BytesSlice bytes(*it);
         String string(utf8::decode(bytes));
         ASSERT_THAT(string.size(), Eq(bytes.size()));

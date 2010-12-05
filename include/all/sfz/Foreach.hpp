@@ -18,7 +18,31 @@
 #define foreach(VAR, CONTAINER) \
     for (bool __loop = true; __loop; ) \
     for (const SFZ_DECLTYPE(CONTAINER)& __container = (CONTAINER); __loop; __loop = false) \
-    for (SFZ_DECLTYPE(__container.begin()) VAR = __container.begin(), __end = __container.end(); \
-            VAR != __end; ++VAR)
+    for (SFZ_DECLTYPE(::sfz::begin(__container)) VAR = ::sfz::begin(__container), \
+            __end = ::sfz::end(__container); VAR != __end; ++VAR)
+
+namespace sfz {
+
+template <typename T>
+typename T::const_iterator begin(const T& container) {
+    return container.begin();
+}
+
+template <typename T, int size>
+const T* begin(const T (&array)[size]) {
+    return array;
+}
+
+template <typename T>
+typename T::const_iterator end(const T& container) {
+    return container.end();
+}
+
+template <typename T, int size>
+const T* end(const T (&array)[size]) {
+    return array + size;
+}
+
+}  // namespace sfz
 
 #endif  // SFZ_FOREACH_HPP_
