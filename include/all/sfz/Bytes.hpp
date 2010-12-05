@@ -59,7 +59,6 @@ class Bytes {
     void assign(size_t num, uint8_t byte);
 
     uint8_t at(size_t loc) const;
-    uint8_t front() const { return at(0); }
 
     size_type find(uint8_t byte) const;
     size_type find(const BytesSlice& bytes) const;
@@ -129,7 +128,6 @@ class BytesSlice {
     size_t size() const;
 
     uint8_t at(size_t loc) const;
-    uint8_t front() const { return at(0); }
 
     size_type find(uint8_t byte) const;
     size_type find(const BytesSlice& bytes) const;

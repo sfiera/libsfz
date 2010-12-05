@@ -16,14 +16,12 @@ class ReadSource {
     template <typename T> ReadSource(T* target);
 
     inline bool empty() const;
-    inline uint8_t front() const;
     inline void shift(size_t size);
     inline void shift(uint8_t* data, size_t size);
 
   private:
     struct DispatchTable {
         bool (*empty)(const void* target);
-        uint8_t (*front)(const void* target);
         void (*shift)(void* target, size_t size);
         void (*shift_data)(void* target, uint8_t* data, size_t size);
     };
@@ -41,9 +39,6 @@ struct ReadSource::Dispatch {
     static bool empty(const void* target) {
         return reinterpret_cast<const T*>(target)->empty();
     }
-    static uint8_t front(const void* target) {
-        return reinterpret_cast<const T*>(target)->front();
-    }
     static void shift(void* target, size_t size) {
         reinterpret_cast<T*>(target)->shift(size);
     }
@@ -56,7 +51,6 @@ struct ReadSource::Dispatch {
 template <typename T>
 const ReadSource::DispatchTable ReadSource::Dispatch<T>::table = {
     empty,
-    front,
     shift,
     shift_data,
 };
@@ -68,10 +62,6 @@ ReadSource::ReadSource(T* t)
 
 inline bool ReadSource::empty() const {
     return _dispatch_table->empty(_target);
-}
-
-inline uint8_t ReadSource::front() const {
-    return _dispatch_table->front(_target);
 }
 
 inline void ReadSource::shift(size_t size) {
