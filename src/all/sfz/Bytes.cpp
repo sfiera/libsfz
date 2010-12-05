@@ -115,23 +115,23 @@ void Bytes::assign(size_t num, uint8_t byte) {
 }
 
 uint8_t Bytes::at(size_t loc) const {
-    return BytesSlice(*this).at(loc);
+    return slice().at(loc);
 }
 
 size_t Bytes::find(uint8_t byte) const {
-    return BytesSlice(*this).find(byte);
+    return slice().find(byte);
 }
 
 size_t Bytes::find(const BytesSlice& bytes) const {
-    return BytesSlice(*this).find(bytes);
+    return slice().find(bytes);
 }
 
 size_t Bytes::rfind(uint8_t byte) const {
-    return BytesSlice(*this).rfind(byte);
+    return slice().rfind(byte);
 }
 
 size_t Bytes::rfind(const BytesSlice& bytes) const {
-    return BytesSlice(*this).rfind(bytes);
+    return slice().rfind(bytes);
 }
 
 void Bytes::clear() {
@@ -142,12 +142,16 @@ bool Bytes::empty() const {
     return _size == 0;
 }
 
+BytesSlice Bytes::slice() const {
+    return *this;
+}
+
 BytesSlice Bytes::slice(size_t index) const {
-    return BytesSlice(*this).slice(index);
+    return slice().slice(index);
 }
 
 BytesSlice Bytes::slice(size_t index, size_t size) const {
-    return BytesSlice(*this).slice(index, size);
+    return slice().slice(index, size);
 }
 
 void Bytes::replace(size_t index, size_t num, const BytesSlice& bytes) {
@@ -255,6 +259,10 @@ size_t BytesSlice::rfind(const BytesSlice& bytes) const {
 
 bool BytesSlice::empty() const {
     return _size == 0;
+}
+
+BytesSlice BytesSlice::slice() const {
+    return *this;
 }
 
 BytesSlice BytesSlice::slice(size_t index) const {

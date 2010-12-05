@@ -70,6 +70,7 @@ class Bytes {
 
     bool empty() const;
 
+    BytesSlice slice() const;
     BytesSlice slice(size_t index) const;
     BytesSlice slice(size_t index, size_t size) const;
 
@@ -137,6 +138,7 @@ class BytesSlice {
 
     bool empty() const;
 
+    BytesSlice slice() const;
     BytesSlice slice(size_t index) const;
     BytesSlice slice(size_t index, size_t size) const;
 

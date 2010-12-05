@@ -122,39 +122,43 @@ void String::replace(size_t index, size_t num, const StringSlice& string) {
 }
 
 size_t String::size() const {
-    return StringSlice(*this).size();
+    return slice().size();
 }
 
 Rune String::at(size_t loc) const {
-    return StringSlice(*this).at(loc);
+    return slice().at(loc);
 }
 
 bool String::empty() const {
-    return StringSlice(*this).empty();
+    return slice().empty();
 }
 
 size_t String::find(Rune rune, size_t index) const {
-    return StringSlice(*this).find(rune, index);
+    return slice().find(rune, index);
 }
 
 size_t String::find(const StringSlice& string, size_t index) const {
-    return StringSlice(*this).find(string, index);
+    return slice().find(string, index);
 }
 
 size_t String::rfind(Rune rune, size_t index) const {
-    return StringSlice(*this).rfind(rune, index);
+    return slice().rfind(rune, index);
 }
 
 size_t String::rfind(const StringSlice& string, size_t index) const {
-    return StringSlice(*this).rfind(string, index);
+    return slice().rfind(string, index);
+}
+
+StringSlice String::slice() const {
+    return *this;
 }
 
 StringSlice String::slice(size_t loc) const {
-    return StringSlice(*this).slice(loc);
+    return slice().slice(loc);
 }
 
 StringSlice String::slice(size_t loc, size_t size) const {
-    return StringSlice(*this).slice(loc, size);
+    return slice().slice(loc, size);
 }
 
 void String::initialize(size_t capacity) {
@@ -225,7 +229,7 @@ size_t StringSlice::find(const StringSlice& string, size_t index) const {
         return npos;
     }
     foreach (i, range(index, _size - string._size + 1)) {
-        if (StringSlice(*this).slice(i, string._size) == string) {
+        if (slice(i, string._size) == string) {
             return i;
         }
     }
@@ -255,11 +259,15 @@ size_t StringSlice::rfind(const StringSlice& string, size_t index) const {
         index = _size - string._size;
     }
     foreach (i, range(index - string._size + 1)) {
-        if (StringSlice(*this).slice(index - i, string._size) == string) {
+        if (slice(index - i, string._size) == string) {
             return index - i;
         }
     }
     return npos;
+}
+
+StringSlice StringSlice::slice() const {
+    return *this;
 }
 
 StringSlice StringSlice::slice(size_t loc) const {

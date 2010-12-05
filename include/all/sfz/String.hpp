@@ -111,6 +111,8 @@ class String {
     size_t find(const StringSlice& string, size_t index = 0) const;
     size_t rfind(Rune rune, size_t index = npos) const;
     size_t rfind(const StringSlice& string, size_t index = npos) const;
+
+    StringSlice slice() const;
     StringSlice slice(size_t loc) const;
     StringSlice slice(size_t loc, size_t size) const;
 
@@ -206,6 +208,7 @@ class StringSlice {
     // @returns             The slice starting at index `loc` and containing `size` code points. If
     //                      `size` is not provided, the returned slice extends to the end of the
     //                      source string.
+    StringSlice slice() const;
     StringSlice slice(size_t loc) const;
     StringSlice slice(size_t loc, size_t size) const;
 
