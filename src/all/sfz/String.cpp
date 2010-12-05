@@ -7,7 +7,7 @@
 
 #include <string.h>
 #include <algorithm>
-#include "sfz/Bytes.hpp"
+#include "sfz/Compare.hpp"
 #include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
@@ -365,10 +365,14 @@ void swap(StringSlice& x, StringSlice& y) {
 }
 
 int compare(const String& x, const String& y) {
+    using sfz::compare;
+
     return compare(StringSlice(x), StringSlice(y));
 }
 
 int compare(const StringSlice& x, const StringSlice& y) {
+    using sfz::compare;
+
     for (StringSlice::iterator xit = x.begin(), yit = y.begin(), xend = x.end(), yend = y.end();
             true; ++xit, ++yit) {
         if ((xit == xend) && (yit == yend)) {
@@ -377,28 +381,20 @@ int compare(const StringSlice& x, const StringSlice& y) {
             return -1;
         } else if (yit == yend) {
             return 1;
-        } else if (*xit < *yit) {
-            return -1;
-        } else if (*yit < *xit) {
-            return 1;
+        } else if (compare(*xit, *yit) != 0) {
+            return compare(*xit, *yit);
         }
     }
 }
 
 int compare(const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    return x._it - y._it;
+    using sfz::compare;
+
+    return sfz::compare(x._it, y._it);
 }
 
-#define DEFINE_OPERATORS(TYPE) \
-    bool operator==(const TYPE& x, const TYPE& y) { return compare(x, y) == 0; } \
-    bool operator!=(const TYPE& x, const TYPE& y) { return compare(x, y) != 0; } \
-    bool operator< (const TYPE& x, const TYPE& y) { return compare(x, y) <  0; } \
-    bool operator<=(const TYPE& x, const TYPE& y) { return compare(x, y) <= 0; } \
-    bool operator> (const TYPE& x, const TYPE& y) { return compare(x, y) >  0; } \
-    bool operator>=(const TYPE& x, const TYPE& y) { return compare(x, y) >= 0; }
-
-DEFINE_OPERATORS(String)
-DEFINE_OPERATORS(StringSlice)
-DEFINE_OPERATORS(StringSlice::iterator)
+SFZ_OPERATORS_BASED_ON_COMPARE(String)
+SFZ_OPERATORS_BASED_ON_COMPARE(StringSlice)
+SFZ_OPERATORS_BASED_ON_COMPARE(StringSlice::iterator)
 
 }  // namespace sfz

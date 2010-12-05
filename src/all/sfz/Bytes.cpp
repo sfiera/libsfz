@@ -6,6 +6,7 @@
 #include "sfz/Bytes.hpp"
 
 #include <algorithm>
+#include "sfz/Compare.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"
@@ -314,15 +315,7 @@ int compare(const BytesSlice& x, const BytesSlice& y) {
     }
 }
 
-#define DEFINE_OPERATORS(TYPE) \
-        bool operator==(const TYPE& x, const TYPE& y) { return compare(x, y) == 0; } \
-    bool operator!=(const TYPE& x, const TYPE& y) { return compare(x, y) != 0; } \
-    bool operator< (const TYPE& x, const TYPE& y) { return compare(x, y) <  0; } \
-    bool operator<=(const TYPE& x, const TYPE& y) { return compare(x, y) <= 0; } \
-    bool operator> (const TYPE& x, const TYPE& y) { return compare(x, y) >  0; } \
-    bool operator>=(const TYPE& x, const TYPE& y) { return compare(x, y) >= 0; }
-
-DEFINE_OPERATORS(Bytes)
-DEFINE_OPERATORS(BytesSlice)
+SFZ_OPERATORS_BASED_ON_COMPARE(Bytes)
+SFZ_OPERATORS_BASED_ON_COMPARE(BytesSlice)
 
 }  // namespace sfz
