@@ -73,8 +73,8 @@ void String::assign(size_t num, Rune rune) {
 
 void String::push(const StringSlice& string) {
     reserve(_size + string._size);
-    foreach (it, string) {
-        append(1, *it);
+    foreach (Rune r, string) {
+        append(1, r);
     }
 }
 
@@ -107,7 +107,7 @@ void String::reserve(size_t capacity) {
 void String::resize(size_t size, Rune rune) {
     if (size > _size) {
         reserve(size);
-        foreach (i, range(_size, size)) {
+        foreach (size_t i, range(_size, size)) {
             _data[i] = rune;
         }
     }
@@ -182,8 +182,8 @@ StringSlice::StringSlice(const String& string)
 
 StringSlice::StringSlice(const char* ascii_string) {
     BytesSlice bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
-    foreach (it, bytes) {
-        if ((*it) & 0x80) {
+    foreach (uint8_t byte, bytes) {
+        if (byte & 0x80) {
             throw Exception("string is not ASCII");
         }
     }
@@ -216,7 +216,7 @@ bool StringSlice::empty() const {
 }
 
 size_t StringSlice::find(Rune rune, size_t index) const {
-    foreach (i, range(index, _size)) {
+    foreach (size_t i, range(index, _size)) {
         if (at(i) == rune) {
             return i;
         }
@@ -228,7 +228,7 @@ size_t StringSlice::find(const StringSlice& string, size_t index) const {
     if (index + string._size > _size) {
         return npos;
     }
-    foreach (i, range(index, _size - string._size + 1)) {
+    foreach (size_t i, range(index, _size - string._size + 1)) {
         if (slice(i, string._size) == string) {
             return i;
         }
@@ -240,7 +240,7 @@ size_t StringSlice::rfind(Rune rune, size_t index) const {
     if (index == npos) {
         index = _size - 1;
     }
-    foreach (i, range(index + 1)) {
+    foreach (size_t i, range(index + 1)) {
         if (at(index - i) == rune) {
             return index - i;
         }
@@ -258,7 +258,7 @@ size_t StringSlice::rfind(const StringSlice& string, size_t index) const {
     if (index + string._size > _size) {
         index = _size - string._size;
     }
-    foreach (i, range(index - string._size + 1)) {
+    foreach (size_t i, range(index - string._size + 1)) {
         if (slice(index - i, string._size) == string) {
             return index - i;
         }

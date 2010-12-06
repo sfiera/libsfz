@@ -17,7 +17,7 @@ namespace {
 void span_complement(
         const StringSlice& input, const StringSlice& chars,
         StringSlice* span, StringSlice* remainder) {
-    foreach (i, range(input.size())) {
+    foreach (int i, range(input.size())) {
         if (chars.find(input.at(i)) != String::npos) {
             *span = input.slice(0, i);
             *remainder = input.slice(i);

@@ -40,22 +40,21 @@ bool is_valid_code_point(Rune rune) {
 namespace ascii {
 
 void Ascii::encode_to(WriteTarget out, const StringSlice& string) {
-    foreach (it, string) {
-        if (*it > 0x7f) {
+    foreach (Rune r, string) {
+        if (r > 0x7f) {
             out.push(1, kAsciiUnknownCodePoint);
         } else {
-            out.push(1, *it);
+            out.push(1, r);
         }
     }
 }
 
 void Ascii::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    foreach (it, bytes) {
-        uint8_t c = *it;
-        if (c & 0x80) {
+    foreach (uint8_t byte, bytes) {
+        if (byte & 0x80) {
             out.push(1, kUnknownCodePoint);
         } else {
-            out.push(1, c);
+            out.push(1, byte);
         }
     }
 }
@@ -65,18 +64,18 @@ void Ascii::decode_to(PrintTarget out, const BytesSlice& bytes) {
 namespace latin1 {
 
 void Latin1::encode_to(WriteTarget out, const StringSlice& string) {
-    foreach (it, string) {
-        if (*it > 0xff) {
+    foreach (Rune r, string) {
+        if (r > 0xff) {
             out.push(1, kAsciiUnknownCodePoint);
         } else {
-            out.push(1, *it);
+            out.push(1, r);
         }
     }
 }
 
 void Latin1::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    foreach (it, bytes) {
-        out.push(1, *it);
+    foreach (uint8_t byte, bytes) {
+        out.push(1, byte);
     }
 }
 
@@ -121,8 +120,7 @@ const Rune kUtf8Max[4] = { 0x80, 0x800, 0x10000 };
 }  // namespace
 
 void Utf8::encode_to(WriteTarget out, const StringSlice& string) {
-    foreach (it, string) {
-        const Rune rune = *it;
+    foreach (Rune rune, string) {
         if (rune < kUtf8Max[0]) {
             out.push(1, rune);
         } else if (rune < kUtf8Max[1]) {
@@ -146,10 +144,10 @@ void Utf8::decode_to(PrintTarget out, const BytesSlice& bytes) {
     int multibytes_seen = 0;
     Rune rune = 0;
 
-    foreach (it, bytes) {
+    foreach (uint8_t byte, bytes) {
         if (multibytes_expected > 0) {
-            if (is_continuation_byte(*it)) {
-                rune = (rune << 6) | right(6, *it);
+            if (is_continuation_byte(byte)) {
+                rune = (rune << 6) | right(6, byte);
                 --multibytes_expected;
                 ++multibytes_seen;
                 if (multibytes_expected == 0) {
@@ -166,15 +164,15 @@ void Utf8::decode_to(PrintTarget out, const BytesSlice& bytes) {
             }
         }
 
-        if (is_ascii(*it)) {
-            out.push(1, *it);
+        if (is_ascii(byte)) {
+            out.push(1, byte);
             goto next_byte;
         }
         for (int count = 2; count <= 4; ++count) {
-            if (is_multibyte_head(count, *it)) {
+            if (is_multibyte_head(count, byte)) {
                 multibytes_expected = count - 1;
                 multibytes_seen = 1;
-                rune = right(7 - count, *it);
+                rune = right(7 - count, byte);
                 goto next_byte;
             }
         }
@@ -328,13 +326,13 @@ uint16_t kMacRomanSupplement[0x80] = {
 }  // namespace
 
 void MacRoman::encode_to(WriteTarget out, const StringSlice& string) {
-    foreach (it, string) {
-        if (*it <= 0x7f) {
-            out.push(1, *it);
+    foreach (Rune r, string) {
+        if (r <= 0x7f) {
+            out.push(1, r);
         } else {
-            foreach (jt, kMacRomanSupplement) {
-                if (*it == *jt) {
-                    out.push(1, jt - kMacRomanSupplement + 0x80);
+            foreach (int i, range(0x80)) {
+                if (r == kMacRomanSupplement[i]) {
+                    out.push(1, 0x80 + i);
                     goto next_rune;
                 }
             }
@@ -346,11 +344,11 @@ next_rune:
 }
 
 void MacRoman::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    foreach (it, bytes) {
-        if (*it < 0x80) {
-            out.push(1, *it);
+    foreach (uint8_t byte, bytes) {
+        if (byte < 0x80) {
+            out.push(1, byte);
         } else {
-            out.push(1, kMacRomanSupplement[*it - 0x80]);
+            out.push(1, kMacRomanSupplement[byte - 0x80]);
         }
     }
 }

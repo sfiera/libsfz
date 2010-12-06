@@ -43,21 +43,20 @@ template <> bool is_signed<uint64_t>() { return false; }
 }  // namespace
 
 template <typename T>
-bool string_to_int(const StringSlice& s, T* out, int base) {
+bool string_to_int(StringSlice s, T* out, int base) {
     bool positive = true;
     T value = 0;
 
     if (s.size() == 0) {
         return false;
     }
-    foreach (it, s) {
-        if (is_signed<T>() && (*it == '-') && (it == s.begin())) {
-            positive = false;
-            continue;
-        }
-
+    if (is_signed<T>() && (s.at(0) == '-')) {
+        positive = false;
+        s = s.slice(1);
+    }
+    foreach (Rune r, s) {
         int digit;
-        if (!get_digit_value(*it, base, &digit)) {
+        if (!get_digit_value(r, base, &digit)) {
             return false;
         }
 
@@ -85,13 +84,13 @@ bool string_to_int(const StringSlice& s, T* out, int base) {
     return true;
 }
 
-template bool string_to_int<int8_t>(const StringSlice& s, int8_t* out, int base);
-template bool string_to_int<uint8_t>(const StringSlice& s, uint8_t* out, int base);
-template bool string_to_int<int16_t>(const StringSlice& s, int16_t* out, int base);
-template bool string_to_int<uint16_t>(const StringSlice& s, uint16_t* out, int base);
-template bool string_to_int<int32_t>(const StringSlice& s, int32_t* out, int base);
-template bool string_to_int<uint32_t>(const StringSlice& s, uint32_t* out, int base);
-template bool string_to_int<int64_t>(const StringSlice& s, int64_t* out, int base);
-template bool string_to_int<uint64_t>(const StringSlice& s, uint64_t* out, int base);
+template bool string_to_int<int8_t>(StringSlice s, int8_t* out, int base);
+template bool string_to_int<uint8_t>(StringSlice s, uint8_t* out, int base);
+template bool string_to_int<int16_t>(StringSlice s, int16_t* out, int base);
+template bool string_to_int<uint16_t>(StringSlice s, uint16_t* out, int base);
+template bool string_to_int<int32_t>(StringSlice s, int32_t* out, int base);
+template bool string_to_int<uint32_t>(StringSlice s, uint32_t* out, int base);
+template bool string_to_int<int64_t>(StringSlice s, int64_t* out, int base);
+template bool string_to_int<uint64_t>(StringSlice s, uint64_t* out, int base);
 
 }  // namespace sfz

@@ -26,12 +26,12 @@ struct TestData {
 
 class FormatterTest : public Test {
   protected:
-    template <int i>
-    void Run(const StringSlice& prefix, const TestData (&data)[i]) {
-        foreach (it, range(data, data + i)) {
+    template <int size>
+    void Run(const StringSlice& prefix, const TestData (&data)[size]) {
+        foreach (const TestData& test, data) {
             String s(prefix);
-            it->value.print_to(&s);
-            EXPECT_THAT(s, Eq(it->expected));
+            test.value.print_to(&s);
+            EXPECT_THAT(s, Eq(test.expected));
         }
     }
 };

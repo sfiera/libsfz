@@ -6,33 +6,70 @@
 #ifndef SFZ_RANGE_HPP_
 #define SFZ_RANGE_HPP_
 
+#include <sfz/Compare.hpp>
+
 namespace sfz {
 
 template <typename T>
-class basic_range {
+class RangeIterator {
   public:
-    typedef T const_iterator;
+    typedef T value_type;
+    typedef const value_type* pointer;
+    typedef const value_type* const_pointer;
+    typedef const value_type& reference;
+    typedef const value_type& const_reference;
 
-    basic_range(T begin, T end) : _begin(begin), _end(end) {}
+    RangeIterator(value_type value): _value(value) { }
 
-    const_iterator begin() const { return _begin; }
-    const_iterator end() const { return _end; }
+    value_type operator*() const { return _value; }
+    pointer operator->() const { return &_value; }
+
+    RangeIterator& operator++() { ++_value; return *this; }
+    RangeIterator operator++(int) { return _value++; }
+    RangeIterator& operator--() { --_value; return *this; }
+    RangeIterator operator--(int) { return _value--; }
 
   private:
-    const_iterator _begin;
-    const_iterator _end;
+    value_type _value;
 
     // ALLOW_COPY_AND_ASSIGN
 };
 
 template <typename T>
-basic_range<T> range(T begin, T end) {
-    return basic_range<T>(begin, end);
+class Range {
+  public:
+    typedef T value_type;
+
+    typedef RangeIterator<T> iterator;
+    typedef RangeIterator<T> const_iterator;
+
+    Range(value_type first, value_type last): _first(first), _last(last) {}
+
+    const_iterator begin() const { return _first; }
+    const_iterator end() const { return _last; }
+
+  private:
+    iterator _first;
+    iterator _last;
+
+    // ALLOW_COPY_AND_ASSIGN
+};
+
+template <typename T>
+int compare(RangeIterator<T> x, RangeIterator<T> y) {
+    return compare(*x, *y);
+}
+
+SFZ_OPERATORS_BASED_ON_COMPARE_T(template <typename T>, RangeIterator<T>)
+
+template <typename T>
+Range<T> range(T begin, T end) {
+    return Range<T>(begin, end);
 }
 
 template <typename T>
-basic_range<T> range(T end) {
-    return basic_range<T>(T(), end);
+Range<T> range(T end) {
+    return Range<T>(T(), end);
 }
 
 }  // namespace sfz
