@@ -82,13 +82,13 @@ class PrintItemTest : public Test {
         EXPECT_TRUE(k32Bit || k64Bit) << "Unknown pointer size";
     }
 
-    template <typename T, int i>
-    void Run(const StringSlice& prefix, const T (&data)[i]) {
-        foreach (it, range(data, data + i)) {
-            typename T::TestType value(it->value);
+    template <typename T, int size>
+    void Run(const StringSlice& prefix, const T (&data)[size]) {
+        foreach (const T& test, data) {
+            typename T::TestType value(test.value);
             String s(prefix);
             print(&s, value);
-            EXPECT_THAT(s, Eq(it->expected));
+            EXPECT_THAT(s, Eq(test.expected));
         }
     }
 

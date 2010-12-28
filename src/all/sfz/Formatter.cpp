@@ -53,8 +53,7 @@ const char kEscaped[' '][5] = {
 }  // namespace
 
 void print_to(PrintTarget out, const EscapedString& value) {
-    foreach (it, value.string) {
-        Rune rune = *it;
+    foreach (Rune rune, value.string) {
         if (rune < ' ') {
             out.push(kEscaped[rune]);
         } else if (rune == '\'' || rune == '\"' || rune == '\\') {

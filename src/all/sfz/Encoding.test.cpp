@@ -58,52 +58,52 @@ typedef Test AsciiEncodingTest;
 
 TEST_F(AsciiEncodingTest, DecodeValid) {
     Bytes bytes;
-    foreach (i, range(0x80)) {
+    foreach (int i, range(0x80)) {
         bytes.append(1, i);
     }
 
     String string(ascii::decode(bytes));
     ASSERT_THAT(string.size(), Eq(bytes.size()));
-    foreach (i, range(string.size())) {
+    foreach (int i, range(string.size())) {
         EXPECT_THAT(string.at(i), Eq<Rune>(i));
     }
 }
 
 TEST_F(AsciiEncodingTest, EncodeValid) {
     String string;
-    foreach (i, range(0x80)) {
+    foreach (int i, range(0x80)) {
         string.append(1, i);
     }
 
     Bytes bytes(ascii::encode(string));
     ASSERT_THAT(bytes.size(), Eq(string.size()));
-    foreach (i, range(bytes.size())) {
+    foreach (size_t i, range(bytes.size())) {
         EXPECT_THAT(bytes.at(i), Eq<uint8_t>(i));
     }
 }
 
 TEST_F(AsciiEncodingTest, DecodeInvalid) {
     Bytes bytes;
-    foreach (i, range(0x80, 0x100)) {
+    foreach (int i, range(0x80, 0x100)) {
         bytes.append(1, i);
     }
 
     String string(ascii::decode(bytes));
     ASSERT_THAT(string.size(), Eq(bytes.size()));
-    foreach (i, range(string.size())) {
+    foreach (int i, range(string.size())) {
         EXPECT_THAT(string.at(i), Eq(kUnknownCodePoint));
     }
 }
 
 TEST_F(AsciiEncodingTest, EncodeInvalid) {
     String string;
-    foreach (i, range(0x8, 0x100)) {
+    foreach (int i, range(0x8, 0x100)) {
         string.append(1, i * 0x10);
     }
 
     Bytes bytes(ascii::encode(string));
     ASSERT_THAT(bytes.size(), Eq(string.size()));
-    foreach (i, range(bytes.size())) {
+    foreach (int i, range(bytes.size())) {
         EXPECT_THAT(bytes.at(i), Eq(kAsciiUnknownCodePoint));
     }
 }
@@ -112,33 +112,33 @@ typedef Test Latin1EncodingTest;
 
 TEST_F(Latin1EncodingTest, Decode) {
     Bytes bytes;
-    foreach (i, range(0x100)) {
+    foreach (int i, range(0x100)) {
         bytes.append(1, i);
     }
 
     String string(latin1::decode(bytes));
     ASSERT_THAT(string.size(), Eq(bytes.size()));
-    foreach (i, range(string.size())) {
+    foreach (int i, range(string.size())) {
         EXPECT_THAT(string.at(i), Eq<Rune>(i));
     }
 }
 
 TEST_F(Latin1EncodingTest, EncodeValid) {
     String string;
-    foreach (i, range(0x100)) {
+    foreach (int i, range(0x100)) {
         string.append(1, i);
     }
 
     Bytes bytes(latin1::encode(string));
     ASSERT_THAT(bytes.size(), Eq(string.size()));
-    foreach (i, range(bytes.size())) {
+    foreach (int i, range(bytes.size())) {
         EXPECT_THAT(bytes.at(i), Eq<uint8_t>(i));
     }
 }
 
 TEST_F(Latin1EncodingTest, EncodeInvalid) {
     String string;
-    foreach (i, range(0x1, 0x100)) {
+    foreach (int i, range(0x1, 0x100)) {
         // Some of these generated code points will be in the surrogate code point range, meaning
         // they cannot be appended to the string.  Append kUnknownCodePoint instead, which is
         // valid, but unencodable, so it will end up being encoded as kAsciiUnknownCodePoint.
@@ -151,7 +151,7 @@ TEST_F(Latin1EncodingTest, EncodeInvalid) {
 
     Bytes bytes(latin1::encode(string));
     ASSERT_THAT(bytes.size(), Eq(string.size()));
-    foreach (i, range(bytes.size())) {
+    foreach (int i, range(bytes.size())) {
         EXPECT_THAT(bytes.at(i), Eq(kAsciiUnknownCodePoint));
     }
 }
@@ -164,13 +164,13 @@ const char kMacRomanSupplement[] =
 
 TEST_F(MacRomanEncodingTest, Decode) {
     Bytes bytes;
-    foreach (i, range(0x100)) {
+    foreach (int i, range(0x100)) {
         bytes.append(1, i);
     }
 
     String string(macroman::decode(bytes));
     ASSERT_THAT(string.size(), Eq(bytes.size()));
-    foreach (i, range(0x80)) {
+    foreach (int i, range(0x80)) {
         EXPECT_THAT(string.at(i), Eq<Rune>(i));
     }
     const String supplement(utf8::decode(kMacRomanSupplement));
@@ -179,14 +179,14 @@ TEST_F(MacRomanEncodingTest, Decode) {
 
 TEST_F(MacRomanEncodingTest, EncodeValid) {
     String string;
-    foreach (i, range(0x80)) {
+    foreach (int i, range(0x80)) {
         string.append(1, i);
     }
     string.append(utf8::decode(kMacRomanSupplement));
 
     Bytes bytes(macroman::encode(string));
     ASSERT_THAT(bytes.size(), Eq(string.size()));
-    foreach (i, range(bytes.size())) {
+    foreach (int i, range(bytes.size())) {
         EXPECT_THAT(bytes.at(i), Eq<uint8_t>(i));
     }
 }
@@ -194,7 +194,7 @@ TEST_F(MacRomanEncodingTest, EncodeValid) {
 TEST_F(MacRomanEncodingTest, EncodeInvalid) {
     const String supplement(utf8::decode(kMacRomanSupplement));
     String string;
-    foreach (i, range(0x8, 0x100)) {
+    foreach (int i, range(0x8, 0x100)) {
         if (supplement.find(i * 0x10) == String::npos) {
             string.append(1, i * 0x10);
         } else {
@@ -204,7 +204,7 @@ TEST_F(MacRomanEncodingTest, EncodeInvalid) {
 
     Bytes bytes(macroman::encode(string));
     ASSERT_THAT(bytes.size(), Eq(string.size()));
-    foreach (i, range(bytes.size())) {
+    foreach (int i, range(bytes.size())) {
         EXPECT_THAT(bytes.at(i), Eq<uint8_t>(kAsciiUnknownCodePoint));
     }
 }
@@ -213,13 +213,13 @@ typedef Test Utf8EncodingTest;
 
 TEST_F(Utf8EncodingTest, EncodeAscii) {
     String string;
-    foreach (i, range(0x80)) {
+    foreach (int i, range(0x80)) {
         string.append(1, i);
     }
 
     Bytes bytes(utf8::encode(string));
     ASSERT_THAT(bytes.size(), Eq(string.size()));
-    foreach (i, range(bytes.size())) {
+    foreach (int i, range(bytes.size())) {
         EXPECT_THAT(bytes.at(i), Eq<uint8_t>(i));
     }
 }
@@ -234,7 +234,7 @@ TEST_F(Utf8EncodingTest, EncodeLatin1) {
         "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
 
     String string;
-    foreach (i, range(0x80, 0x100)) {
+    foreach (int i, range(0x80, 0x100)) {
         string.append(1, i);
     }
 
@@ -250,7 +250,7 @@ TEST_F(Utf8EncodingTest, EncodeCJK) {
         "まみむめもゃやゅゆょよらりるれろゎわゐゑをん";
 
     String string;
-    foreach (i, range(0x3041, 0x3094)) {
+    foreach (int i, range(0x3041, 0x3094)) {
         string.append(1, i);
     }
 
@@ -276,7 +276,7 @@ TEST_F(Utf8EncodingTest, EncodeHigherPlane) {
         "\364\217\277\277";
 
     String string;
-    foreach (i, range(0x1f000, 0x1f02a)) {
+    foreach (int i, range(0x1f000, 0x1f02a)) {
         string.append(1, i);
     }
     string.append(1, 0x10ffff);
@@ -345,11 +345,10 @@ TEST_F(Utf8EncodingTest, DecodeInvalid) {
         "\367\277\277\277",  // => 0x1fffff
     };
 
-    foreach (it, kInvalid) {
-        BytesSlice bytes(*it);
+    foreach (BytesSlice bytes, kInvalid) {
         String string(utf8::decode(bytes));
         ASSERT_THAT(string.size(), Eq(bytes.size()));
-        foreach (i, range(string.size())) {
+        foreach (size_t i, range(string.size())) {
             if (bytes.at(i) < 0x80) {
                 EXPECT_THAT(string.at(i), Eq(bytes.at(i)));
             } else {

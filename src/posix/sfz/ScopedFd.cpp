@@ -46,7 +46,7 @@ void ScopedFd::push(const BytesSlice& bytes) {
 }
 
 void ScopedFd::push(size_t num, uint8_t byte) {
-    foreach (it, range(num)) {
+    foreach (int i, range(num)) {
         push(BytesSlice(&byte, 1));
     }
 }

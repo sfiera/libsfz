@@ -64,12 +64,12 @@ TEST_F(Sha1Test, ForceSecondBlock) {
 TEST_F(Sha1Test, Long) {
     Bytes input;
     const char* kChars = "abcdefghijklm";
-    foreach (i, range(1000)) {
+    foreach (int i, range(1000)) {
         input.append(1, kChars[i % 13]);
     }
 
     Sha1 sha;
-    foreach (i, range(1000)) {
+    foreach (int i, range(1000)) {
         write(&sha, input);
     }
 
@@ -80,13 +80,13 @@ TEST_F(Sha1Test, Long) {
 // Adding the input in chunks of 512 bits (64 bytes) should work fine.
 TEST_F(Sha1Test, EvenMultipleOf512Bits) {
     Bytes bytes;
-    foreach (i, range(8)) {
+    foreach (int i, range(8)) {
         write(&bytes, "01234567", 8);
     }
     ASSERT_THAT(bytes.size(), Eq<size_t>(64));
 
     Sha1 sha;
-    foreach (i, range(10)) {
+    foreach (int i, range(10)) {
         write(&sha, bytes);
     }
 
@@ -196,7 +196,7 @@ TEST_F(Sha1Test, IncrementalDigest) {
     };
 
     Sha1 sha;
-    foreach (byte, range<uint8_t>(' ', '\x80')) {
+    foreach (uint8_t byte, range(' ', '\x80')) {
         write(&sha, byte);
         EXPECT_THAT(sha.digest(), Eq(expected[byte - ' ']));
     }
@@ -276,15 +276,15 @@ const Sha1::Digest kTreeDigest = { 0x9ff59f85, 0x3ca5ef83, 0x62cf1fcd, 0x3f29371
 TEST_F(Sha1Test, TreeDigest) {
     TemporaryDirectory dir("sha1-test");
 
-    foreach (it, kTreeData) {
-        String path(format("{0}/{1}", dir.path(), utf8::decode(it->path)));
-        String data(utf8::decode(it->data));
+    foreach (const TreeData& tree_data, kTreeData) {
+        String path(format("{0}/{1}", dir.path(), utf8::decode(tree_data.path)));
+        String data(utf8::decode(tree_data.data));
 
         makedirs(path::dirname(path), 0700);
         ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0600));
         write(&fd, utf8::encode(data));
 
-        EXPECT_THAT(file_digest(path), Eq(it->digest));
+        EXPECT_THAT(file_digest(path), Eq(tree_data.digest));
     }
     EXPECT_THAT(tree_digest(dir.path()), Eq(kTreeDigest));
 }
