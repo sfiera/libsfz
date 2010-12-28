@@ -47,6 +47,7 @@
             'sources': [
                 'src/all/sfz/Bytes.test.cpp',
                 'src/all/sfz/Encoding.test.cpp',
+                'src/all/sfz/Foreach.test.cpp',
                 'src/all/sfz/Formatter.test.cpp',
                 'src/all/sfz/LinkedPtr.test.cpp',
                 'src/all/sfz/Os.test.cpp',
