@@ -8,11 +8,13 @@
 
 #include <sfz/Bytes.hpp>
 #include <sfz/CString.hpp>
+#include <sfz/Compare.hpp>
 #include <sfz/Encoding.hpp>
 #include <sfz/Exception.hpp>
 #include <sfz/Foreach.hpp>
 #include <sfz/Format.hpp>
 #include <sfz/Formatter.hpp>
+#include <sfz/Integer.hpp>
 #include <sfz/Io.hpp>
 #include <sfz/LinkedPtr.hpp>
 #include <sfz/Macros.hpp>
