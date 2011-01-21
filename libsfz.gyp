@@ -49,6 +49,7 @@
                 'src/all/sfz/Encoding.test.cpp',
                 'src/all/sfz/Foreach.test.cpp',
                 'src/all/sfz/Formatter.test.cpp',
+                'src/all/sfz/Io.test.cpp',
                 'src/all/sfz/LinkedPtr.test.cpp',
                 'src/all/sfz/Os.test.cpp',
                 'src/all/sfz/PrintItem.test.cpp',

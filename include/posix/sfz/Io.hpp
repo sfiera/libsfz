@@ -14,10 +14,8 @@ namespace io {
 
 struct Io {
     int fd;
-    void append(const char* string);
-    void append(String& string);
-    void append(const StringSlice& string);
-    void append(size_t num, Rune rune);
+    void push(const StringSlice& string);
+    void push(size_t num, Rune rune);
 };
 
 extern Io* in;

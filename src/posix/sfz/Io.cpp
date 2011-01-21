@@ -27,15 +27,7 @@ Io fds[] = {{0}, {1}, {2}};
 
 }  // namespace
 
-void Io::append(const char* string) {
-    append(StringSlice(string));
-}
-
-void Io::append(String& string) {
-    append(StringSlice(string));
-}
-
-void Io::append(const StringSlice& string) {
+void Io::push(const StringSlice& string) {
     Bytes bytes(utf8::encode(string));
     BytesSlice remainder(bytes);
     while (!remainder.empty()) {
@@ -48,9 +40,9 @@ void Io::append(const StringSlice& string) {
     }
 }
 
-void Io::append(size_t num, Rune rune) {
+void Io::push(size_t num, Rune rune) {
     String string(num, rune);
-    append(StringSlice(string));
+    push(StringSlice(string));
 }
 
 Io* in = &fds[0];
