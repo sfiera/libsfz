@@ -28,13 +28,13 @@
                 'src/posix/sfz/Os.cpp',
                 'src/posix/sfz/PosixFormatter.cpp',
                 'src/all/sfz/PrintItem.cpp',
-                'src/all/sfz/ReadItem.cpp',
                 'src/mac/sfz/ReferenceCounted.cpp',
                 'src/posix/sfz/ScopedFd.cpp',
                 'src/all/sfz/Sha1.cpp',
                 'src/all/sfz/String.cpp',
                 'src/all/sfz/StringUtilities.cpp',
                 'src/all/sfz/WriteItem.cpp',
+                'src/all/sfz/read.cpp',
             ],
             'direct_dependent_settings': {
                 'include_dirs': [
@@ -56,11 +56,11 @@
                 'src/all/sfz/LinkedPtr.test.cpp',
                 'src/all/sfz/Os.test.cpp',
                 'src/all/sfz/PrintItem.test.cpp',
-                'src/all/sfz/ReadItem.test.cpp',
                 'src/all/sfz/Sha1.test.cpp',
                 'src/all/sfz/String.test.cpp',
                 'src/all/sfz/StringUtilities.test.cpp',
                 'src/all/sfz/WriteItem.test.cpp',
+                'src/all/sfz/read.test.cpp',
             ],
             'dependencies': [
                 ':libsfz',

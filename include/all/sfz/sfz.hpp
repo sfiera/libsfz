@@ -24,8 +24,6 @@
 #include <sfz/PrintItem.hpp>
 #include <sfz/PrintTarget.hpp>
 #include <sfz/Range.hpp>
-#include <sfz/ReadItem.hpp>
-#include <sfz/ReadSource.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/Rune.hpp>
 #include <sfz/ScopedFd.hpp>
@@ -36,5 +34,6 @@
 #include <sfz/StringUtilities.hpp>
 #include <sfz/WriteItem.hpp>
 #include <sfz/WriteTarget.hpp>
+#include <sfz/read.hpp>
 
 #endif  // SFZ_SFZ_HPP_

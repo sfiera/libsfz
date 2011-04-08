@@ -9,8 +9,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sfz/PrintTarget.hpp>
-#include <sfz/ReadSource.hpp>
 #include <sfz/WriteTarget.hpp>
+#include <sfz/read.hpp>
 
 namespace sfz {
 

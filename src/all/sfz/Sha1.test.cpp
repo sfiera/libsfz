@@ -17,10 +17,10 @@
 #include "sfz/Os.hpp"
 #include "sfz/PrintItem.hpp"
 #include "sfz/Range.hpp"
-#include "sfz/ReadItem.hpp"
 #include "sfz/ScopedFd.hpp"
 #include "sfz/WriteItem.hpp"
 #include "sfz/WriteTarget.hpp"
+#include "sfz/read.hpp"
 
 using testing::Eq;
 using testing::Test;

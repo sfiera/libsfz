@@ -3,14 +3,39 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#ifndef SFZ_READ_ITEM_HPP_
-#define SFZ_READ_ITEM_HPP_
+#ifndef SFZ_READ_HPP_
+#define SFZ_READ_HPP_
 
-#include <sfz/ReadSource.hpp>
+#include <stdint.h>
+#include <stdlib.h>
 
 namespace sfz {
 
-class ReadItem;
+class ReadSource;
+
+template <typename T>
+void read(ReadSource in, T* items, size_t count = 1);
+
+template <typename T>
+T read(ReadSource in);
+
+class ReadSource {
+  public:
+    template <typename T> ReadSource(T* target);
+
+    inline bool empty() const;
+    inline void shift(size_t size);
+    inline void shift(uint8_t* data, size_t size);
+
+  private:
+    struct DispatchTable;
+    template <typename T> struct Dispatch;
+
+    void* _target;
+    const DispatchTable* _dispatch_table;
+
+    // ALLOW_COPY_AND_ASSIGN
+};
 
 class ReadItem {
   public:
@@ -19,10 +44,7 @@ class ReadItem {
     inline void read_from(ReadSource in, size_t count);
 
   private:
-    struct DispatchTable {
-        void (*read_from)(void* target, ReadSource in, size_t count);
-    };
-
+    struct DispatchTable;
     template <typename T> struct Dispatch;
 
     void* const _target;
@@ -31,8 +53,10 @@ class ReadItem {
     // ALLOW_COPY_AND_ASSIGN
 };
 
+// Implementation details follow.
+
 template <typename T>
-void read(ReadSource in, T* items, size_t count = 1) {
+void read(ReadSource in, T* items, size_t count) {
     ReadItem(items).read_from(in, count);
 }
 
@@ -43,7 +67,53 @@ T read(ReadSource in) {
     return result;
 }
 
-// Implementation details follow.
+struct ReadSource::DispatchTable {
+    bool (*empty)(const void* target);
+    void (*shift)(void* target, size_t size);
+    void (*shift_data)(void* target, uint8_t* data, size_t size);
+};
+
+template <typename T>
+struct ReadSource::Dispatch {
+    static bool empty(const void* target) {
+        return reinterpret_cast<const T*>(target)->empty();
+    }
+    static void shift(void* target, size_t size) {
+        reinterpret_cast<T*>(target)->shift(size);
+    }
+    static void shift_data(void* target, uint8_t* data, size_t size) {
+        reinterpret_cast<T*>(target)->shift(data, size);
+    }
+    static const DispatchTable table;
+};
+
+template <typename T>
+const ReadSource::DispatchTable ReadSource::Dispatch<T>::table = {
+    empty,
+    shift,
+    shift_data,
+};
+
+template <typename T>
+ReadSource::ReadSource(T* t)
+    : _target(t),
+      _dispatch_table(&Dispatch<T>::table) { }
+
+inline bool ReadSource::empty() const {
+    return _dispatch_table->empty(_target);
+}
+
+inline void ReadSource::shift(size_t size) {
+    _dispatch_table->shift(_target, size);
+}
+
+inline void ReadSource::shift(uint8_t* data, size_t size) {
+    _dispatch_table->shift_data(_target, data, size);
+}
+
+struct ReadItem::DispatchTable {
+    void (*read_from)(void* target, ReadSource in, size_t count);
+};
 
 }  // namespace sfz
 
@@ -99,4 +169,4 @@ inline void ReadItem::read_from(ReadSource in, size_t count) {
 
 }  // namespace sfz
 
-#endif  // SFZ_READ_ITEM_HPP_
+#endif  // SFZ_READ_HPP_
