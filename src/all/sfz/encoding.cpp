@@ -7,9 +7,8 @@
 
 #include <algorithm>
 #include "sfz/Bytes.hpp"
-#include "sfz/Foreach.hpp"
-#include "sfz/Range.hpp"
 #include "sfz/String.hpp"
+#include "sfz/foreach.hpp"
 
 namespace sfz {
 

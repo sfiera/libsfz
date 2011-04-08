@@ -10,9 +10,8 @@
 #include <gtest/gtest.h>
 #include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
-#include "sfz/Foreach.hpp"
 #include "sfz/Formatter.hpp"
-#include "sfz/Range.hpp"
+#include "sfz/foreach.hpp"
 
 using std::numeric_limits;
 using testing::Eq;

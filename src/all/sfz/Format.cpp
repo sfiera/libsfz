@@ -5,10 +5,9 @@
 
 #include "sfz/Format.hpp"
 
-#include "sfz/Foreach.hpp"
-#include "sfz/Range.hpp"
 #include "sfz/String.hpp"
 #include "sfz/StringUtilities.hpp"
+#include "sfz/foreach.hpp"
 
 namespace sfz {
 

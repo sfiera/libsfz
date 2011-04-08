@@ -10,8 +10,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "sfz/Exception.hpp"
-#include "sfz/Foreach.hpp"
-#include "sfz/Range.hpp"
+#include "sfz/foreach.hpp"
 
 using std::next_permutation;
 using std::set;

@@ -3,12 +3,59 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#ifndef SFZ_RANGE_HPP_
-#define SFZ_RANGE_HPP_
+#ifndef SFZ_FOREACH_HPP_
+#define SFZ_FOREACH_HPP_
 
 #include <sfz/Compare.hpp>
 
+#   if (_MSC_VER >= 1600) && (_MSC_VER < 1700)
+#       define SFZ_DECLTYPE(x) decltype(x)
+#   elif __GNUC__ == 4
+#       define SFZ_DECLTYPE(x) __typeof__(x)
+#   else
+#       define SFZ_DECLTYPE(x) int
+#       error "Don't know how to get decltype-like functionality"
+#   endif
+
+#define foreach(DECLARATION, CONTAINER) \
+    for (bool __loop = true; __loop; ) \
+    for (const SFZ_DECLTYPE(CONTAINER)& __container = (CONTAINER); __loop; __loop = false) \
+    for (SFZ_DECLTYPE(::sfz::begin(__container)) __begin = ::sfz::begin(__container), \
+            __end = ::sfz::end(__container); __begin != __end; ++__begin) \
+    for (bool __loop = true; __loop; ) \
+    for (DECLARATION __attribute__((unused)) = *__begin; __loop; __loop = false) \
+
 namespace sfz {
+
+template <typename T> class Range;
+
+template <typename T>
+Range<T> range(T begin, T end);
+
+template <typename T>
+Range<T> range(T end);
+
+// Implementation details follow.
+
+template <typename T>
+typename T::const_iterator begin(const T& container) {
+    return container.begin();
+}
+
+template <typename T, int size>
+const T* begin(const T (&array)[size]) {
+    return array;
+}
+
+template <typename T>
+typename T::const_iterator end(const T& container) {
+    return container.end();
+}
+
+template <typename T, int size>
+const T* end(const T (&array)[size]) {
+    return array + size;
+}
 
 template <typename T>
 class RangeIterator {
@@ -74,4 +121,4 @@ Range<T> range(T end) {
 
 }  // namespace sfz
 
-#endif // _SFZ_RANGE_HPP
+#endif  // SFZ_FOREACH_HPP_

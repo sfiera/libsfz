@@ -49,7 +49,6 @@
             'type': 'executable',
             'sources': [
                 'src/all/sfz/Bytes.test.cpp',
-                'src/all/sfz/Foreach.test.cpp',
                 'src/all/sfz/Formatter.test.cpp',
                 'src/all/sfz/Io.test.cpp',
                 'src/all/sfz/LinkedPtr.test.cpp',
@@ -58,6 +57,7 @@
                 'src/all/sfz/String.test.cpp',
                 'src/all/sfz/StringUtilities.test.cpp',
                 'src/all/sfz/encoding.test.cpp',
+                'src/all/sfz/foreach.test.cpp',
                 'src/all/sfz/print.test.cpp',
                 'src/all/sfz/read.test.cpp',
                 'src/all/sfz/write.test.cpp',

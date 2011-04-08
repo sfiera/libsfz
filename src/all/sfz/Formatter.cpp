@@ -6,8 +6,8 @@
 #include "sfz/Formatter.hpp"
 
 #include "sfz/Bytes.hpp"
-#include "sfz/Foreach.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/foreach.hpp"
 
 namespace sfz {
 

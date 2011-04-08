@@ -10,7 +10,6 @@
 #include <sfz/CString.hpp>
 #include <sfz/Compare.hpp>
 #include <sfz/Exception.hpp>
-#include <sfz/Foreach.hpp>
 #include <sfz/Format.hpp>
 #include <sfz/Formatter.hpp>
 #include <sfz/Integer.hpp>
@@ -20,7 +19,6 @@
 #include <sfz/MappedFile.hpp>
 #include <sfz/NetworkBytes.hpp>
 #include <sfz/Os.hpp>
-#include <sfz/Range.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/ScopedFd.hpp>
 #include <sfz/ScopedPtr.hpp>
@@ -29,6 +27,7 @@
 #include <sfz/String.hpp>
 #include <sfz/StringUtilities.hpp>
 #include <sfz/encoding.hpp>
+#include <sfz/foreach.hpp>
 #include <sfz/print.hpp>
 #include <sfz/read.hpp>
 #include <sfz/write.hpp>

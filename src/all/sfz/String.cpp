@@ -9,10 +9,9 @@
 #include <algorithm>
 #include "sfz/Compare.hpp"
 #include "sfz/Exception.hpp"
-#include "sfz/Foreach.hpp"
 #include "sfz/Format.hpp"
-#include "sfz/Range.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/foreach.hpp"
 
 namespace sfz {
 

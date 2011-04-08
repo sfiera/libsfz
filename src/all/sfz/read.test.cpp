@@ -9,9 +9,8 @@
 #include <gtest/gtest.h>
 #include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
-#include "sfz/Foreach.hpp"
 #include "sfz/Format.hpp"
-#include "sfz/Range.hpp"
+#include "sfz/foreach.hpp"
 
 using testing::Eq;
 using testing::Test;
