@@ -7,9 +7,9 @@
 
 #include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
-#include "sfz/Format.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/format.hpp"
 
 using sfz::Bytes;
 using sfz::Rune;

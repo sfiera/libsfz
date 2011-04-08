@@ -5,7 +5,7 @@
 
 #include "sfz/print.hpp"
 
-#include "sfz/Formatter.hpp"
+#include "sfz/format.hpp"
 
 namespace sfz {
 

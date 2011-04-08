@@ -12,9 +12,9 @@
 #include <sys/stat.h>
 #include "sfz/CString.hpp"
 #include "sfz/Exception.hpp"
-#include "sfz/Format.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/ScopedFd.hpp"
+#include "sfz/format.hpp"
 
 namespace sfz {
 

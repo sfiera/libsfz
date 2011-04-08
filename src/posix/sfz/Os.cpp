@@ -8,9 +8,9 @@
 #include <fcntl.h>
 #include <fts.h>
 #include "sfz/Exception.hpp"
-#include "sfz/Format.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/format.hpp"
 
 namespace sfz {
 

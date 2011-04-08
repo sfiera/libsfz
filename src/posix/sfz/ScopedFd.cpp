@@ -7,9 +7,9 @@
 
 #include <unistd.h>
 #include "sfz/Exception.hpp"
-#include "sfz/Format.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/foreach.hpp"
+#include "sfz/format.hpp"
 
 namespace sfz {
 
