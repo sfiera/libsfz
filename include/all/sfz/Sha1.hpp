@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <sfz/PrintTarget.hpp>
+#include <sfz/print.hpp>
 #include <sfz/read.hpp>
 #include <sfz/write.hpp>
 

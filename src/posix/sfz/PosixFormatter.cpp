@@ -9,7 +9,7 @@
 #include <string.h>
 #include "sfz/Bytes.hpp"
 #include "sfz/Encoding.hpp"
-#include "sfz/PrintItem.hpp"
+#include "sfz/print.hpp"
 
 namespace sfz {
 

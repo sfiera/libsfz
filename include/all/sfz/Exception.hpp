@@ -8,10 +8,10 @@
 
 #include <exception>
 #include <sfz/CString.hpp>
-#include <sfz/PrintItem.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/ScopedPtr.hpp>
 #include <sfz/String.hpp>
+#include <sfz/print.hpp>
 
 namespace sfz {
 

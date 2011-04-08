@@ -10,9 +10,8 @@
 #include <stdlib.h>
 #include <iterator>
 #include <sfz/ScopedPtr.hpp>
-#include <sfz/PrintItem.hpp>
-#include <sfz/PrintTarget.hpp>
 #include <sfz/Rune.hpp>
+#include <sfz/print.hpp>
 
 namespace sfz {
 

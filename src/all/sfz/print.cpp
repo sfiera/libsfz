@@ -3,7 +3,7 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/PrintItem.hpp"
+#include "sfz/print.hpp"
 
 #include "sfz/Formatter.hpp"
 

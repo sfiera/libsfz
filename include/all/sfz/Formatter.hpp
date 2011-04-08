@@ -7,8 +7,8 @@
 #define SFZ_FORMATTER_HPP_
 
 #include <sfz/Integer.hpp>
-#include <sfz/PrintTarget.hpp>
 #include <sfz/String.hpp>
+#include <sfz/print.hpp>
 
 namespace sfz {
 

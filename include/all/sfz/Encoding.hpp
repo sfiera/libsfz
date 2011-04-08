@@ -6,7 +6,7 @@
 #ifndef SFZ_ENCODING_HPP_
 #define SFZ_ENCODING_HPP_
 
-#include <sfz/PrintItem.hpp>
+#include <sfz/print.hpp>
 #include <sfz/write.hpp>
 
 namespace sfz {

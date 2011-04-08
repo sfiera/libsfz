@@ -21,8 +21,6 @@
 #include <sfz/MappedFile.hpp>
 #include <sfz/NetworkBytes.hpp>
 #include <sfz/Os.hpp>
-#include <sfz/PrintItem.hpp>
-#include <sfz/PrintTarget.hpp>
 #include <sfz/Range.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/Rune.hpp>
@@ -32,6 +30,7 @@
 #include <sfz/SmartPtr.hpp>
 #include <sfz/String.hpp>
 #include <sfz/StringUtilities.hpp>
+#include <sfz/print.hpp>
 #include <sfz/read.hpp>
 #include <sfz/write.hpp>
 

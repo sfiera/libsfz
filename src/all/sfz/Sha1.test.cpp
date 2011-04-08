@@ -15,9 +15,9 @@
 #include "sfz/Foreach.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/Os.hpp"
-#include "sfz/PrintItem.hpp"
 #include "sfz/Range.hpp"
 #include "sfz/ScopedFd.hpp"
+#include "sfz/print.hpp"
 #include "sfz/read.hpp"
 #include "sfz/write.hpp"
 

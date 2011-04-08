@@ -6,8 +6,7 @@
 #ifndef SFZ_FORMAT_HPP_
 #define SFZ_FORMAT_HPP_
 
-#include <sfz/PrintItem.hpp>
-#include <sfz/PrintTarget.hpp>
+#include <sfz/print.hpp>
 
 namespace sfz {
 

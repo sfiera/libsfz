@@ -8,8 +8,8 @@
 #include <vector>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <sfz/PrintItem.hpp>
 #include <sfz/String.hpp>
+#include <sfz/print.hpp>
 
 using std::vector;
 using testing::Eq;
