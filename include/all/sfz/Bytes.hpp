@@ -10,8 +10,7 @@
 #include <stdlib.h>
 #include <iterator>
 #include <sfz/ScopedPtr.hpp>
-#include <sfz/WriteItem.hpp>
-#include <sfz/WriteTarget.hpp>
+#include <sfz/write.hpp>
 
 namespace sfz {
 

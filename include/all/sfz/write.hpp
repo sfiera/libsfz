@@ -1,14 +1,41 @@
-// Copyright (c) 2010 Chris Pickel <sfiera@gmail.com>
+// Copyright (c) 2009 Chris Pickel <sfiera@gmail.com>
 //
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#ifndef SFZ_WRITE_ITEM_HPP_
-#define SFZ_WRITE_ITEM_HPP_
+#ifndef SFZ_WRITE_HPP_
+#define SFZ_WRITE_HPP_
 
-#include <sfz/WriteTarget.hpp>
+#include <stdint.h>
+#include <stdlib.h>
 
 namespace sfz {
+
+class BytesSlice;
+class WriteTarget;
+
+template <typename T>
+void write(WriteTarget out, const T& item);
+
+template <typename T>
+void write(WriteTarget out, const T* items, size_t count);
+
+class WriteTarget {
+  public:
+    template <typename T> WriteTarget(T* target);
+
+    inline void push(const BytesSlice& bytes);
+    inline void push(size_t num, uint8_t byte);
+
+  private:
+    struct DispatchTable;
+    template <typename T> struct Dispatch;
+
+    void* _target;
+    const DispatchTable* _dispatch_table;
+
+    // ALLOW_COPY_AND_ASSIGN
+};
 
 class WriteItem {
   public:
@@ -18,10 +45,7 @@ class WriteItem {
     inline void write_to(WriteTarget out) const;
 
   private:
-    struct DispatchTable {
-        void (*write_to)(const void* target, WriteTarget out, size_t count);
-    };
-
+    struct DispatchTable;
     template <typename T> struct Dispatch;
 
     const void* _target;
@@ -41,6 +65,41 @@ void write(WriteTarget out, const T* items, size_t count) {
     WriteItem(items, count).write_to(out);
 }
 
+struct WriteTarget::DispatchTable {
+    void (*push_bytes)(void* target, const BytesSlice& bytes);
+    void (*push_repeated_bytes)(void* target, size_t num, uint8_t byte);
+};
+
+template <typename T>
+struct WriteTarget::Dispatch {
+    static void push_bytes(void* target, const BytesSlice& bytes) {
+        reinterpret_cast<T*>(target)->push(bytes);
+    }
+    static void push_repeated_bytes(void* target, size_t num, uint8_t byte) {
+        reinterpret_cast<T*>(target)->push(num, byte);
+    }
+    static const DispatchTable table;
+};
+
+template <typename T>
+const WriteTarget::DispatchTable WriteTarget::Dispatch<T>::table = {
+    push_bytes,
+    push_repeated_bytes,
+};
+
+template <typename T>
+WriteTarget::WriteTarget(T* t)
+    : _target(t),
+      _dispatch_table(&Dispatch<T>::table) { }
+
+inline void WriteTarget::push(const BytesSlice& bytes) {
+    _dispatch_table->push_bytes(_target, bytes);
+}
+
+inline void WriteTarget::push(size_t num, uint8_t byte) {
+    _dispatch_table->push_repeated_bytes(_target, num, byte);
+}
+
 // Implementation details follow.
 
 }  // namespace sfz
@@ -55,6 +114,10 @@ inline void adl_write_to(::sfz::WriteTarget out, const T& t) {
 }  // sfz_adl
 
 namespace sfz {
+
+struct WriteItem::DispatchTable {
+    void (*write_to)(const void* target, WriteTarget out, size_t count);
+};
 
 template <typename T>
 struct WriteItem::Dispatch {
@@ -104,4 +167,4 @@ inline void WriteItem::write_to(WriteTarget out) const {
 
 }  // namespace sfz
 
-#endif  // SFZ_WRITE_ITEM_HPP_
+#endif  // SFZ_WRITE_HPP_

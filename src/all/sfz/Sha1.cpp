@@ -14,8 +14,8 @@
 #include "sfz/NetworkBytes.hpp"
 #include "sfz/Os.hpp"
 #include "sfz/MappedFile.hpp"
-#include "sfz/WriteItem.hpp"
 #include "sfz/read.hpp"
+#include "sfz/write.hpp"
 
 using std::numeric_limits;
 

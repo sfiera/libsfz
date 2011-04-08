@@ -32,8 +32,7 @@
 #include <sfz/SmartPtr.hpp>
 #include <sfz/String.hpp>
 #include <sfz/StringUtilities.hpp>
-#include <sfz/WriteItem.hpp>
-#include <sfz/WriteTarget.hpp>
 #include <sfz/read.hpp>
+#include <sfz/write.hpp>
 
 #endif  // SFZ_SFZ_HPP_

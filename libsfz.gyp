@@ -33,8 +33,8 @@
                 'src/all/sfz/Sha1.cpp',
                 'src/all/sfz/String.cpp',
                 'src/all/sfz/StringUtilities.cpp',
-                'src/all/sfz/WriteItem.cpp',
                 'src/all/sfz/read.cpp',
+                'src/all/sfz/write.cpp',
             ],
             'direct_dependent_settings': {
                 'include_dirs': [
@@ -59,8 +59,8 @@
                 'src/all/sfz/Sha1.test.cpp',
                 'src/all/sfz/String.test.cpp',
                 'src/all/sfz/StringUtilities.test.cpp',
-                'src/all/sfz/WriteItem.test.cpp',
                 'src/all/sfz/read.test.cpp',
+                'src/all/sfz/write.test.cpp',
             ],
             'dependencies': [
                 ':libsfz',
