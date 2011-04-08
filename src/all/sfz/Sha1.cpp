@@ -7,13 +7,13 @@
 
 #include <limits>
 #include "sfz/Bytes.hpp"
-#include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/Formatter.hpp"
 #include "sfz/NetworkBytes.hpp"
 #include "sfz/Os.hpp"
 #include "sfz/MappedFile.hpp"
+#include "sfz/encoding.hpp"
 #include "sfz/read.hpp"
 #include "sfz/write.hpp"
 

@@ -6,25 +6,18 @@
 #ifndef SFZ_ENCODING_HPP_
 #define SFZ_ENCODING_HPP_
 
+#include <stdint.h>
 #include <sfz/print.hpp>
 #include <sfz/write.hpp>
 
 namespace sfz {
 
 class BytesSlice;
+class PrintTarget;
 class StringSlice;
+class WriteTarget;
 template <typename T> struct EncodedString;
 template <typename T> struct DecodedBytes;
-
-template <typename T> struct EncodedString {
-    const BytesSlice& bytes;
-    EncodedString(const BytesSlice& b) : bytes(b) { }
-};
-
-template <typename T> struct DecodedBytes {
-    const StringSlice& string;
-    DecodedBytes(const StringSlice& s) : string(s) { }
-};
 
 // Constants for replacing code points which cannot be encoded.
 //
@@ -62,8 +55,8 @@ struct Ascii {
     static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<Ascii> encode(const StringSlice& string) { return string; }
-inline EncodedString<Ascii> decode(const BytesSlice& bytes) { return bytes; }
+inline DecodedBytes<Ascii> encode(const StringSlice& string);
+inline EncodedString<Ascii> decode(const BytesSlice& bytes);
 
 }  // namespace ascii
 
@@ -83,8 +76,8 @@ struct Latin1 {
     static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<Latin1> encode(const StringSlice& string) { return string; }
-inline EncodedString<Latin1> decode(const BytesSlice& bytes) { return bytes; }
+inline DecodedBytes<Latin1> encode(const StringSlice& string);
+inline EncodedString<Latin1> decode(const BytesSlice& bytes);
 
 }  // namespace latin1
 
@@ -105,18 +98,10 @@ struct Utf8 {
     static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<Utf8> encode(const StringSlice& string) { return string; }
-inline EncodedString<Utf8> decode(const BytesSlice& bytes) { return bytes; }
+inline DecodedBytes<Utf8> encode(const StringSlice& string);
+inline EncodedString<Utf8> decode(const BytesSlice& bytes);
 
-}  // namespace latin1
-
-template <typename T> void print_to(PrintTarget out, const EncodedString<T>& string) {
-    T::decode_to(out, string.bytes);
-}
-
-template <typename T> void write_to(WriteTarget out, const DecodedBytes<T>& bytes) {
-    T::encode_to(out, bytes.string);
-}
+}  // namespace utf8
 
 // MacRoman text encoding.
 //
@@ -134,10 +119,54 @@ struct MacRoman {
     static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
+inline DecodedBytes<MacRoman> encode(const StringSlice& string);
+inline EncodedString<MacRoman> decode(const BytesSlice& bytes);
+
+}  // namespace macroman
+
+}  // namespace sfz
+
+// Implementation details follow.
+
+namespace sfz {
+
+template <typename T> struct EncodedString {
+    const BytesSlice& bytes;
+    EncodedString(const BytesSlice& b) : bytes(b) { }
+};
+
+template <typename T> struct DecodedBytes {
+    const StringSlice& string;
+    DecodedBytes(const StringSlice& s) : string(s) { }
+};
+
+template <typename T> void print_to(PrintTarget out, const EncodedString<T>& string) {
+    T::decode_to(out, string.bytes);
+}
+
+template <typename T> void write_to(WriteTarget out, const DecodedBytes<T>& bytes) {
+    T::encode_to(out, bytes.string);
+}
+
+namespace ascii {
+inline DecodedBytes<Ascii> encode(const StringSlice& string) { return string; }
+inline EncodedString<Ascii> decode(const BytesSlice& bytes) { return bytes; }
+}  // namespace ascii
+
+namespace latin1 {
+inline DecodedBytes<Latin1> encode(const StringSlice& string) { return string; }
+inline EncodedString<Latin1> decode(const BytesSlice& bytes) { return bytes; }
+}  // namespace latin1
+
+namespace utf8 {
+inline DecodedBytes<Utf8> encode(const StringSlice& string) { return string; }
+inline EncodedString<Utf8> decode(const BytesSlice& bytes) { return bytes; }
+}  // namespace utf8
+
+namespace macroman {
 inline DecodedBytes<MacRoman> encode(const StringSlice& string) { return string; }
 inline EncodedString<MacRoman> decode(const BytesSlice& bytes) { return bytes; }
-
-}  // namespace latin1
+}  // namespace macroman
 
 }  // namespace sfz
 

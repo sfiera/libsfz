@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <string.h>
 #include "sfz/Bytes.hpp"
-#include "sfz/Encoding.hpp"
+#include "sfz/encoding.hpp"
 #include "sfz/print.hpp"
 
 namespace sfz {

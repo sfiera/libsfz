@@ -5,8 +5,8 @@
 
 #include "sfz/CString.hpp"
 
-#include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
+#include "sfz/encoding.hpp"
 
 namespace sfz {
 

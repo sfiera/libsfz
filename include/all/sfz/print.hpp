@@ -7,12 +7,14 @@
 #define SFZ_PRINT_HPP_
 
 #include <stdlib.h>
-#include <sfz/Rune.hpp>
 
 namespace sfz {
 
 class PrintTarget;
 class StringSlice;
+
+// A type capable of representing any valid Unicode code point.
+typedef uint32_t Rune;
 
 template <typename T>
 void print(PrintTarget out, const T& item);

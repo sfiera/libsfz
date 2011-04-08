@@ -10,7 +10,7 @@
 #include "sfz/Bytes.hpp"
 #include "sfz/Foreach.hpp"
 #include "sfz/Range.hpp"
-#include "sfz/Rune.hpp"
+#include "sfz/print.hpp"
 
 using testing::Eq;
 using testing::Test;

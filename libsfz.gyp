@@ -16,7 +16,6 @@
             'sources': [
                 'src/all/sfz/Bytes.cpp',
                 'src/all/sfz/CString.cpp',
-                'src/all/sfz/Encoding.cpp',
                 'src/all/sfz/Exception.cpp',
                 'src/all/sfz/Format.cpp',
                 'src/all/sfz/Formatter.cpp',
@@ -32,6 +31,7 @@
                 'src/all/sfz/Sha1.cpp',
                 'src/all/sfz/String.cpp',
                 'src/all/sfz/StringUtilities.cpp',
+                'src/all/sfz/encoding.cpp',
                 'src/all/sfz/print.cpp',
                 'src/all/sfz/read.cpp',
                 'src/all/sfz/write.cpp',
@@ -49,7 +49,6 @@
             'type': 'executable',
             'sources': [
                 'src/all/sfz/Bytes.test.cpp',
-                'src/all/sfz/Encoding.test.cpp',
                 'src/all/sfz/Foreach.test.cpp',
                 'src/all/sfz/Formatter.test.cpp',
                 'src/all/sfz/Io.test.cpp',
@@ -58,6 +57,7 @@
                 'src/all/sfz/Sha1.test.cpp',
                 'src/all/sfz/String.test.cpp',
                 'src/all/sfz/StringUtilities.test.cpp',
+                'src/all/sfz/encoding.test.cpp',
                 'src/all/sfz/print.test.cpp',
                 'src/all/sfz/read.test.cpp',
                 'src/all/sfz/write.test.cpp',

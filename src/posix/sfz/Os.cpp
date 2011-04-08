@@ -7,10 +7,10 @@
 
 #include <fcntl.h>
 #include <fts.h>
-#include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/PosixFormatter.hpp"
+#include "sfz/encoding.hpp"
 
 namespace sfz {
 

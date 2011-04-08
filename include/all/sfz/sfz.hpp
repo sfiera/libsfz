@@ -9,7 +9,6 @@
 #include <sfz/Bytes.hpp>
 #include <sfz/CString.hpp>
 #include <sfz/Compare.hpp>
-#include <sfz/Encoding.hpp>
 #include <sfz/Exception.hpp>
 #include <sfz/Foreach.hpp>
 #include <sfz/Format.hpp>
@@ -23,13 +22,13 @@
 #include <sfz/Os.hpp>
 #include <sfz/Range.hpp>
 #include <sfz/ReferenceCounted.hpp>
-#include <sfz/Rune.hpp>
 #include <sfz/ScopedFd.hpp>
 #include <sfz/ScopedPtr.hpp>
 #include <sfz/Sha1.hpp>
 #include <sfz/SmartPtr.hpp>
 #include <sfz/String.hpp>
 #include <sfz/StringUtilities.hpp>
+#include <sfz/encoding.hpp>
 #include <sfz/print.hpp>
 #include <sfz/read.hpp>
 #include <sfz/write.hpp>

@@ -8,8 +8,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "sfz/Bytes.hpp"
-#include "sfz/Encoding.hpp"
 #include "sfz/Exception.hpp"
+#include "sfz/encoding.hpp"
 
 using testing::ByRef;
 using testing::Eq;
