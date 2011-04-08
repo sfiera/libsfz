@@ -6,8 +6,8 @@
 #ifndef SFZ_C_STRING_HPP_
 #define SFZ_C_STRING_HPP_
 
-#include <sfz/Macros.hpp>
 #include <sfz/bytes.hpp>
+#include <sfz/macros.hpp>
 #include <sfz/string.hpp>
 
 namespace sfz {

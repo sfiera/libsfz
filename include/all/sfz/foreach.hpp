@@ -6,7 +6,8 @@
 #ifndef SFZ_FOREACH_HPP_
 #define SFZ_FOREACH_HPP_
 
-#include <sfz/Compare.hpp>
+#include <sfz/algorithm.hpp>
+#include <sfz/macros.hpp>
 
 #   if (_MSC_VER >= 1600) && (_MSC_VER < 1700)
 #       define SFZ_DECLTYPE(x) decltype(x)

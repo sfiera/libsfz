@@ -6,9 +6,9 @@
 #include "sfz/bytes.hpp"
 
 #include <algorithm>
-#include "sfz/Compare.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/foreach.hpp"
+#include "sfz/macros.hpp"
 
 namespace sfz {
 

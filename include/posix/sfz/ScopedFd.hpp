@@ -6,8 +6,8 @@
 #ifndef SFZ_SCOPED_FD_HPP_
 #define SFZ_SCOPED_FD_HPP_
 
-#include <sfz/Macros.hpp>
 #include <sfz/bytes.hpp>
+#include <sfz/macros.hpp>
 
 namespace sfz {
 

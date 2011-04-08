@@ -7,11 +7,12 @@
 
 #include <string.h>
 #include <algorithm>
-#include "sfz/Compare.hpp"
 #include "sfz/Exception.hpp"
+#include "sfz/algorithm.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/format.hpp"
+#include "sfz/macros.hpp"
 
 namespace sfz {
 
@@ -372,8 +373,6 @@ void swap(StringSlice& x, StringSlice& y) {
 }
 
 int compare(const String& x, const String& y) {
-    using sfz::compare;
-
     return compare(StringSlice(x), StringSlice(y));
 }
 

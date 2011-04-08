@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <algorithm>
-#include <sfz/Macros.hpp>
+#include <sfz/macros.hpp>
 
 namespace sfz {
 
