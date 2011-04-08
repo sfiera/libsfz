@@ -7,9 +7,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/Bytes.hpp"
-#include "sfz/String.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/foreach.hpp"
+#include "sfz/string.hpp"
 
 using testing::Eq;
 using testing::Test;

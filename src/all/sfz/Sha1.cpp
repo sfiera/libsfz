@@ -6,12 +6,12 @@
 #include "sfz/Sha1.hpp"
 
 #include <limits>
-#include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/NetworkBytes.hpp"
 #include "sfz/Os.hpp"
 #include "sfz/MappedFile.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/format.hpp"
 #include "sfz/read.hpp"
 #include "sfz/write.hpp"

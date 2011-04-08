@@ -7,7 +7,7 @@
 #define SFZ_SCOPED_FD_HPP_
 
 #include <sfz/Macros.hpp>
-#include <sfz/Bytes.hpp>
+#include <sfz/bytes.hpp>
 
 namespace sfz {
 

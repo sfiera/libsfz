@@ -7,8 +7,8 @@
 #define SFZ_FORMAT_HPP_
 
 #include <stdint.h>
-#include <sfz/String.hpp>
 #include <sfz/print.hpp>
+#include <sfz/string.hpp>
 
 namespace sfz {
 

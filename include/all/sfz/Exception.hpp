@@ -9,9 +9,9 @@
 #include <exception>
 #include <sfz/CString.hpp>
 #include <sfz/ReferenceCounted.hpp>
-#include <sfz/String.hpp>
 #include <sfz/memory.hpp>
 #include <sfz/print.hpp>
+#include <sfz/string.hpp>
 
 namespace sfz {
 

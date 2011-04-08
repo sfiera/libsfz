@@ -6,7 +6,6 @@
 #ifndef SFZ_SFZ_HPP_
 #define SFZ_SFZ_HPP_
 
-#include <sfz/Bytes.hpp>
 #include <sfz/CString.hpp>
 #include <sfz/Compare.hpp>
 #include <sfz/Exception.hpp>
@@ -18,14 +17,15 @@
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/ScopedFd.hpp>
 #include <sfz/Sha1.hpp>
-#include <sfz/String.hpp>
 #include <sfz/StringUtilities.hpp>
+#include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 #include <sfz/memory.hpp>
 #include <sfz/print.hpp>
 #include <sfz/read.hpp>
+#include <sfz/string.hpp>
 #include <sfz/write.hpp>
 
 #endif  // SFZ_SFZ_HPP_

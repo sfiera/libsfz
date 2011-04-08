@@ -6,8 +6,8 @@
 #ifndef SFZ_IO_HPP_
 #define SFZ_IO_HPP_
 
-#include <sfz/String.hpp>
 #include <sfz/print.hpp>
+#include <sfz/string.hpp>
 
 namespace sfz {
 namespace io {

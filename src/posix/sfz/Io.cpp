@@ -5,9 +5,9 @@
 
 #include "sfz/Io.hpp"
 
-#include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/PosixFormatter.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/format.hpp"
 

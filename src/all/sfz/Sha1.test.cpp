@@ -9,10 +9,10 @@
 #include <cstring>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Os.hpp"
 #include "sfz/ScopedFd.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/format.hpp"

@@ -7,7 +7,7 @@
 
 #include <errno.h>
 #include <string.h>
-#include "sfz/Bytes.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/print.hpp"
 

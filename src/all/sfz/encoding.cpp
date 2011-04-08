@@ -6,9 +6,9 @@
 #include "sfz/encoding.hpp"
 
 #include <algorithm>
-#include "sfz/Bytes.hpp"
-#include "sfz/String.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/foreach.hpp"
+#include "sfz/string.hpp"
 
 namespace sfz {
 

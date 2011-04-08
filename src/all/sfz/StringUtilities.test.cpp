@@ -7,8 +7,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/String.hpp"
 #include "sfz/foreach.hpp"
+#include "sfz/string.hpp"
 
 using testing::Eq;
 using testing::Test;

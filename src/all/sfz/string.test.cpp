@@ -3,12 +3,12 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/String.hpp"
+#include "sfz/string.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
 
 using testing::ByRef;

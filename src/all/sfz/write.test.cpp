@@ -7,7 +7,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/Bytes.hpp"
+#include "sfz/bytes.hpp"
 #include "sfz/print.hpp"
 #include "sfz/foreach.hpp"
 

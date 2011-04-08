@@ -6,8 +6,8 @@
 #include "sfz/StringUtilities.hpp"
 
 #include <limits>
-#include "sfz/String.hpp"
 #include "sfz/foreach.hpp"
+#include "sfz/string.hpp"
 
 using std::numeric_limits;
 
