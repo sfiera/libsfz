@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <iterator>
-#include <sfz/ScopedPtr.hpp>
+#include <sfz/memory.hpp>
 #include <sfz/write.hpp>
 
 namespace sfz {
