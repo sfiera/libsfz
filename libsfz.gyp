@@ -4,6 +4,9 @@
             'include/all',
             'include/mac',
             'include/posix',
+            'src/all',
+            'src/mac',
+            'src/posix',
         ],
     },
     'targets': [

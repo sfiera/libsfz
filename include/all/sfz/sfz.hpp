@@ -21,7 +21,6 @@
 #include <sfz/MappedFile.hpp>
 #include <sfz/NetworkBytes.hpp>
 #include <sfz/Os.hpp>
-#include <sfz/PosixFormatter.hpp>
 #include <sfz/PrintItem.hpp>
 #include <sfz/PrintTarget.hpp>
 #include <sfz/Range.hpp>
