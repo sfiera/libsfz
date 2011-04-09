@@ -5,7 +5,7 @@
 
 #include "sfz/memory.hpp"
 
-#include "sfz/Exception.hpp"
+#include "sfz/exception.hpp"
 
 namespace sfz {
 

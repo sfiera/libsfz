@@ -7,8 +7,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/Exception.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/exception.hpp"
 #include "sfz/string.hpp"
 
 using testing::ByRef;

@@ -14,7 +14,6 @@
             'target_name': 'libsfz',
             'type': '<(library)',
             'sources': [
-                'src/all/sfz/Exception.cpp',
                 'src/posix/sfz/Io.cpp',
                 'src/posix/sfz/MappedFile.cpp',
                 'src/posix/sfz/PosixFormatter.cpp',
@@ -24,6 +23,7 @@
                 'src/all/sfz/digest.cpp',
                 'src/all/sfz/encoding.cpp',
                 'src/all/sfz/endian.cpp',
+                'src/all/sfz/exception.cpp',
                 'src/all/sfz/format.cpp',
                 'src/all/sfz/memory.cpp',
                 'src/posix/sfz/os.cpp',

@@ -6,8 +6,8 @@
 #include "sfz/ScopedFd.hpp"
 
 #include <unistd.h>
-#include "sfz/Exception.hpp"
 #include "sfz/PosixFormatter.hpp"
+#include "sfz/exception.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/format.hpp"
 

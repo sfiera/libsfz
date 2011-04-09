@@ -6,8 +6,8 @@
 #include "sfz/string-utils.hpp"
 
 #include <limits>
-#include "sfz/Exception.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/exception.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/string.hpp"
 

@@ -5,10 +5,10 @@
 
 #include "sfz/Io.hpp"
 
-#include "sfz/Exception.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/exception.hpp"
 #include "sfz/format.hpp"
 
 using sfz::Bytes;

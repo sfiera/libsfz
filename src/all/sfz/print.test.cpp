@@ -8,8 +8,8 @@
 #include <limits>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/Exception.hpp"
 #include "sfz/bytes.hpp"
+#include "sfz/exception.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/format.hpp"
 

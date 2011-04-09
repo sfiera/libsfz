@@ -6,7 +6,7 @@
 #include "sfz/bytes.hpp"
 
 #include <algorithm>
-#include "sfz/Exception.hpp"
+#include "sfz/exception.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/macros.hpp"
 

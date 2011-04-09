@@ -7,9 +7,9 @@
 
 #include <string.h>
 #include <algorithm>
-#include "sfz/Exception.hpp"
 #include "sfz/algorithm.hpp"
 #include "sfz/encoding.hpp"
+#include "sfz/exception.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/format.hpp"
 #include "sfz/macros.hpp"
