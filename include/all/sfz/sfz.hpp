@@ -9,7 +9,6 @@
 #include <sfz/Exception.hpp>
 #include <sfz/Io.hpp>
 #include <sfz/MappedFile.hpp>
-#include <sfz/NetworkBytes.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/ScopedFd.hpp>
 #include <sfz/algorithm.hpp>

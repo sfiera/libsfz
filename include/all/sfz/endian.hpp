@@ -3,8 +3,8 @@
 // This file is part of libsfz, a free software project.  You can redistribute
 // it and/or modify it under the terms of the MIT License.
 
-#ifndef SFZ_NETWORK_BYTES_HPP_
-#define SFZ_NETWORK_BYTES_HPP_
+#ifndef SFZ_ENDIAN_HPP_
+#define SFZ_ENDIAN_HPP_
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -37,4 +37,4 @@ class NetworkBytes {
 
 }  // namespace sfz
 
-#endif  // SFZ_NETWORK_BYTES_HPP_
+#endif  // SFZ_ENDIAN_HPP_

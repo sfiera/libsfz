@@ -7,10 +7,10 @@
 
 #include <limits>
 #include "sfz/Exception.hpp"
-#include "sfz/NetworkBytes.hpp"
 #include "sfz/MappedFile.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/bytes.hpp"
+#include "sfz/endian.hpp"
 #include "sfz/format.hpp"
 #include "sfz/os.hpp"
 #include "sfz/read.hpp"

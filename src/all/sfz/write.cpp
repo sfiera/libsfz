@@ -5,8 +5,8 @@
 
 #include "sfz/write.hpp"
 
-#include "sfz/NetworkBytes.hpp"
 #include "sfz/bytes.hpp"
+#include "sfz/endian.hpp"
 #include "sfz/foreach.hpp"
 
 namespace sfz {

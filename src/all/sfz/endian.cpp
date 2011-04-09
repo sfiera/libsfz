@@ -3,7 +3,7 @@
 // This file is part of libsfz, a free software project.  You can redistribute
 // it and/or modify it under the terms of the MIT License.
 
-#include "sfz/NetworkBytes.hpp"
+#include "sfz/endian.hpp"
 
 #include <arpa/inet.h>
 #include <string.h>
