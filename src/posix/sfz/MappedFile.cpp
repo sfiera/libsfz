@@ -10,11 +10,11 @@
 #include <errno.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include "sfz/CString.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/ScopedFd.hpp"
 #include "sfz/format.hpp"
+#include "sfz/string-utils.hpp"
 
 namespace sfz {
 

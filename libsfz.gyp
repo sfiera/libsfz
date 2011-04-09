@@ -14,7 +14,6 @@
             'target_name': 'libsfz',
             'type': '<(library)',
             'sources': [
-                'src/all/sfz/CString.cpp',
                 'src/all/sfz/Exception.cpp',
                 'src/posix/sfz/Io.cpp',
                 'src/posix/sfz/MappedFile.cpp',
@@ -23,7 +22,6 @@
                 'src/posix/sfz/PosixFormatter.cpp',
                 'src/mac/sfz/ReferenceCounted.cpp',
                 'src/posix/sfz/ScopedFd.cpp',
-                'src/all/sfz/StringUtilities.cpp',
                 'src/all/sfz/bytes.cpp',
                 'src/all/sfz/digest.cpp',
                 'src/all/sfz/encoding.cpp',
@@ -32,6 +30,7 @@
                 'src/all/sfz/print.cpp',
                 'src/all/sfz/read.cpp',
                 'src/all/sfz/string.cpp',
+                'src/all/sfz/string-utils.cpp',
                 'src/all/sfz/write.cpp',
             ],
             'direct_dependent_settings': {
@@ -48,7 +47,6 @@
             'sources': [
                 'src/all/sfz/Io.test.cpp',
                 'src/all/sfz/Os.test.cpp',
-                'src/all/sfz/StringUtilities.test.cpp',
                 'src/all/sfz/bytes.test.cpp',
                 'src/all/sfz/digest.test.cpp',
                 'src/all/sfz/encoding.test.cpp',
@@ -58,6 +56,7 @@
                 'src/all/sfz/print.test.cpp',
                 'src/all/sfz/read.test.cpp',
                 'src/all/sfz/string.test.cpp',
+                'src/all/sfz/string-utils.test.cpp',
                 'src/all/sfz/write.test.cpp',
             ],
             'dependencies': [

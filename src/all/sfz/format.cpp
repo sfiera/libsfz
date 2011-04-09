@@ -5,11 +5,11 @@
 
 #include "sfz/format.hpp"
 
-#include "sfz/StringUtilities.hpp"
 #include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/string.hpp"
+#include "sfz/string-utils.hpp"
 
 namespace sfz {
 

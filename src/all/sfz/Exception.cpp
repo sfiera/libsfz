@@ -5,7 +5,7 @@
 
 #include "sfz/Exception.hpp"
 
-#include "sfz/CString.hpp"
+#include "sfz/string-utils.hpp"
 
 namespace sfz {
 

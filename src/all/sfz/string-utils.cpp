@@ -3,9 +3,11 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/StringUtilities.hpp"
+#include "sfz/string-utils.hpp"
 
 #include <limits>
+#include "sfz/Exception.hpp"
+#include "sfz/encoding.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/string.hpp"
 
@@ -92,5 +94,25 @@ template bool string_to_int<int32_t>(StringSlice s, int32_t* out, int base);
 template bool string_to_int<uint32_t>(StringSlice s, uint32_t* out, int base);
 template bool string_to_int<int64_t>(StringSlice s, int64_t* out, int base);
 template bool string_to_int<uint64_t>(StringSlice s, uint64_t* out, int base);
+
+CString::CString(const StringSlice& string) {
+    if (string.find('\0') != StringSlice::npos) {
+        throw Exception("Tried to create CString from string with embedded NUL");
+    }
+    _bytes.append(utf8::encode(string));
+    _bytes.append(1, '\0');
+}
+
+char* CString::data() {
+    return reinterpret_cast<char*>(_bytes.data());
+}
+
+const char* CString::data() const {
+    return reinterpret_cast<const char*>(_bytes.data());
+}
+
+size_t CString::size() const {
+    return _bytes.size() - 1;
+}
 
 }  // namespace sfz

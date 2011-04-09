@@ -1,16 +1,22 @@
-// Copyright (c) 2010 Chris Pickel <sfiera@gmail.com>
+// Copyright (c) 2009 Chris Pickel <sfiera@gmail.com>
 //
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#ifndef SFZ_C_STRING_HPP_
-#define SFZ_C_STRING_HPP_
+#ifndef SFZ_STRING_UTILS_HPP_
+#define SFZ_STRING_UTILS_HPP_
 
+#include <stdint.h>
 #include <sfz/bytes.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/string.hpp>
 
 namespace sfz {
+
+class StringSlice;
+
+template <typename T>
+bool string_to_int(StringSlice s, T* out, int base = 10);
 
 class CString {
   public:
@@ -28,4 +34,4 @@ class CString {
 
 }  // namespace sfz
 
-#endif  // SFZ_C_STRING_HPP_
+#endif  // SFZ_STRING_UTILS_HPP_
