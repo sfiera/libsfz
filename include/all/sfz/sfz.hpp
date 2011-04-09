@@ -10,7 +10,6 @@
 #include <sfz/Io.hpp>
 #include <sfz/MappedFile.hpp>
 #include <sfz/NetworkBytes.hpp>
-#include <sfz/Os.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/ScopedFd.hpp>
 #include <sfz/algorithm.hpp>
@@ -21,6 +20,7 @@
 #include <sfz/format.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/memory.hpp>
+#include <sfz/os.hpp>
 #include <sfz/print.hpp>
 #include <sfz/read.hpp>
 #include <sfz/string.hpp>

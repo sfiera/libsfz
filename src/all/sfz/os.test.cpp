@@ -3,7 +3,7 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/Os.hpp"
+#include "sfz/os.hpp"
 
 #include <fcntl.h>
 #include <gmock/gmock.h>
@@ -77,7 +77,7 @@ MATCHER(IsFifoStat, "") { return (arg.st_mode & S_IFMT) == S_IFIFO; }
 // files, and symlinks.  Try walking the directory with a few different options; then, delete some
 // of the files and directories and try walking again.
 //
-// This exercises most of Os.hpp, aside from the simple functions tested above, and some of the
+// This exercises most of os.hpp, aside from the simple functions tested above, and some of the
 // stranger cases during walk().
 TEST_F(OsTest, Hierarchy) {
     TemporaryDirectory dir("os-test");
@@ -194,7 +194,7 @@ TEST_F(OsTest, Hierarchy) {
     }
 }
 
-// Exercise the remaining bits of Os.hpp: mkfifo, as well as walk() calls which include files of
+// Exercise the remaining bits of os.hpp: mkfifo, as well as walk() calls which include files of
 // type other() and cycle_directory().
 TEST_F(OsTest, WalkOther) {
     TemporaryDirectory dir("os-test");

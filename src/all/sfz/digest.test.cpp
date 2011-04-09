@@ -10,12 +10,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "sfz/Exception.hpp"
-#include "sfz/Os.hpp"
 #include "sfz/ScopedFd.hpp"
 #include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/format.hpp"
+#include "sfz/os.hpp"
 #include "sfz/print.hpp"
 #include "sfz/read.hpp"
 #include "sfz/write.hpp"
