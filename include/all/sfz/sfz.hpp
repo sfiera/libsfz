@@ -14,10 +14,10 @@
 #include <sfz/Os.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/ScopedFd.hpp>
-#include <sfz/Sha1.hpp>
 #include <sfz/StringUtilities.hpp>
 #include <sfz/algorithm.hpp>
 #include <sfz/bytes.hpp>
+#include <sfz/digest.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/foreach.hpp>
 #include <sfz/format.hpp>

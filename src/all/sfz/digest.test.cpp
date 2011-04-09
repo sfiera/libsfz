@@ -3,7 +3,7 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/Sha1.hpp"
+#include "sfz/digest.hpp"
 
 #include <fcntl.h>
 #include <cstring>

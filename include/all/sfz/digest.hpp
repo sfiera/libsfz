@@ -3,8 +3,8 @@
 // This file is part of libsfz, a free software project.  You can redistribute
 // it and/or modify it under the terms of the MIT License.
 
-#ifndef SFZ_SHA1_HPP_
-#define SFZ_SHA1_HPP_
+#ifndef SFZ_DIGEST_HPP_
+#define SFZ_DIGEST_HPP_
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -91,4 +91,4 @@ Sha1::Digest tree_digest(const StringSlice& path);
 
 }  // namespace sfz
 
-#endif  // SFZ_SHA1_HPP_
+#endif  // SFZ_DIGEST_HPP_
