@@ -11,10 +11,10 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include "sfz/PosixFormatter.hpp"
 #include "sfz/exception.hpp"
 #include "sfz/foreach.hpp"
 #include "sfz/format.hpp"
+#include "sfz/posix-format.hpp"
 #include "sfz/string-utils.hpp"
 
 namespace sfz {

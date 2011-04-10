@@ -5,11 +5,11 @@
 
 #include "sfz/io.hpp"
 
-#include "sfz/PosixFormatter.hpp"
 #include "sfz/bytes.hpp"
 #include "sfz/encoding.hpp"
 #include "sfz/exception.hpp"
 #include "sfz/format.hpp"
+#include "sfz/posix-format.hpp"
 
 using sfz::Bytes;
 using sfz::Rune;

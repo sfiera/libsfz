@@ -3,8 +3,8 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#ifndef SFZ_POSIX_FORMATTER_HPP_
-#define SFZ_POSIX_FORMATTER_HPP_
+#ifndef SFZ_POSIX_FORMAT_HPP_
+#define SFZ_POSIX_FORMAT_HPP_
 
 #include "sfz/print.hpp"
 
@@ -22,4 +22,4 @@ void print_to(PrintTarget out, const PosixStrerror& error);
 
 }  // namespace sfz
 
-#endif // SFZ_POSIX_FORMATTER_HPP_
+#endif // SFZ_POSIX_FORMAT_HPP_
