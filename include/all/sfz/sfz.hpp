@@ -6,7 +6,6 @@
 #ifndef SFZ_SFZ_HPP_
 #define SFZ_SFZ_HPP_
 
-#include <sfz/Io.hpp>
 #include <sfz/ReferenceCounted.hpp>
 #include <sfz/algorithm.hpp>
 #include <sfz/bytes.hpp>
@@ -16,6 +15,7 @@
 #include <sfz/file.hpp>
 #include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
+#include <sfz/io.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/memory.hpp>
 #include <sfz/os.hpp>

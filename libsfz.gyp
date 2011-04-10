@@ -14,7 +14,6 @@
             'target_name': 'libsfz',
             'type': '<(library)',
             'sources': [
-                'src/posix/sfz/Io.cpp',
                 'src/posix/sfz/PosixFormatter.cpp',
                 'src/mac/sfz/ReferenceCounted.cpp',
                 'src/all/sfz/bytes.cpp',
@@ -24,6 +23,7 @@
                 'src/all/sfz/exception.cpp',
                 'src/posix/sfz/file.cpp',
                 'src/all/sfz/format.cpp',
+                'src/posix/sfz/io.cpp',
                 'src/all/sfz/memory.cpp',
                 'src/posix/sfz/os.cpp',
                 'src/all/sfz/print.cpp',
