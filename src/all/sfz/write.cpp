@@ -3,11 +3,11 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/write.hpp"
+#include <sfz/write.hpp>
 
-#include "sfz/bytes.hpp"
-#include "sfz/endian.hpp"
-#include "sfz/foreach.hpp"
+#include <sfz/bytes.hpp>
+#include <sfz/endian.hpp>
+#include <sfz/foreach.hpp>
 
 namespace sfz {
 

@@ -3,16 +3,16 @@
 // This file is part of libsfz, a free software project.  You can redistribute
 // it and/or modify it under the terms of the MIT License.
 
-#include "sfz/string.hpp"
+#include <sfz/string.hpp>
 
 #include <string.h>
 #include <algorithm>
-#include "sfz/algorithm.hpp"
-#include "sfz/encoding.hpp"
-#include "sfz/exception.hpp"
-#include "sfz/foreach.hpp"
-#include "sfz/format.hpp"
-#include "sfz/macros.hpp"
+#include <sfz/algorithm.hpp>
+#include <sfz/encoding.hpp>
+#include <sfz/exception.hpp>
+#include <sfz/foreach.hpp>
+#include <sfz/format.hpp>
+#include <sfz/macros.hpp>
 
 namespace sfz {
 

@@ -3,13 +3,13 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/io.hpp"
+#include <sfz/io.hpp>
 
-#include "sfz/bytes.hpp"
-#include "sfz/encoding.hpp"
-#include "sfz/exception.hpp"
-#include "sfz/format.hpp"
-#include "sfz/posix-format.hpp"
+#include <sfz/bytes.hpp>
+#include <sfz/encoding.hpp>
+#include <sfz/exception.hpp>
+#include <sfz/format.hpp>
+#include <sfz/posix-format.hpp>
 
 using sfz::Bytes;
 using sfz::Rune;

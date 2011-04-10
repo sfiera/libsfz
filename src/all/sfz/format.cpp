@@ -3,13 +3,13 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/format.hpp"
+#include <sfz/format.hpp>
 
-#include "sfz/bytes.hpp"
-#include "sfz/encoding.hpp"
-#include "sfz/foreach.hpp"
-#include "sfz/string.hpp"
-#include "sfz/string-utils.hpp"
+#include <sfz/bytes.hpp>
+#include <sfz/encoding.hpp>
+#include <sfz/foreach.hpp>
+#include <sfz/string.hpp>
+#include <sfz/string-utils.hpp>
 
 namespace sfz {
 

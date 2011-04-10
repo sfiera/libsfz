@@ -3,7 +3,7 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/io.hpp"
+#include <sfz/io.hpp>
 
 #include <fcntl.h>
 #include <gmock/gmock.h>

@@ -3,18 +3,18 @@
 // This file is part of libsfz, a free software project.  You can redistribute
 // it and/or modify it under the terms of the MIT License.
 
-#include "sfz/digest.hpp"
+#include <sfz/digest.hpp>
 
 #include <limits>
-#include "sfz/bytes.hpp"
-#include "sfz/encoding.hpp"
-#include "sfz/endian.hpp"
-#include "sfz/exception.hpp"
-#include "sfz/file.hpp"
-#include "sfz/format.hpp"
-#include "sfz/os.hpp"
-#include "sfz/read.hpp"
-#include "sfz/write.hpp"
+#include <sfz/bytes.hpp>
+#include <sfz/encoding.hpp>
+#include <sfz/endian.hpp>
+#include <sfz/exception.hpp>
+#include <sfz/file.hpp>
+#include <sfz/format.hpp>
+#include <sfz/os.hpp>
+#include <sfz/read.hpp>
+#include <sfz/write.hpp>
 
 using std::numeric_limits;
 

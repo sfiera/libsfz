@@ -3,14 +3,14 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/memory.hpp"
+#include <sfz/memory.hpp>
 
 #include <algorithm>
 #include <vector>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/exception.hpp"
-#include "sfz/foreach.hpp"
+#include <sfz/exception.hpp>
+#include <sfz/foreach.hpp>
 
 using std::next_permutation;
 using std::set;

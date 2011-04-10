@@ -3,15 +3,15 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/print.hpp"
+#include <sfz/print.hpp>
 
 #include <limits>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/bytes.hpp"
-#include "sfz/exception.hpp"
-#include "sfz/foreach.hpp"
-#include "sfz/format.hpp"
+#include <sfz/bytes.hpp>
+#include <sfz/exception.hpp>
+#include <sfz/foreach.hpp>
+#include <sfz/format.hpp>
 
 using std::numeric_limits;
 using testing::Eq;

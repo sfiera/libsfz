@@ -3,7 +3,7 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/file.hpp"
+#include <sfz/file.hpp>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -11,11 +11,11 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include "sfz/exception.hpp"
-#include "sfz/foreach.hpp"
-#include "sfz/format.hpp"
-#include "sfz/posix-format.hpp"
-#include "sfz/string-utils.hpp"
+#include <sfz/exception.hpp>
+#include <sfz/foreach.hpp>
+#include <sfz/format.hpp>
+#include <sfz/posix-format.hpp>
+#include <sfz/string-utils.hpp>
 
 namespace sfz {
 

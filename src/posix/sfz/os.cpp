@@ -3,14 +3,14 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/os.hpp"
+#include <sfz/os.hpp>
 
 #include <fcntl.h>
 #include <fts.h>
-#include "sfz/encoding.hpp"
-#include "sfz/exception.hpp"
-#include "sfz/format.hpp"
-#include "sfz/posix-format.hpp"
+#include <sfz/encoding.hpp>
+#include <sfz/exception.hpp>
+#include <sfz/format.hpp>
+#include <sfz/posix-format.hpp>
 
 namespace sfz {
 

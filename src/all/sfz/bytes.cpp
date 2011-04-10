@@ -3,12 +3,12 @@
 // This file is part of libsfz, a free software project.  You can redistribute
 // it and/or modify it under the terms of the MIT License.
 
-#include "sfz/bytes.hpp"
+#include <sfz/bytes.hpp>
 
 #include <algorithm>
-#include "sfz/exception.hpp"
-#include "sfz/foreach.hpp"
-#include "sfz/macros.hpp"
+#include <sfz/exception.hpp>
+#include <sfz/foreach.hpp>
+#include <sfz/macros.hpp>
 
 namespace sfz {
 

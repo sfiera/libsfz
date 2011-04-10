@@ -3,12 +3,12 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "sfz/string-utils.hpp"
+#include <sfz/string-utils.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "sfz/foreach.hpp"
-#include "sfz/string.hpp"
+#include <sfz/foreach.hpp>
+#include <sfz/string.hpp>
 
 using testing::Eq;
 using testing::Test;
