@@ -15,7 +15,6 @@
             'type': '<(library)',
             'sources': [
                 'src/posix/sfz/PosixFormatter.cpp',
-                'src/mac/sfz/ReferenceCounted.cpp',
                 'src/all/sfz/bytes.cpp',
                 'src/all/sfz/digest.cpp',
                 'src/all/sfz/encoding.cpp',
@@ -28,6 +27,7 @@
                 'src/posix/sfz/os.cpp',
                 'src/all/sfz/print.cpp',
                 'src/all/sfz/read.cpp',
+                'src/mac/sfz/ref-count.cpp',
                 'src/all/sfz/string.cpp',
                 'src/all/sfz/string-utils.cpp',
                 'src/all/sfz/write.cpp',

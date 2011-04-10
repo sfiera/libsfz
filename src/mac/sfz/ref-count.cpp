@@ -3,7 +3,7 @@
 // This file is part of libsfz, a free software project.  You can redistribute
 // it and/or modify it under the terms of the MIT License.
 
-#include "sfz/ReferenceCounted.hpp"
+#include "sfz/ref-count.hpp"
 
 #include <libkern/OSAtomic.h>
 #include <stdio.h>

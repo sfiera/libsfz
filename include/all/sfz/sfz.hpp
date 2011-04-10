@@ -6,7 +6,6 @@
 #ifndef SFZ_SFZ_HPP_
 #define SFZ_SFZ_HPP_
 
-#include <sfz/ReferenceCounted.hpp>
 #include <sfz/algorithm.hpp>
 #include <sfz/bytes.hpp>
 #include <sfz/digest.hpp>
@@ -21,6 +20,7 @@
 #include <sfz/os.hpp>
 #include <sfz/print.hpp>
 #include <sfz/read.hpp>
+#include <sfz/ref-count.hpp>
 #include <sfz/string.hpp>
 #include <sfz/string-utils.hpp>
 #include <sfz/write.hpp>

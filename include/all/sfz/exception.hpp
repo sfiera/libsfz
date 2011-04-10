@@ -7,9 +7,9 @@
 #define SFZ_EXCEPTION_HPP_
 
 #include <exception>
-#include <sfz/ReferenceCounted.hpp>
 #include <sfz/memory.hpp>
 #include <sfz/print.hpp>
+#include <sfz/ref-count.hpp>
 #include <sfz/string.hpp>
 #include <sfz/string-utils.hpp>
 
