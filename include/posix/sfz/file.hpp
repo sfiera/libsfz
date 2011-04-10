@@ -3,14 +3,31 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#ifndef SFZ_MAPPED_FILE_HPP_
-#define SFZ_MAPPED_FILE_HPP_
+#ifndef SFZ_FILE_HPP_
+#define SFZ_FILE_HPP_
 
 #include <sfz/bytes.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/string.hpp>
 
 namespace sfz {
+
+class ScopedFd {
+  public:
+    explicit ScopedFd(int fd);
+    ~ScopedFd();
+
+    int get();
+    int release();
+
+    void push(const BytesSlice& bytes);
+    void push(size_t num, uint8_t byte);
+
+  private:
+    int _fd;
+
+    DISALLOW_COPY_AND_ASSIGN(ScopedFd);
+};
 
 // Maps a file into memory in read-only mode.
 //
@@ -50,4 +67,4 @@ class MappedFile {
 
 }  // namespace sfz
 
-#endif // SFZ_MAPPED_FILE_HPP_
+#endif // SFZ_FILE_HPP_

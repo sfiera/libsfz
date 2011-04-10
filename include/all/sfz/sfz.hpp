@@ -7,14 +7,13 @@
 #define SFZ_SFZ_HPP_
 
 #include <sfz/Io.hpp>
-#include <sfz/MappedFile.hpp>
 #include <sfz/ReferenceCounted.hpp>
-#include <sfz/ScopedFd.hpp>
 #include <sfz/algorithm.hpp>
 #include <sfz/bytes.hpp>
 #include <sfz/digest.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
+#include <sfz/file.hpp>
 #include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 #include <sfz/macros.hpp>
