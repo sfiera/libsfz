@@ -20,7 +20,7 @@
 
 #define SFZ_FOREACH(DECLARATION, CONTAINER, BLOCK) \
     do { \
-        const SFZ_DECLTYPE(CONTAINER)& __container = (CONTAINER); \
+        const SFZ_DECLTYPE((CONTAINER))& __container = (CONTAINER); \
         for (SFZ_DECLTYPE(::sfz::begin(__container)) __begin = ::sfz::begin(__container), \
                 __end = ::sfz::end(__container); __begin != __end; ++__begin) { \
             DECLARATION __attribute__((unused)) = *__begin; \

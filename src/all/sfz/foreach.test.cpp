@@ -196,8 +196,7 @@ TEST_F(ForeachTest, KingdomsTemporary) {
     EXPECT_CALL(f, Call(Eq("Sussex")));
     EXPECT_CALL(f, Call(Eq("Wessex")));
 
-    // Extra parentheses needed to avoid most vexing parse.
-    SFZ_FOREACH(const StringSlice& s, (Kingdoms()), {
+    SFZ_FOREACH(const StringSlice& s, Kingdoms(), {
         f(s);
     });
 }
