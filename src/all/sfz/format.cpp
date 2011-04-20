@@ -18,13 +18,13 @@ namespace {
 void span_complement(
         const StringSlice& input, const StringSlice& chars,
         StringSlice* span, StringSlice* remainder) {
-    foreach (int i, range(input.size())) {
+    SFZ_FOREACH(int i, range(input.size()), {
         if (chars.find(input.at(i)) != String::npos) {
             *span = input.slice(0, i);
             *remainder = input.slice(i);
             return;
         }
-    }
+    });
     *span = input;
     *remainder = StringSlice();
 }
@@ -158,7 +158,7 @@ const char kEscaped[' '][5] = {
 }  // namespace
 
 void print_to(PrintTarget out, const EscapedString& value) {
-    foreach (Rune rune, value.string) {
+    SFZ_FOREACH(Rune rune, value.string, {
         if (rune < ' ') {
             out.push(kEscaped[rune]);
         } else if (rune == '\'' || rune == '\"' || rune == '\\') {
@@ -167,7 +167,7 @@ void print_to(PrintTarget out, const EscapedString& value) {
         } else {
             out.push(1, rune);
         }
-    }
+    });
 }
 
 void print_to(PrintTarget out, const QuotedString& value) {

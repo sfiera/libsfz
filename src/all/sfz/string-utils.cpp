@@ -56,7 +56,7 @@ bool string_to_int(StringSlice s, T* out, int base) {
         positive = false;
         s = s.slice(1);
     }
-    foreach (Rune r, s) {
+    SFZ_FOREACH(Rune r, s, {
         int digit;
         if (!get_digit_value(r, base, &digit)) {
             return false;
@@ -81,7 +81,7 @@ bool string_to_int(StringSlice s, T* out, int base) {
             }
             value -= digit;
         }
-    }
+    });
     *out = value;
     return true;
 }

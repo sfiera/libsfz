@@ -51,9 +51,9 @@ void ScopedFd::push(const BytesSlice& bytes) {
 }
 
 void ScopedFd::push(size_t num, uint8_t byte) {
-    foreach (int i, range(num)) {
+    SFZ_FOREACH(int i, range(num), {
         push(BytesSlice(&byte, 1));
-    }
+    });
 }
 
 MappedFile::MappedFile(const StringSlice& path)

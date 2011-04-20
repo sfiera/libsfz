@@ -32,7 +32,7 @@ class StringUtilitiesTest : public Test {
   protected:
     template <typename T, int size>
     void Run(const TestData<T> (&inputs)[size]) {
-        foreach (const TestData<T>& input, inputs) {
+        SFZ_FOREACH(const TestData<T>& input, inputs, {
             T actual;
             if (input.good) {
                 EXPECT_THAT(string_to_int(input.string, &actual), Eq(true))
@@ -42,7 +42,7 @@ class StringUtilitiesTest : public Test {
                 EXPECT_THAT(string_to_int(input.string, &actual), Eq(false))
                     << "input: " << input.string << "; output: " << actual;
             }
-        }
+        });
     }
 };
 

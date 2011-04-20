@@ -73,9 +73,9 @@ void String::assign(size_t num, Rune rune) {
 
 void String::push(const StringSlice& string) {
     reserve(_size + string._size);
-    foreach (Rune r, string) {
+    SFZ_FOREACH(Rune r, string, {
         append(1, r);
-    }
+    });
 }
 
 void String::push(size_t num, Rune rune) {
@@ -107,9 +107,9 @@ void String::reserve(size_t capacity) {
 void String::resize(size_t size, Rune rune) {
     if (size > _size) {
         reserve(size);
-        foreach (size_t i, range(_size, size)) {
+        SFZ_FOREACH(size_t i, range(_size, size), {
             _data[i] = rune;
-        }
+        });
     }
     _size = size;
 }
@@ -182,11 +182,11 @@ StringSlice::StringSlice(const String& string)
 
 StringSlice::StringSlice(const char* ascii_string) {
     BytesSlice bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
-    foreach (uint8_t byte, bytes) {
+    SFZ_FOREACH(uint8_t byte, bytes, {
         if (byte & 0x80) {
             throw Exception("string is not ASCII");
         }
-    }
+    });
     _data = bytes.data();
     _encoding = sizeof(uint8_t);
     _size = bytes.size();
@@ -216,11 +216,11 @@ bool StringSlice::empty() const {
 }
 
 size_t StringSlice::find(Rune rune, size_t index) const {
-    foreach (size_t i, range(index, _size)) {
+    SFZ_FOREACH(size_t i, range(index, _size), {
         if (at(i) == rune) {
             return i;
         }
-    }
+    });
     return npos;
 }
 
@@ -228,11 +228,11 @@ size_t StringSlice::find(const StringSlice& string, size_t index) const {
     if (index + string._size > _size) {
         return npos;
     }
-    foreach (size_t i, range(index, _size - string._size + 1)) {
+    SFZ_FOREACH(size_t i, range(index, _size - string._size + 1), {
         if (slice(i, string._size) == string) {
             return i;
         }
-    }
+    });
     return npos;
 }
 
@@ -240,11 +240,11 @@ size_t StringSlice::rfind(Rune rune, size_t index) const {
     if (index == npos) {
         index = _size - 1;
     }
-    foreach (size_t i, range(index + 1)) {
+    SFZ_FOREACH(size_t i, range(index + 1), {
         if (at(index - i) == rune) {
             return index - i;
         }
-    }
+    });
     return npos;
 }
 
@@ -258,11 +258,11 @@ size_t StringSlice::rfind(const StringSlice& string, size_t index) const {
     if (index + string._size > _size) {
         index = _size - string._size;
     }
-    foreach (size_t i, range(index - string._size + 1)) {
+    SFZ_FOREACH(size_t i, range(index - string._size + 1), {
         if (slice(index - i, string._size) == string) {
             return index - i;
         }
-    }
+    });
     return npos;
 }
 

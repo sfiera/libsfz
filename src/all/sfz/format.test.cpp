@@ -27,11 +27,11 @@ class FormatterTest : public Test {
   protected:
     template <int size>
     void Run(const StringSlice& prefix, const TestData (&data)[size]) {
-        foreach (const TestData& test, data) {
+        SFZ_FOREACH(const TestData& test, data, {
             String s(prefix);
             test.value.print_to(&s);
             EXPECT_THAT(s, Eq(test.expected));
-        }
+        });
     }
 };
 

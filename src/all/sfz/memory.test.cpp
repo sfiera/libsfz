@@ -104,10 +104,10 @@ TEST_F(LinkedPtrTest, Triple) {
             ptrs[0].reset(new ObservedObject(&observer));
             ptrs[1] = ptrs[0];
             ptrs[2] = ptrs[i];
-            foreach (int index, sequence) {
+            SFZ_FOREACH(int index, sequence, {
                 ptrs[index]->mark();
                 ptrs[index].reset();
-            }
+            });
         } while (next_permutation(sequence.begin(), sequence.end()));
     }
 }

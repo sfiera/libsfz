@@ -14,6 +14,7 @@
 using std::vector;
 using testing::Eq;
 using testing::Ne;
+using testing::StrictMock;
 using testing::Test;
 
 namespace sfz {
@@ -52,9 +53,9 @@ TEST_F(ForeachTest, IntArray) {
     EXPECT_CALL(f, Call(3));
 
     int values[] = {0, 1, 2, 3};
-    foreach (int i, values) {
+    SFZ_FOREACH(int i, values, {
         f(i);
-    }
+    });
 }
 
 // Iteration over a vector<> of primitives.
@@ -66,9 +67,9 @@ TEST_F(ForeachTest, IntVector) {
     EXPECT_CALL(f, Call(3));
 
     vector<int> values = mkrange(0, 4);
-    foreach (int i, values) {
+    SFZ_FOREACH(int i, values, {
         f(i);
-    }
+    });
 }
 
 // As before, except that it is a const vector<>& of a temporary, and not a variable on the stack.
@@ -80,9 +81,9 @@ TEST_F(ForeachTest, IntVectorConstRef) {
     EXPECT_CALL(f, Call(3));
 
     const vector<int>& values = mkrange(0, 4);
-    foreach (int i, values) {
+    SFZ_FOREACH(int i, values, {
         f(i);
-    }
+    });
 }
 
 // As before, except that there is no const vector<>& declared (foreach should do so itself).
@@ -93,9 +94,9 @@ TEST_F(ForeachTest, IntVectorTemporary) {
     EXPECT_CALL(f, Call(2));
     EXPECT_CALL(f, Call(3));
 
-    foreach (int i, mkrange(0, 4)) {
+    SFZ_FOREACH(int i, mkrange(0, 4), {
         f(i);
-    }
+    });
 }
 
 // Array of a non-primitive type.  We would like to test with a vector<String> as well, but String
@@ -112,9 +113,39 @@ TEST_F(ForeachTest, StringArray) {
     values[1].assign("two");
     values[2].assign("three");
     values[3].assign("four");
-    foreach (const String& s, values) {
+    SFZ_FOREACH(const String& s, values, {
         f(s);
-    }
+    });
+}
+
+// Break out of a foreach loop prematurely.
+TEST_F(ForeachTest, Break) {
+    StrictMock<MockFunctor<void(int)> > f;
+    EXPECT_CALL(f, Call(Eq(0)));
+    EXPECT_CALL(f, Call(Eq(1)));
+
+    int values[] = {0, 1, 2, 3};
+    SFZ_FOREACH(int i, values, {
+        f(i);
+        if (i == 1) {
+            break;
+        }
+    });
+}
+
+// Use continue statements from within a foreach loop.
+TEST_F(ForeachTest, Continue) {
+    StrictMock<MockFunctor<void(int)> > f;
+    EXPECT_CALL(f, Call(Eq(1)));
+    EXPECT_CALL(f, Call(Eq(3)));
+
+    int values[] = {0, 1, 2, 3};
+    SFZ_FOREACH(int i, values, {
+        if ((i % 2) == 0) {
+            continue;
+        }
+        f(i);
+    });
 }
 
 // In addition to being used to foreach with a custom container, the Kingdoms type also differs
@@ -153,9 +184,9 @@ TEST_F(ForeachTest, Kingdoms) {
     EXPECT_CALL(f, Call(Eq("Wessex")));
 
     Kingdoms kingdoms;
-    foreach (const StringSlice& s, kingdoms) {
+    SFZ_FOREACH(const StringSlice& s, kingdoms, {
         f(s);
-    }
+    });
 }
 
 // Special test: does foreach extend the lifetime of a temporary?
@@ -166,9 +197,9 @@ TEST_F(ForeachTest, KingdomsTemporary) {
     EXPECT_CALL(f, Call(Eq("Wessex")));
 
     // Extra parentheses needed to avoid most vexing parse.
-    foreach (const StringSlice& s, (Kingdoms())) {
+    SFZ_FOREACH(const StringSlice& s, (Kingdoms()), {
         f(s);
-    }
+    });
 }
 
 }  // namespace

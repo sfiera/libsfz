@@ -19,23 +19,23 @@ inline void write_bytes_to(const void* target, WriteTarget out, size_t count) {
 
 template <typename T>
 inline void write_integers_to(const void* target, WriteTarget out, size_t count) {
-    foreach (size_t i, range(count)) {
+    SFZ_FOREACH(size_t i, range(count), {
         NetworkBytes<T> bytes(reinterpret_cast<const T*>(target)[i]);
         out.push(BytesSlice(bytes.data(), bytes.size()));
-    }
+    });
 }
 
 }  // namespace
 
 template <>
 void WriteItem::Dispatch<bool>::write_to(const void* target, WriteTarget out, size_t count) {
-    foreach (size_t i, range(count)) {
+    SFZ_FOREACH(size_t i, range(count), {
         if (reinterpret_cast<const bool*>(target)[i]) {
             out.push(1, 0x01);
         } else {
             out.push(1, 0x00);
         }
-    }
+    });
 }
 
 template <>

@@ -18,13 +18,15 @@
 #       error "Don't know how to get decltype-like functionality"
 #   endif
 
-#define foreach(DECLARATION, CONTAINER) \
-    for (bool __loop = true; __loop; ) \
-    for (const SFZ_DECLTYPE(CONTAINER)& __container = (CONTAINER); __loop; __loop = false) \
-    for (SFZ_DECLTYPE(::sfz::begin(__container)) __begin = ::sfz::begin(__container), \
-            __end = ::sfz::end(__container); __begin != __end; ++__begin) \
-    for (bool __loop = true; __loop; ) \
-    for (DECLARATION __attribute__((unused)) = *__begin; __loop; __loop = false) \
+#define SFZ_FOREACH(DECLARATION, CONTAINER, BLOCK) \
+    do { \
+        const SFZ_DECLTYPE(CONTAINER)& __container = (CONTAINER); \
+        for (SFZ_DECLTYPE(::sfz::begin(__container)) __begin = ::sfz::begin(__container), \
+                __end = ::sfz::end(__container); __begin != __end; ++__begin) { \
+            DECLARATION __attribute__((unused)) = *__begin; \
+            { BLOCK } \
+        } \
+    } while (false)
 
 namespace sfz {
 

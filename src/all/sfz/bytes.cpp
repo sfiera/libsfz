@@ -215,11 +215,11 @@ uint8_t BytesSlice::at(size_t loc) const {
 }
 
 size_t BytesSlice::find(uint8_t byte) const {
-    foreach (size_type i, range(_size)) {
+    SFZ_FOREACH(size_type i, range(_size), {
         if (at(i) == byte) {
             return i;
         }
-    }
+    });
     return BytesSlice::npos;
 }
 
@@ -227,20 +227,20 @@ size_t BytesSlice::find(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
         return BytesSlice::npos;
     }
-    foreach (size_type i, range(_size - bytes.size() + 1)) {
+    SFZ_FOREACH(size_type i, range(_size - bytes.size() + 1), {
         if (slice(i, bytes.size()) == bytes) {
             return i;
         }
-    }
+    });
     return BytesSlice::npos;
 }
 
 size_t BytesSlice::rfind(uint8_t byte) const {
-    foreach (size_type i, range(_size)) {
+    SFZ_FOREACH(size_type i, range(_size), {
         if (at(_size - i - 1) == byte) {
             return _size - i - 1;
         }
-    }
+    });
     return BytesSlice::npos;
 }
 
@@ -248,11 +248,11 @@ size_t BytesSlice::rfind(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
         return BytesSlice::npos;
     }
-    foreach (size_type i, range(_size - bytes.size() + 1)) {
+    SFZ_FOREACH(size_type i, range(_size - bytes.size() + 1), {
         if (slice(_size - bytes.size() - i, bytes.size()) == bytes) {
             return _size - bytes.size() - i;
         }
-    }
+    });
     return BytesSlice::npos;
 }
 
