@@ -15,6 +15,7 @@
 #include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 #include <sfz/io.hpp>
+#include <sfz/json.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/memory.hpp>
 #include <sfz/os.hpp>
@@ -22,6 +23,7 @@
 #include <sfz/read.hpp>
 #include <sfz/ref-count.hpp>
 #include <sfz/string.hpp>
+#include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>
 #include <sfz/write.hpp>
 
