@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <sfz/bytes.hpp>
 #include <sfz/print.hpp>
-#include <sfz/foreach.hpp>
 
 using testing::Eq;
 using testing::Test;

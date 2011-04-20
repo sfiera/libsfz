@@ -83,12 +83,12 @@ class PrintItemTest : public Test {
 
     template <typename T, int size>
     void Run(const StringSlice& prefix, const T (&data)[size]) {
-        foreach (const T& test, data) {
+        SFZ_FOREACH(const T& test, data, {
             typename T::TestType value(test.value);
             String s(prefix);
             print(&s, value);
             EXPECT_THAT(s, Eq(test.expected));
-        }
+        });
     }
 
 };

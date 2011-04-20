@@ -62,14 +62,14 @@ TEST_F(Sha1Test, ForceSecondBlock) {
 TEST_F(Sha1Test, Long) {
     Bytes input;
     const char* kChars = "abcdefghijklm";
-    foreach (int i, range(1000)) {
+    SFZ_FOREACH(int i, range(1000), {
         input.append(1, kChars[i % 13]);
-    }
+    });
 
     Sha1 sha;
-    foreach (int i, range(1000)) {
+    SFZ_FOREACH(int i, range(1000), {
         write(&sha, input);
-    }
+    });
 
     const Sha1::Digest expected = { 0x2287c79b, 0xe65d2e85, 0x104e4c8e, 0xa704680a, 0x6ba68a75 };
     EXPECT_THAT(sha.digest(), Eq(expected));
@@ -78,15 +78,15 @@ TEST_F(Sha1Test, Long) {
 // Adding the input in chunks of 512 bits (64 bytes) should work fine.
 TEST_F(Sha1Test, EvenMultipleOf512Bits) {
     Bytes bytes;
-    foreach (int i, range(8)) {
+    SFZ_FOREACH(int i, range(8), {
         write(&bytes, "01234567", 8);
-    }
+    });
     ASSERT_THAT(bytes.size(), Eq<size_t>(64));
 
     Sha1 sha;
-    foreach (int i, range(10)) {
+    SFZ_FOREACH(int i, range(10), {
         write(&sha, bytes);
-    }
+    });
 
     const Sha1::Digest expected = { 0xdea356a2, 0xcddd90c7, 0xa7ecedc5, 0xebb56393, 0x4f460452 };
     EXPECT_THAT(sha.digest(), Eq(expected));
@@ -194,10 +194,10 @@ TEST_F(Sha1Test, IncrementalDigest) {
     };
 
     Sha1 sha;
-    foreach (uint8_t byte, range(' ', '\x80')) {
+    SFZ_FOREACH(uint8_t byte, range(' ', '\x80'), {
         write(&sha, byte);
         EXPECT_THAT(sha.digest(), Eq(expected[byte - ' ']));
-    }
+    });
 
     sha.reset();
     EXPECT_THAT(sha.digest(), Eq(kEmptyDigest));
@@ -274,7 +274,7 @@ const Sha1::Digest kTreeDigest = { 0x9ff59f85, 0x3ca5ef83, 0x62cf1fcd, 0x3f29371
 TEST_F(Sha1Test, TreeDigest) {
     TemporaryDirectory dir("sha1-test");
 
-    foreach (const TreeData& tree_data, kTreeData) {
+    SFZ_FOREACH(const TreeData& tree_data, kTreeData, {
         String path(format("{0}/{1}", dir.path(), utf8::decode(tree_data.path)));
         String data(utf8::decode(tree_data.data));
 
@@ -283,7 +283,7 @@ TEST_F(Sha1Test, TreeDigest) {
         write(&fd, utf8::encode(data));
 
         EXPECT_THAT(file_digest(path), Eq(tree_data.digest));
-    }
+    });
     EXPECT_THAT(tree_digest(dir.path()), Eq(kTreeDigest));
 }
 
