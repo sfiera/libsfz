@@ -4,9 +4,6 @@
 [submodule "ext/googlemock"]
 	path = ext/googlemock
 	url = git://github.com/sfiera/googlemock.git
-[submodule "ext/gyputil"]
-	path = ext/gyputil
-	url = git://github.com/sfiera/gyputil.git
-[submodule "ext/gyp"]
-	path = ext/gyp
-	url = git://github.com/sfiera/gyp.git
+[submodule "ext/waf-sfiera"]
+	path = ext/waf-sfiera
+	url = git://github.com/sfiera/waf-sfiera.git
