@@ -6,6 +6,7 @@
 #ifndef SFZ_PRINT_HPP_
 #define SFZ_PRINT_HPP_
 
+#include <stdint.h>
 #include <stdlib.h>
 
 namespace sfz {
