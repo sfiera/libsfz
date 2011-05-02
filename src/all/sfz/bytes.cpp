@@ -5,6 +5,7 @@
 
 #include <sfz/bytes.hpp>
 
+#include <string.h>
 #include <algorithm>
 #include <sfz/exception.hpp>
 #include <sfz/foreach.hpp>

@@ -5,6 +5,7 @@
 
 #include <sfz/digest.hpp>
 
+#include <string.h>
 #include <limits>
 #include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
