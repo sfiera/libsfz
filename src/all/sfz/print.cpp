@@ -124,7 +124,7 @@ void PrintItem::Dispatch<const char[]>::print_to(const void* target, PrintTarget
 
 template <>
 void PrintItem::Dispatch<const void*>::print_to(const void* target, PrintTarget out) {
-    uint64_t addr = reinterpret_cast<uint64_t>(*reinterpret_cast<const void* const*>(target));
+    size_t addr = reinterpret_cast<uint64_t>(*reinterpret_cast<const void* const*>(target));
     size_t size = sizeof(const void*) * 2;
     sfz::print_to(out, hex(addr, size));
 }

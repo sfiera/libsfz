@@ -54,6 +54,16 @@ def build(bld):
 
     bld.platform(
         target="libsfz/libsfz",
+        platform="linux",
+        source=[
+            "src/linux/sfz/ref-count.cpp",
+        ],
+        includes="./include/linux ./src/linux",
+        export_includes="./include/linux",
+    )
+
+    bld.platform(
+        target="libsfz/libsfz",
         platform="darwin linux",
         source=[
             "src/posix/sfz/file.cpp",
