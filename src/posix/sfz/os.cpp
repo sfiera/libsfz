@@ -7,6 +7,7 @@
 
 #include <fcntl.h>
 #include <fts.h>
+#include <string.h>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
