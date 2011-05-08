@@ -5,9 +5,7 @@ VERSION = "0.1.0"
 
 def common(ctx):
     ctx.load("compiler_cxx")
-    ctx.load("externals", "ext/waf-sfiera")
-    ctx.load("platforms", "ext/waf-sfiera")
-    ctx.load("test", "ext/waf-sfiera")
+    ctx.load("core externals test", "ext/waf-sfiera")
     ctx.external("googlemock")
 
 def options(opt):
