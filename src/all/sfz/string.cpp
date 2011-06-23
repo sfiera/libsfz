@@ -46,7 +46,7 @@ String::String(const PrintItem& item) {
 }
 
 void String::append(const PrintItem& item) {
-    item.print_to(this);
+    item.print_to(*this);
 }
 
 void String::assign(const PrintItem& item) {

@@ -221,7 +221,7 @@ TEST_F(Sha1Test, Print) {
     StringSlice printed("da39a3ee5e6b4b0d3255bfef95601890afd80709");
 
     String out;
-    print(&out, kEmptyDigest);
+    print(out, kEmptyDigest);
     EXPECT_THAT(out, Eq(printed));
 }
 

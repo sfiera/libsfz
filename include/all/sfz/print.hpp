@@ -22,7 +22,8 @@ void print(PrintTarget out, const T& item);
 
 class PrintTarget {
   public:
-    template <typename T> PrintTarget(T* t);
+    PrintTarget(const PrintTarget& t);
+    template <typename T> PrintTarget(T& t);
 
     inline void push(const StringSlice& string);
     inline void push(size_t num, Rune rune);
@@ -81,9 +82,13 @@ const PrintTarget::DispatchTable PrintTarget::Dispatch<T>::table = {
     push_repeated_runes,
 };
 
+inline PrintTarget::PrintTarget(const PrintTarget& other)
+    : _target(other._target),
+      _dispatch_table(other._dispatch_table) { }
+
 template <typename T>
-PrintTarget::PrintTarget(T* t)
-    : _target(t),
+PrintTarget::PrintTarget(T& t)
+    : _target(&t),
       _dispatch_table(&Dispatch<T>::table) { }
 
 inline void PrintTarget::push(const StringSlice& string) {

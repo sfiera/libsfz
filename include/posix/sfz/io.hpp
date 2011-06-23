@@ -18,9 +18,9 @@ struct Io {
     void push(size_t num, Rune rune);
 };
 
-extern Io* in;
-extern Io* out;
-extern Io* err;
+extern Io& in;
+extern Io& out;
+extern Io& err;
 
 }  // namespace  io
 }  // namespace sfz

@@ -45,9 +45,9 @@ void Io::push(size_t num, Rune rune) {
     push(StringSlice(string));
 }
 
-Io* in = &fds[0];
-Io* out = &fds[1];
-Io* err = &fds[2];
+Io& in = fds[0];
+Io& out = fds[1];
+Io& err = fds[2];
 
 }  // namespace io
 }  // namespace sfz

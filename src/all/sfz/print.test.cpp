@@ -86,7 +86,7 @@ class PrintItemTest : public Test {
         SFZ_FOREACH(const T& test, data, {
             typename T::TestType value(test.value);
             String s(prefix);
-            print(&s, value);
+            print(s, value);
             EXPECT_THAT(s, Eq(test.expected));
         });
     }
@@ -95,7 +95,7 @@ class PrintItemTest : public Test {
 
 TEST_F(PrintItemTest, EmptyItem) {
     String s("empty: ");
-    PrintItem().print_to(&s);
+    PrintItem().print_to(s);
     EXPECT_THAT(s, Eq<StringSlice>("empty: "));
 }
 
@@ -111,12 +111,12 @@ TEST_F(PrintItemTest, CStringItem) {
 TEST_F(PrintItemTest, CStringLiteralItem) {
     {
         String s("const char[1]: ");
-        print(&s, "");
+        print(s, "");
         EXPECT_THAT(s, Eq<StringSlice>("const char[1]: "));
     }
     {
         String s("const char[14]: ");
-        print(&s, "quoted string");
+        print(s, "quoted string");
         EXPECT_THAT(s, Eq<StringSlice>("const char[14]: quoted string"));
     }
 }
