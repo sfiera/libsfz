@@ -29,18 +29,18 @@ struct Mapping {
     sfz::Rune code_point;
 };
 
-void read_from(sfz::ReadSource in, Grapheme* grapheme) {
+void read_from(sfz::ReadSource in, Grapheme& grapheme) {
     uint8_t byte = sfz::read<uint8_t>(&in);
     if (byte <= YOGH) {
-        *grapheme = static_cast<Grapheme>(byte);
+        grapheme = static_cast<Grapheme>(byte);
     } else {
         throw sfz::Exception(sfz::format("invalid Grapheme {0}", byte));
     }
 }
 
-void read_from(sfz::ReadSource in, Mapping* mapping) {
-    sfz::read(in, &mapping->grapheme);
-    sfz::read(in, &mapping->code_point);
+void read_from(sfz::ReadSource in, Mapping& mapping) {
+    sfz::read(in, mapping.grapheme);
+    sfz::read(in, mapping.code_point);
 }
 
 };

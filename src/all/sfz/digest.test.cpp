@@ -209,7 +209,7 @@ TEST_F(Sha1Test, ReadWrite) {
 
     BytesSlice in(written);
     Sha1::Digest digest;
-    read(&in, &digest);
+    read(&in, digest);
     EXPECT_THAT(digest, Eq(kEmptyDigest));
 
     Bytes out;

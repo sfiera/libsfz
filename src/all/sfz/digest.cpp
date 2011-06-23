@@ -137,8 +137,8 @@ void Sha1::process_message_block() {
     _message_block_index = 0;
 }
 
-void read_from(ReadSource in, Sha1::Digest* digest) {
-    read(in, digest->digest, 5);
+void read_from(ReadSource in, Sha1::Digest& digest) {
+    read(in, digest.digest, 5);
 }
 
 void write_to(WriteTarget out, const Sha1::Digest& digest) {

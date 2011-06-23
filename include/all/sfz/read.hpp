@@ -13,11 +13,9 @@ namespace sfz {
 
 class ReadSource;
 
-template <typename T>
-void read(ReadSource in, T* items, size_t count = 1);
-
-template <typename T>
-T read(ReadSource in);
+template <typename T> T read(ReadSource in);
+template <typename T> void read(ReadSource in, T& item);
+template <typename T> void read(ReadSource in, T* items, size_t count);
 
 class ReadSource {
   public:
@@ -39,15 +37,16 @@ class ReadSource {
 
 class ReadItem {
   public:
-    template <typename T> ReadItem(T* t);
+    template <typename T> ReadItem(T* t, size_t count);
 
-    inline void read_from(ReadSource in, size_t count);
+    inline void read_from(ReadSource in);
 
   private:
     struct DispatchTable;
     template <typename T> struct Dispatch;
 
     void* const _target;
+    const size_t _count;
     const DispatchTable* const _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
@@ -56,15 +55,20 @@ class ReadItem {
 // Implementation details follow.
 
 template <typename T>
-void read(ReadSource in, T* items, size_t count) {
-    ReadItem(items).read_from(in, count);
+T read(ReadSource in) {
+    T result;
+    read(in, result);
+    return result;
 }
 
 template <typename T>
-T read(ReadSource in) {
-    T result;
-    read(in, &result);
-    return result;
+void read(ReadSource in, T& item) {
+    ReadItem(&item, 1).read_from(in);
+}
+
+template <typename T>
+void read(ReadSource in, T* items, size_t count) {
+    ReadItem(items, count).read_from(in);
 }
 
 struct ReadSource::DispatchTable {
@@ -120,7 +124,7 @@ struct ReadItem::DispatchTable {
 namespace sfz_adl {
 
 template <typename T>
-inline void adl_read_from(::sfz::ReadSource in, T* t) {
+inline void adl_read_from(::sfz::ReadSource in, T& t) {
     read_from(in, t);
 }
 
@@ -132,7 +136,7 @@ template <typename T>
 struct ReadItem::Dispatch {
     static void read_from(void* target, ReadSource in, size_t count) {
         for (size_t i = 0; i < count; ++i) {
-            ::sfz_adl::adl_read_from(in, reinterpret_cast<T*>(target) + i);
+            ::sfz_adl::adl_read_from(in, reinterpret_cast<T*>(target)[i]);
         }
     }
     static const DispatchTable table;
@@ -159,12 +163,13 @@ const ReadItem::DispatchTable ReadItem::Dispatch<T>::table = {
 };
 
 template <typename T>
-ReadItem::ReadItem(T* t)
+ReadItem::ReadItem(T* t, size_t count)
     : _target(t),
+      _count(count),
       _dispatch_table(&Dispatch<T>::table) { }
 
-inline void ReadItem::read_from(ReadSource in, size_t count) {
-    _dispatch_table->read_from(_target, in, count);
+inline void ReadItem::read_from(ReadSource in) {
+    _dispatch_table->read_from(_target, in, _count);
 }
 
 }  // namespace sfz
