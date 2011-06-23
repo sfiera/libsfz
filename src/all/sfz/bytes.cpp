@@ -42,7 +42,7 @@ Bytes::Bytes(WriteItem item)
     : _data(new uint8_t[kDefaultBytesSize]),
       _size(0),
       _capacity(kDefaultBytesSize) {
-    item.write_to(this);
+    item.write_to(*this);
 }
 
 Bytes::Bytes(const uint8_t* data, size_t size)
@@ -82,7 +82,7 @@ void Bytes::push(size_t num, uint8_t byte) {
 }
 
 void Bytes::append(WriteItem item) {
-    item.write_to(this);
+    item.write_to(*this);
 }
 
 void Bytes::append(const uint8_t* data, size_t size) {
@@ -99,7 +99,7 @@ void Bytes::append(size_t num, uint8_t byte) {
 
 void Bytes::assign(WriteItem item) {
     clear();
-    item.write_to(this);
+    item.write_to(*this);
 }
 
 void Bytes::assign(const uint8_t* data, size_t size) {

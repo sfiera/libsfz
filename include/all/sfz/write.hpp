@@ -22,7 +22,7 @@ void write(WriteTarget out, const T* items, size_t count);
 
 class WriteTarget {
   public:
-    template <typename T> WriteTarget(T* target);
+    template <typename T> WriteTarget(T& target);
 
     inline void push(const BytesSlice& bytes);
     inline void push(size_t num, uint8_t byte);
@@ -88,8 +88,8 @@ const WriteTarget::DispatchTable WriteTarget::Dispatch<T>::table = {
 };
 
 template <typename T>
-WriteTarget::WriteTarget(T* t)
-    : _target(t),
+WriteTarget::WriteTarget(T& t)
+    : _target(&t),
       _dispatch_table(&Dispatch<T>::table) { }
 
 inline void WriteTarget::push(const BytesSlice& bytes) {

@@ -29,7 +29,7 @@ class FormatterTest : public Test {
     void Run(const StringSlice& prefix, const TestData (&data)[size]) {
         SFZ_FOREACH(const TestData& test, data, {
             String s(prefix);
-            test.value.print_to(&s);
+            test.value.print_to(s);
             EXPECT_THAT(s, Eq(test.expected));
         });
     }

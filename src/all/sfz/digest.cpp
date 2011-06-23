@@ -105,7 +105,7 @@ void Sha1::process_message_block() {
 
     uint32_t w[80];
     BytesSlice block(_message_block, 64);
-    read(&block, w, 16);
+    read(block, w, 16);
     for (int i = 16; i < 80; ++i) {
         w[i] = left_rotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
     }
@@ -137,8 +137,8 @@ void Sha1::process_message_block() {
     _message_block_index = 0;
 }
 
-void read_from(ReadSource in, Sha1::Digest* digest) {
-    read(in, digest->digest, 5);
+void read_from(ReadSource in, Sha1::Digest& digest) {
+    read(in, digest.digest, 5);
 }
 
 void write_to(WriteTarget out, const Sha1::Digest& digest) {
@@ -168,11 +168,11 @@ Sha1::Digest tree_digest(const StringSlice& path) {
         // we wouldn't if taking the digest of a file.
         void file(const StringSlice& path, const Stat&) {
             Bytes path_bytes(utf8::encode(path.slice(prefix_size)));
-            write<uint64_t>(&sha, path_bytes.size());
+            write<uint64_t>(sha, path_bytes.size());
             sha.push(path_bytes);
 
             MappedFile file(path);
-            write<uint64_t>(&sha, file.data().size());
+            write<uint64_t>(sha, file.data().size());
             sha.push(file.data());
         }
 

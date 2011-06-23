@@ -79,7 +79,7 @@ class Sha1 {
 
 bool operator==(const Sha1::Digest& lhs, const Sha1::Digest& rhs);
 bool operator!=(const Sha1::Digest& lhs, const Sha1::Digest& rhs);
-void read_from(ReadSource in, Sha1::Digest* digest);
+void read_from(ReadSource in, Sha1::Digest& digest);
 void write_to(WriteTarget out, const Sha1::Digest& digest);
 void print_to(PrintTarget out, const Sha1::Digest& digest);
 
