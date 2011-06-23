@@ -105,7 +105,7 @@ void Sha1::process_message_block() {
 
     uint32_t w[80];
     BytesSlice block(_message_block, 64);
-    read(&block, w, 16);
+    read(block, w, 16);
     for (int i = 16; i < 80; ++i) {
         w[i] = left_rotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
     }
