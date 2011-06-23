@@ -168,11 +168,11 @@ Sha1::Digest tree_digest(const StringSlice& path) {
         // we wouldn't if taking the digest of a file.
         void file(const StringSlice& path, const Stat&) {
             Bytes path_bytes(utf8::encode(path.slice(prefix_size)));
-            write<uint64_t>(&sha, path_bytes.size());
+            write<uint64_t>(sha, path_bytes.size());
             sha.push(path_bytes);
 
             MappedFile file(path);
-            write<uint64_t>(&sha, file.data().size());
+            write<uint64_t>(sha, file.data().size());
             sha.push(file.data());
         }
 

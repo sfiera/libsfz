@@ -44,7 +44,7 @@ TEST_F(Sha1Test, Empty) {
 // about the Sha1 implementation.
 TEST_F(Sha1Test, Short) {
     Sha1 sha;
-    write(&sha, "abc", 3);
+    write(sha, "abc", 3);
     const Sha1::Digest expected = {{0xa9993e36, 0x4706816a, 0xba3e2571, 0x7850c26c, 0x9cd0d89d}};
     EXPECT_THAT(sha.digest(), Eq(expected));
 }
@@ -53,7 +53,7 @@ TEST_F(Sha1Test, Short) {
 // input size to the end.
 TEST_F(Sha1Test, ForceSecondBlock) {
     Sha1 sha;
-    write(&sha, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+    write(sha, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     const Sha1::Digest expected = {{0x84983e44, 0x1c3bd26e, 0xbaae4aa1, 0xf95129e5, 0xe54670f1}};
     EXPECT_THAT(sha.digest(), Eq(expected));
 }
@@ -68,7 +68,7 @@ TEST_F(Sha1Test, Long) {
 
     Sha1 sha;
     SFZ_FOREACH(int i, range(1000), {
-        write(&sha, input);
+        write(sha, input);
     });
 
     const Sha1::Digest expected = {{0x2287c79b, 0xe65d2e85, 0x104e4c8e, 0xa704680a, 0x6ba68a75}};
@@ -79,13 +79,13 @@ TEST_F(Sha1Test, Long) {
 TEST_F(Sha1Test, EvenMultipleOf512Bits) {
     Bytes bytes;
     SFZ_FOREACH(int i, range(8), {
-        write(&bytes, "01234567", 8);
+        write(bytes, "01234567", 8);
     });
     ASSERT_THAT(bytes.size(), Eq<size_t>(64));
 
     Sha1 sha;
     SFZ_FOREACH(int i, range(10), {
-        write(&sha, bytes);
+        write(sha, bytes);
     });
 
     const Sha1::Digest expected = {{0xdea356a2, 0xcddd90c7, 0xa7ecedc5, 0xebb56393, 0x4f460452}};
@@ -195,7 +195,7 @@ TEST_F(Sha1Test, IncrementalDigest) {
 
     Sha1 sha;
     SFZ_FOREACH(uint8_t byte, range(' ', '\x80'), {
-        write(&sha, byte);
+        write(sha, byte);
         EXPECT_THAT(sha.digest(), Eq(expected[byte - ' ']));
     });
 
@@ -213,7 +213,7 @@ TEST_F(Sha1Test, ReadWrite) {
     EXPECT_THAT(digest, Eq(kEmptyDigest));
 
     Bytes out;
-    write(&out, kEmptyDigest);
+    write(out, kEmptyDigest);
     EXPECT_THAT(out, Eq(written));
 }
 
@@ -280,7 +280,7 @@ TEST_F(Sha1Test, TreeDigest) {
 
         makedirs(path::dirname(path), 0700);
         ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0600));
-        write(&fd, utf8::encode(data));
+        write(fd, utf8::encode(data));
 
         EXPECT_THAT(file_digest(path), Eq(tree_data.digest));
     });
