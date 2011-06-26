@@ -297,5 +297,19 @@ TEST_F(PrintItemTest, ExternalStructTest) {
     Run("other::Mapping: ", data);
 }
 
+template <typename T, typename U>
+T temporary_copy(U& u) {
+    T t(u);
+    return t;
+}
+
+// A copy of a PrintTarget must contain a reference to the original object, not to the PrintTarget
+// that was copied.
+TEST_F(PrintItemTest, CopyPrintTarget) {
+    String string;
+    print(temporary_copy<PrintTarget>(string), 0);
+    EXPECT_THAT(string, Eq<StringSlice>("0"));
+}
+
 }  // namespace
 }  // namespace sfz

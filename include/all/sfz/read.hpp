@@ -19,6 +19,7 @@ template <typename T> void read(ReadSource in, T* items, size_t count);
 
 class ReadSource {
   public:
+    ReadSource(const ReadSource& target);
     template <typename T> ReadSource(T& target);
 
     inline bool empty() const;
@@ -97,6 +98,10 @@ const ReadSource::DispatchTable ReadSource::Dispatch<T>::table = {
     shift,
     shift_data,
 };
+
+inline ReadSource::ReadSource(const ReadSource& other)
+    : _target(other._target),
+      _dispatch_table(other._dispatch_table) { }
 
 template <typename T>
 ReadSource::ReadSource(T& t)

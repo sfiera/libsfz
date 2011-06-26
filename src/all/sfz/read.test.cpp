@@ -162,5 +162,18 @@ TEST_F(ReadItemTest, ReadExternalStruct) {
     EXPECT_THAT(values[2].code_point, Eq(0x021du));
 }
 
+template <typename T, typename U>
+T temporary_copy(U& u) {
+    T t(u);
+    return t;
+}
+
+// A copy of a ReadSource must contain a reference to the original object, not to the ReadSource
+// that was copied.
+TEST_F(ReadItemTest, CopyReadSource) {
+    BytesSlice bytes = char_bytes("\000");
+    EXPECT_THAT(read<int8_t>(temporary_copy<ReadSource>(bytes)), Eq(0));
+}
+
 }  // namespace
 }  // namespace sfz
