@@ -144,5 +144,19 @@ TEST_F(WriteItemTest, WriteExternalStruct) {
                     "\004\000\000\002\035")));
 }
 
+template <typename T, typename U>
+T temporary_copy(U& u) {
+    T t(u);
+    return t;
+}
+
+// A copy of a WriteTarget must contain a reference to the original object, not to the WriteTarget
+// that was copied.
+TEST_F(WriteItemTest, CopyWriteTarget) {
+    Bytes bytes;
+    write<int8_t>(temporary_copy<WriteTarget>(bytes), 0);
+    EXPECT_THAT(bytes, Eq(char_bytes("\000")));
+}
+
 }  // namespace
 }  // namespace sfz
