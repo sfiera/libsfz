@@ -133,18 +133,18 @@ void rmtree(const StringSlice& path) {
     if (path::exists(path)) {
         class RmtreeVisitor : public TreeWalker {
           public:
-            void pre_directory(    const StringSlice& path, const Stat&) { }
-            void cycle_directory(  const StringSlice& path, const Stat&) { }
+            void pre_directory(    const StringSlice& path, const Stat&) const { }
+            void cycle_directory(  const StringSlice& path, const Stat&) const { }
 
-            void post_directory(   const StringSlice& path, const Stat&) { rmdir(path); }
+            void post_directory(   const StringSlice& path, const Stat&) const { rmdir(path); }
 
-            void file(             const StringSlice& path, const Stat&) { unlink(path); }
-            void symlink(          const StringSlice& path, const Stat&) { unlink(path); }
-            void broken_symlink(   const StringSlice& path, const Stat&) { unlink(path); }
-            void other(            const StringSlice& path, const Stat&) { unlink(path); }
+            void file(             const StringSlice& path, const Stat&) const { unlink(path); }
+            void symlink(          const StringSlice& path, const Stat&) const { unlink(path); }
+            void broken_symlink(   const StringSlice& path, const Stat&) const { unlink(path); }
+            void other(            const StringSlice& path, const Stat&) const { unlink(path); }
         };
         RmtreeVisitor visitor;
-        walk(path, WALK_PHYSICAL, &visitor);
+        walk(path, WALK_PHYSICAL, visitor);
     }
 }
 
@@ -180,7 +180,7 @@ int compare_ftsent(const FTSENT** lhs, const FTSENT** rhs) {
 
 }  // namespace
 
-void walk(const StringSlice& root, WalkType type, TreeWalker* visitor) {
+void walk(const StringSlice& root, WalkType type, const TreeWalker& visitor) {
     CString c_str(root);
     char* const pathv[] = { c_str.data(), NULL };
     int options = FTS_NOCHDIR;
@@ -199,13 +199,13 @@ void walk(const StringSlice& root, WalkType type, TreeWalker* visitor) {
         String path(utf8::decode(ent->fts_path));
         const Stat& st = *ent->fts_statp;
         switch (ent->fts_info) {
-          case FTS_D:        visitor->pre_directory(    path, st); break;
-          case FTS_DC:       visitor->cycle_directory(  path, st); break;
-          case FTS_DEFAULT:  visitor->other(            path, st); break;
-          case FTS_DP:       visitor->post_directory(   path, st); break;
-          case FTS_F:        visitor->file(             path, st); break;
-          case FTS_SL:       visitor->symlink(          path, st); break;
-          case FTS_SLNONE:   visitor->broken_symlink(   path, st); break;
+          case FTS_D:        visitor.pre_directory(     path, st); break;
+          case FTS_DC:       visitor.cycle_directory(   path, st); break;
+          case FTS_DEFAULT:  visitor.other(             path, st); break;
+          case FTS_DP:       visitor.post_directory(    path, st); break;
+          case FTS_F:        visitor.file(              path, st); break;
+          case FTS_SL:       visitor.symlink(           path, st); break;
+          case FTS_SLNONE:   visitor.broken_symlink(    path, st); break;
 
           case FTS_DNR:
           case FTS_ERR:

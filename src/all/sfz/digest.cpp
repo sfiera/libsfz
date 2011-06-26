@@ -166,7 +166,7 @@ Sha1::Digest tree_digest(const StringSlice& path) {
         // For files, hash the size and bytes of their UTF-8-encoded path, followed by the size and
         // bytes of the file content.  We don't worry about the mode or owner of the file, just as
         // we wouldn't if taking the digest of a file.
-        void file(const StringSlice& path, const Stat&) {
+        void file(const StringSlice& path, const Stat&) const {
             Bytes path_bytes(utf8::encode(path.slice(prefix_size)));
             write<uint64_t>(sha, path_bytes.size());
             sha.push(path_bytes);
@@ -178,31 +178,33 @@ Sha1::Digest tree_digest(const StringSlice& path) {
 
         // Ignore empty directories.  Directories which are not empty will be included in the
         // resulting digest by virtue of the inclusion of their files.
-        void pre_directory(const StringSlice& path, const Stat&) { }
-        void post_directory(const StringSlice& path, const Stat&) { }
+        void pre_directory(const StringSlice& path, const Stat&) const { }
+        void post_directory(const StringSlice& path, const Stat&) const { }
 
         // Throw exceptions on anything that might break our logical view of a tree as a
         // hierarchical listing of of regular files.
-        void cycle_directory(const StringSlice& path, const Stat&) {
+        void cycle_directory(const StringSlice& path, const Stat&) const {
             throw Exception(format("Found directory cycle: {0}.", path));
         }
-        void other(const StringSlice& path, const Stat&) {
+        void other(const StringSlice& path, const Stat&) const {
             throw Exception(format("Found non-regular file: {0}", path));
         }
 
         // Ignore broken symlinks; they effectively don't exist.
-        void broken_symlink(const StringSlice& path, const Stat&) { }
+        void broken_symlink(const StringSlice& path, const Stat&) const { }
 
         // Can't happen during WALK_LOGICAL.
-        void symlink(const StringSlice& path, const Stat&) { }
+        void symlink(const StringSlice& path, const Stat&) const { }
 
-        Sha1 sha;
-
+        Sha1& sha;
         const int prefix_size;
-        DigestWalker(int prefix_size) : prefix_size(prefix_size) { }
-    } walker(path.size() + 1);
-    walk(path, WALK_LOGICAL, &walker);
-    return walker.sha.digest();
+        DigestWalker(Sha1& sha, int prefix_size):
+                sha(sha),
+                prefix_size(prefix_size) { }
+    };
+    Sha1 sha;
+    walk(path, WALK_LOGICAL, DigestWalker(sha, path.size() + 1));
+    return sha.digest();
 }
 
 bool operator==(const Sha1::Digest& lhs, const Sha1::Digest& rhs) {

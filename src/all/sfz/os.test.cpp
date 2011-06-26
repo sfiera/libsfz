@@ -59,13 +59,13 @@ TEST_F(OsTest, Dirname) {
 
 class MockTreeWalker : public TreeWalker {
   public:
-    MOCK_METHOD2(pre_directory, void(const StringSlice& name, const Stat& st));
-    MOCK_METHOD2(cycle_directory, void(const StringSlice& name, const Stat& st));
-    MOCK_METHOD2(post_directory, void(const StringSlice& name, const Stat& st));
-    MOCK_METHOD2(file, void(const StringSlice& name, const Stat& st));
-    MOCK_METHOD2(symlink, void(const StringSlice& name, const Stat& st));
-    MOCK_METHOD2(broken_symlink, void(const StringSlice& name, const Stat& st));
-    MOCK_METHOD2(other, void(const StringSlice& name, const Stat& st));
+    MOCK_CONST_METHOD2(pre_directory, void(const StringSlice& name, const Stat& st));
+    MOCK_CONST_METHOD2(cycle_directory, void(const StringSlice& name, const Stat& st));
+    MOCK_CONST_METHOD2(post_directory, void(const StringSlice& name, const Stat& st));
+    MOCK_CONST_METHOD2(file, void(const StringSlice& name, const Stat& st));
+    MOCK_CONST_METHOD2(symlink, void(const StringSlice& name, const Stat& st));
+    MOCK_CONST_METHOD2(broken_symlink, void(const StringSlice& name, const Stat& st));
+    MOCK_CONST_METHOD2(other, void(const StringSlice& name, const Stat& st));
 };
 
 MATCHER(IsDirStat, "") { return (arg.st_mode & S_IFMT) == S_IFDIR; }
@@ -137,7 +137,7 @@ TEST_F(OsTest, Hierarchy) {
         EXPECT_CALL(walker, file(StringSlice("roman/upper/Z"), IsFileStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("roman/upper"), IsDirStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("roman"), IsDirStat()));
-        walk("roman", WALK_PHYSICAL, &walker);
+        walk("roman", WALK_PHYSICAL, walker);
     }
 
     {
@@ -152,7 +152,7 @@ TEST_F(OsTest, Hierarchy) {
         EXPECT_CALL(walker, symlink(StringSlice("cyrillic/upper/A"), IsLinkStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("cyrillic/upper"), IsDirStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("cyrillic"), IsDirStat()));
-        walk("cyrillic", WALK_PHYSICAL, &walker);
+        walk("cyrillic", WALK_PHYSICAL, walker);
     }
 
     {
@@ -167,7 +167,7 @@ TEST_F(OsTest, Hierarchy) {
         EXPECT_CALL(walker, file(StringSlice("cyrillic/upper/A"), IsFileStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("cyrillic/upper"), IsDirStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("cyrillic"), IsDirStat()));
-        walk("cyrillic", WALK_LOGICAL, &walker);
+        walk("cyrillic", WALK_LOGICAL, walker);
     }
 
     unlink("cyrillic/lower/a");
@@ -190,7 +190,7 @@ TEST_F(OsTest, Hierarchy) {
         EXPECT_CALL(walker, post_directory(StringSlice("./roman/lower"), IsDirStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("./roman"), IsDirStat()));
         EXPECT_CALL(walker, post_directory(StringSlice("."), IsDirStat()));
-        walk(".", WALK_LOGICAL, &walker);
+        walk(".", WALK_LOGICAL, walker);
     }
 }
 
@@ -218,7 +218,7 @@ TEST_F(OsTest, WalkOther) {
     EXPECT_CALL(walker, post_directory(StringSlice("./aesc/wynn"), IsDirStat()));
     EXPECT_CALL(walker, post_directory(StringSlice("./aesc"), IsDirStat()));
     EXPECT_CALL(walker, post_directory(StringSlice("."), IsDirStat()));
-    walk(".", WALK_LOGICAL, &walker);
+    walk(".", WALK_LOGICAL, walker);
 }
 
 }  // namespace

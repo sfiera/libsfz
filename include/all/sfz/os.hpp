@@ -52,22 +52,22 @@ class TemporaryDirectory {
 
 class TreeWalker;
 enum WalkType { WALK_LOGICAL, WALK_PHYSICAL };
-void walk(const StringSlice& root, WalkType type, TreeWalker* visitor);
+void walk(const StringSlice& root, WalkType type, const TreeWalker& visitor);
 
 class TreeWalker {
   public:
     virtual ~TreeWalker();
 
-    virtual void pre_directory(const StringSlice& name, const Stat& st) = 0;
-    virtual void cycle_directory(const StringSlice& name, const Stat& st) = 0;
-    virtual void post_directory(const StringSlice& name, const Stat& st) = 0;
+    virtual void pre_directory(const StringSlice& name, const Stat& st) const = 0;
+    virtual void cycle_directory(const StringSlice& name, const Stat& st) const = 0;
+    virtual void post_directory(const StringSlice& name, const Stat& st) const = 0;
 
-    virtual void file(const StringSlice& name, const Stat& st) = 0;
+    virtual void file(const StringSlice& name, const Stat& st) const = 0;
 
-    virtual void symlink(const StringSlice& name, const Stat& st) = 0;
-    virtual void broken_symlink(const StringSlice& name, const Stat& st) = 0;
+    virtual void symlink(const StringSlice& name, const Stat& st) const = 0;
+    virtual void broken_symlink(const StringSlice& name, const Stat& st) const = 0;
 
-    virtual void other(const StringSlice& name, const Stat& st) = 0;
+    virtual void other(const StringSlice& name, const Stat& st) const = 0;
 };
 
 }  // namespace sfz
