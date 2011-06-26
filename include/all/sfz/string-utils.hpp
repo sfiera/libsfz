@@ -16,7 +16,7 @@ namespace sfz {
 class StringSlice;
 
 template <typename T>
-bool string_to_int(StringSlice s, T* out, int base = 10);
+bool string_to_int(StringSlice s, T& out, int base = 10);
 
 class CString {
   public:

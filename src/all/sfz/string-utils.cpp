@@ -45,7 +45,7 @@ template <> bool is_signed<uint64_t>() { return false; }
 }  // namespace
 
 template <typename T>
-bool string_to_int(StringSlice s, T* out, int base) {
+bool string_to_int(StringSlice s, T& out, int base) {
     bool positive = true;
     T value = 0;
 
@@ -82,18 +82,18 @@ bool string_to_int(StringSlice s, T* out, int base) {
             value -= digit;
         }
     });
-    *out = value;
+    out = value;
     return true;
 }
 
-template bool string_to_int<int8_t>(StringSlice s, int8_t* out, int base);
-template bool string_to_int<uint8_t>(StringSlice s, uint8_t* out, int base);
-template bool string_to_int<int16_t>(StringSlice s, int16_t* out, int base);
-template bool string_to_int<uint16_t>(StringSlice s, uint16_t* out, int base);
-template bool string_to_int<int32_t>(StringSlice s, int32_t* out, int base);
-template bool string_to_int<uint32_t>(StringSlice s, uint32_t* out, int base);
-template bool string_to_int<int64_t>(StringSlice s, int64_t* out, int base);
-template bool string_to_int<uint64_t>(StringSlice s, uint64_t* out, int base);
+template bool string_to_int<int8_t>(StringSlice s, int8_t& out, int base);
+template bool string_to_int<uint8_t>(StringSlice s, uint8_t& out, int base);
+template bool string_to_int<int16_t>(StringSlice s, int16_t& out, int base);
+template bool string_to_int<uint16_t>(StringSlice s, uint16_t& out, int base);
+template bool string_to_int<int32_t>(StringSlice s, int32_t& out, int base);
+template bool string_to_int<uint32_t>(StringSlice s, uint32_t& out, int base);
+template bool string_to_int<int64_t>(StringSlice s, int64_t& out, int base);
+template bool string_to_int<uint64_t>(StringSlice s, uint64_t& out, int base);
 
 CString::CString(const StringSlice& string) {
     if (string.find('\0') != StringSlice::npos) {

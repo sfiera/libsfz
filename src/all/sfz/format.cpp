@@ -60,7 +60,7 @@ void print_format_to(
                 span_complement(f, kCloseBrace, &span, &remainder);
 
                 uint32_t index;
-                if (string_to_int(span, &index)) {
+                if (string_to_int(span, index)) {
                     if (index < size) {
                         items[index]->print_to(out);
                     }

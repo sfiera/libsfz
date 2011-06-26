@@ -35,11 +35,11 @@ class StringUtilitiesTest : public Test {
         SFZ_FOREACH(const TestData<T>& input, inputs, {
             T actual;
             if (input.good) {
-                EXPECT_THAT(string_to_int(input.string, &actual), Eq(true))
+                EXPECT_THAT(string_to_int(input.string, actual), Eq(true))
                     << "input: " << input.string;
                 EXPECT_THAT(actual, Eq(input.expected));
             } else {
-                EXPECT_THAT(string_to_int(input.string, &actual), Eq(false))
+                EXPECT_THAT(string_to_int(input.string, actual), Eq(false))
                     << "input: " << input.string << "; output: " << actual;
             }
         });
