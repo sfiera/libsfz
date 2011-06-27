@@ -73,7 +73,7 @@ TEST_F(JsonTest, NumberTest) {
 TEST_F(JsonTest, BoolTest) {
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_bool(true));
-    Json::bool_(true).accept(visitor);
+    Json::boolean(true).accept(visitor);
 }
 
 // []
@@ -226,7 +226,7 @@ TEST_F(JsonTest, ComplexObjectTest) {
     StringMap<Json> album;
     album.insert(make_pair("album", Json::string(kAlbum.album)));
     album.insert(make_pair("artist", Json::string(kAlbum.artist)));
-    album.insert(make_pair("compilation", Json::bool_(kAlbum.compilation)));
+    album.insert(make_pair("compilation", Json::boolean(kAlbum.compilation)));
     album.insert(make_pair("tracks", Json::array(tracks)));
 
     Json::object(album).accept(visitor);
@@ -271,8 +271,8 @@ TEST_F(SerializeTest, NumberTest) {
 }
 
 TEST_F(SerializeTest, BoolTest) {
-    EXPECT_THAT(Json::bool_(true), SerializesTo("true"));
-    EXPECT_THAT(Json::bool_(false), SerializesTo("false"));
+    EXPECT_THAT(Json::boolean(true), SerializesTo("true"));
+    EXPECT_THAT(Json::boolean(false), SerializesTo("false"));
 }
 
 TEST_F(SerializeTest, EmptyArrayTest) {
@@ -330,7 +330,7 @@ TEST_F(SerializeTest, ComplexObjectTest) {
     StringMap<Json> album;
     album.insert(make_pair("album", Json::string(kAlbum.album)));
     album.insert(make_pair("artist", Json::string(kAlbum.artist)));
-    album.insert(make_pair("compilation", Json::bool_(kAlbum.compilation)));
+    album.insert(make_pair("compilation", Json::boolean(kAlbum.compilation)));
     album.insert(make_pair("tracks", Json::array(tracks)));
 
     EXPECT_THAT(Json::object(album), SerializesTo(format(

@@ -106,9 +106,9 @@ class Json::Number : public Json::Value {
     DISALLOW_COPY_AND_ASSIGN(Number);
 };
 
-class Json::Bool : public Json::Value {
+class Json::Boolean : public Json::Value {
   public:
-    explicit Bool(bool value)
+    explicit Boolean(bool value)
         : _value(value) { }
 
     virtual void accept(const JsonVisitor& visitor) const {
@@ -118,7 +118,7 @@ class Json::Bool : public Json::Value {
   private:
     const bool _value;
 
-    DISALLOW_COPY_AND_ASSIGN(Bool);
+    DISALLOW_COPY_AND_ASSIGN(Boolean);
 };
 
 Json Json::object(const StringMap<Json>& value) {
@@ -137,8 +137,8 @@ Json Json::number(double value) {
     return Json(new Number(value));
 }
 
-Json Json::bool_(bool value) {
-    return Json(new Bool(value));
+Json Json::boolean(bool value) {
+    return Json(new Boolean(value));
 }
 
 Json::Json() { }

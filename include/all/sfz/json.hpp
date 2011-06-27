@@ -22,7 +22,7 @@ class Json {
     static Json array(const std::vector<Json>& value);
     static Json string(const PrintItem& value);
     static Json number(double value);
-    static Json bool_(bool value);
+    static Json boolean(bool value);
 
     Json();
     Json(const Json& other);
@@ -37,7 +37,7 @@ class Json {
     class Array;
     class String;
     class Number;
-    class Bool;
+    class Boolean;
     class Null;
 
     Json(Value* value);
