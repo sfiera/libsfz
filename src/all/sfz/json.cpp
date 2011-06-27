@@ -19,7 +19,7 @@ namespace sfz {
 
 class Json::Value : public ReferenceCounted {
   public:
-    virtual void accept(JsonVisitor* visitor) const = 0;
+    virtual void accept(const JsonVisitor& visitor) const = 0;
 };
 
 class Json::Object : public Json::Value {
@@ -27,8 +27,8 @@ class Json::Object : public Json::Value {
     Object(const StringMap<Json>& value)
         : _value(value) { }
 
-    virtual void accept(JsonVisitor* visitor) const {
-        visitor->visit_object(_value);
+    virtual void accept(const JsonVisitor& visitor) const {
+        visitor.visit_object(_value);
     }
 
   private:
@@ -42,8 +42,8 @@ class Json::Array : public Json::Value {
     Array(const vector<Json>& value)
         : _value(value) { }
 
-    virtual void accept(JsonVisitor* visitor) const {
-        visitor->visit_array(_value);
+    virtual void accept(const JsonVisitor& visitor) const {
+        visitor.visit_array(_value);
     }
 
   private:
@@ -57,8 +57,8 @@ class Json::String : public Json::Value {
     explicit String(const sfz::PrintItem& s)
         : _value(s) { }
 
-    virtual void accept(JsonVisitor* visitor) const {
-        visitor->visit_string(_value);
+    virtual void accept(const JsonVisitor& visitor) const {
+        visitor.visit_string(_value);
     }
 
   private:
@@ -72,8 +72,8 @@ class Json::Number : public Json::Value {
     explicit Number(double value)
         : _value(value) { }
 
-    virtual void accept(JsonVisitor* visitor) const {
-        visitor->visit_number(_value);
+    virtual void accept(const JsonVisitor& visitor) const {
+        visitor.visit_number(_value);
     }
 
   private:
@@ -87,8 +87,8 @@ class Json::Bool : public Json::Value {
     explicit Bool(bool value)
         : _value(value) { }
 
-    virtual void accept(JsonVisitor* visitor) const {
-        visitor->visit_bool(_value);
+    virtual void accept(const JsonVisitor& visitor) const {
+        visitor.visit_bool(_value);
     }
 
   private:
@@ -132,37 +132,37 @@ Json& Json::operator=(const Json& other) {
 
 Json::~Json() { }
 
-void Json::accept(JsonVisitor* visitor) const {
+void Json::accept(const JsonVisitor& visitor) const {
     if (_value.get()) {
         _value->accept(visitor);
     } else {
-        visitor->visit_null();
+        visitor.visit_null();
     }
 }
 
 JsonVisitor::~JsonVisitor() { }
 
-void JsonDefaultVisitor::visit_object(const StringMap<Json>& value) {
+void JsonDefaultVisitor::visit_object(const StringMap<Json>& value) const {
     visit_default("object");
 }
 
-void JsonDefaultVisitor::visit_array(const vector<Json>& value) {
+void JsonDefaultVisitor::visit_array(const vector<Json>& value) const {
     visit_default("array");
 }
 
-void JsonDefaultVisitor::visit_string(const StringSlice& value) {
+void JsonDefaultVisitor::visit_string(const StringSlice& value) const {
     visit_default("string");
 }
 
-void JsonDefaultVisitor::visit_number(double value) {
+void JsonDefaultVisitor::visit_number(double value) const {
     visit_default("number");
 }
 
-void JsonDefaultVisitor::visit_bool(bool value) {
+void JsonDefaultVisitor::visit_bool(bool value) const {
     visit_default("bool");
 }
 
-void JsonDefaultVisitor::visit_null() {
+void JsonDefaultVisitor::visit_null() const {
     visit_default("null");
 }
 
@@ -172,37 +172,32 @@ class SerializerVisitor : public JsonVisitor {
   public:
     explicit SerializerVisitor(PrintTarget out);
 
-    virtual void visit_object(const StringMap<Json>& value);
-    virtual void visit_array(const vector<Json>& value);
-    virtual void visit_string(const StringSlice& value);
-    virtual void visit_number(double value);
-    virtual void visit_bool(bool value);
-    virtual void visit_null();
+    virtual void visit_object(const StringMap<Json>& value) const;
+    virtual void visit_array(const vector<Json>& value) const;
+    virtual void visit_string(const StringSlice& value) const;
+    virtual void visit_number(double value) const;
+    virtual void visit_bool(bool value) const;
+    virtual void visit_null() const;
 
   protected:
-    PrintTarget _out;
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SerializerVisitor);
+    PrintTarget& _out;
 };
 
 class PrettyPrinterVisitor : public SerializerVisitor {
   public:
-    explicit PrettyPrinterVisitor(PrintTarget out);
+    explicit PrettyPrinterVisitor(int& depth, PrintTarget out);
 
-    virtual void visit_object(const StringMap<Json>& value);
-    virtual void visit_array(const vector<Json>& value);
+    virtual void visit_object(const StringMap<Json>& value) const;
+    virtual void visit_array(const vector<Json>& value) const;
 
   private:
-    int _depth;
-
-    DISALLOW_COPY_AND_ASSIGN(PrettyPrinterVisitor);
+    int& _depth;
 };
 
 SerializerVisitor::SerializerVisitor(PrintTarget out)
     : _out(out) { }
 
-void SerializerVisitor::visit_object(const StringMap<Json>& value) {
+void SerializerVisitor::visit_object(const StringMap<Json>& value) const {
     _out.push(1, '{');
     if (value.size() > 0) {
         bool first = true;
@@ -214,13 +209,13 @@ void SerializerVisitor::visit_object(const StringMap<Json>& value) {
             }
             print_to(_out, quote(item.first));
             _out.push(1, ':');
-            item.second.accept(this);
+            item.second.accept(*this);
         });
     }
     _out.push(1, '}');
 }
 
-void SerializerVisitor::visit_array(const vector<Json>& value) {
+void SerializerVisitor::visit_array(const vector<Json>& value) const {
     _out.push(1, '[');
     if (value.size() > 0) {
         bool first = true;
@@ -230,33 +225,33 @@ void SerializerVisitor::visit_array(const vector<Json>& value) {
             } else {
                 _out.push(1, ',');
             }
-            item.accept(this);
+            item.accept(*this);
         });
     }
     _out.push(1, ']');
 }
 
-void SerializerVisitor::visit_string(const StringSlice& value) {
+void SerializerVisitor::visit_string(const StringSlice& value) const {
     print_to(_out, quote(value));
 }
 
-void SerializerVisitor::visit_number(double value) {
+void SerializerVisitor::visit_number(double value) const {
     PrintItem(value).print_to(_out);
 }
 
-void SerializerVisitor::visit_bool(bool value) {
+void SerializerVisitor::visit_bool(bool value) const {
     PrintItem(value).print_to(_out);
 }
 
-void SerializerVisitor::visit_null() {
+void SerializerVisitor::visit_null() const {
     _out.push("null");
 }
 
-PrettyPrinterVisitor::PrettyPrinterVisitor(PrintTarget out)
+PrettyPrinterVisitor::PrettyPrinterVisitor(int& depth, PrintTarget out)
     : SerializerVisitor(out),
-      _depth(0) { }
+      _depth(depth) { }
 
-void PrettyPrinterVisitor::visit_object(const StringMap<Json>& value) {
+void PrettyPrinterVisitor::visit_object(const StringMap<Json>& value) const {
     _out.push(1, '{');
     if (value.size() > 0) {
         _depth += 2;
@@ -271,7 +266,7 @@ void PrettyPrinterVisitor::visit_object(const StringMap<Json>& value) {
             _out.push(_depth, ' ');
             print_to(_out, quote(item.first));
             _out.push(": ");
-            item.second.accept(this);
+            item.second.accept(*this);
         });
         _depth -= 2;
         _out.push(1, '\n');
@@ -280,7 +275,7 @@ void PrettyPrinterVisitor::visit_object(const StringMap<Json>& value) {
     _out.push(1, '}');
 }
 
-void PrettyPrinterVisitor::visit_array(const vector<Json>& value) {
+void PrettyPrinterVisitor::visit_array(const vector<Json>& value) const {
     _out.push(1, '[');
     if (value.size() > 0) {
         _depth += 2;
@@ -293,7 +288,7 @@ void PrettyPrinterVisitor::visit_array(const vector<Json>& value) {
             }
             _out.push(1, '\n');
             _out.push(_depth, ' ');
-            item.accept(this);
+            item.accept(*this);
         });
         _depth -= 2;
         _out.push(1, '\n');
@@ -310,13 +305,12 @@ JsonPrettyPrinter pretty_print(const Json& value) {
 }
 
 void print_to(sfz::PrintTarget out, const Json& json) {
-    SerializerVisitor visitor(out);
-    json.accept(&visitor);
+    json.accept(SerializerVisitor(out));
 }
 
 void print_to(sfz::PrintTarget out, const JsonPrettyPrinter& json) {
-    PrettyPrinterVisitor visitor(out);
-    json.json.accept(&visitor);
+    int depth = 0;
+    json.json.accept(PrettyPrinterVisitor(depth, out));
 }
 
 }  // namespace sfz

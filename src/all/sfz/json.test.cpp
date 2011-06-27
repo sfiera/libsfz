@@ -22,32 +22,32 @@ namespace {
 
 class MockJsonVisitor : public JsonVisitor {
   public:
-    MOCK_METHOD0(enter_object, void());
-    MOCK_METHOD1(object_key, void(const StringSlice&));
-    MOCK_METHOD0(exit_object, void());
-    void visit_object(const StringMap<Json>& value) {
+    MOCK_CONST_METHOD0(enter_object, void());
+    MOCK_CONST_METHOD1(object_key, void(const StringSlice&));
+    MOCK_CONST_METHOD0(exit_object, void());
+    void visit_object(const StringMap<Json>& value) const {
         enter_object();
         SFZ_FOREACH(const StringMap<Json>::value_type& item, value, {
             object_key(item.first);
-            item.second.accept(this);
+            item.second.accept(*this);
         });
         exit_object();
     }
 
-    MOCK_METHOD0(enter_array, void());
-    MOCK_METHOD0(exit_array, void());
-    void visit_array(const vector<Json>& value) {
+    MOCK_CONST_METHOD0(enter_array, void());
+    MOCK_CONST_METHOD0(exit_array, void());
+    void visit_array(const vector<Json>& value) const {
         enter_array();
         SFZ_FOREACH(const Json& item, value, {
-            item.accept(this);
+            item.accept(*this);
         });
         exit_array();
     }
 
-    MOCK_METHOD1(visit_string, void(const StringSlice& value));
-    MOCK_METHOD1(visit_number, void(double value));
-    MOCK_METHOD1(visit_bool, void(bool value));
-    MOCK_METHOD0(visit_null, void());
+    MOCK_CONST_METHOD1(visit_string, void(const StringSlice& value));
+    MOCK_CONST_METHOD1(visit_number, void(double value));
+    MOCK_CONST_METHOD1(visit_bool, void(bool value));
+    MOCK_CONST_METHOD0(visit_null, void());
 };
 
 typedef ::testing::Test JsonTest;
@@ -55,25 +55,25 @@ typedef ::testing::Test JsonTest;
 TEST_F(JsonTest, NullTest) {
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_null());
-    Json().accept(&visitor);
+    Json().accept(visitor);
 }
 
 TEST_F(JsonTest, StringTest) {
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_string(Eq<StringSlice>("Hello, world!")));
-    Json::string("Hello, world!").accept(&visitor);
+    Json::string("Hello, world!").accept(visitor);
 }
 
 TEST_F(JsonTest, NumberTest) {
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_number(1.0));
-    Json::number(1.0).accept(&visitor);
+    Json::number(1.0).accept(visitor);
 }
 
 TEST_F(JsonTest, BoolTest) {
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_bool(true));
-    Json::bool_(true).accept(&visitor);
+    Json::bool_(true).accept(visitor);
 }
 
 // []
@@ -85,7 +85,7 @@ TEST_F(JsonTest, EmptyArrayTest) {
         EXPECT_CALL(visitor, exit_array());
     }
     vector<Json> a;
-    Json::array(a).accept(&visitor);
+    Json::array(a).accept(visitor);
 }
 
 // [1.0, 2.0, 3.0]
@@ -103,7 +103,7 @@ TEST_F(JsonTest, NonEmptyArrayTest) {
     a.push_back(Json::number(1.0));
     a.push_back(Json::number(2.0));
     a.push_back(Json::number(3.0));
-    Json::array(a).accept(&visitor);
+    Json::array(a).accept(visitor);
 }
 
 // {}
@@ -115,7 +115,7 @@ TEST_F(JsonTest, EmptyObjectTest) {
         EXPECT_CALL(visitor, exit_object());
     }
     StringMap<Json> o;
-    Json::object(o).accept(&visitor);
+    Json::object(o).accept(visitor);
 }
 
 // {
@@ -140,7 +140,7 @@ TEST_F(JsonTest, NonEmptyObjectTest) {
     o.insert(make_pair("one", Json::number(1.0)));
     o.insert(make_pair("two", Json::number(2.0)));
     o.insert(make_pair("three", Json::number(3.0)));
-    Json::object(o).accept(&visitor);
+    Json::object(o).accept(visitor);
 }
 
 // {
@@ -229,7 +229,7 @@ TEST_F(JsonTest, ComplexObjectTest) {
     album.insert(make_pair("compilation", Json::bool_(kAlbum.compilation)));
     album.insert(make_pair("tracks", Json::array(tracks)));
 
-    Json::object(album).accept(&visitor);
+    Json::object(album).accept(visitor);
 }
 
 typedef ::testing::Test SerializeTest;
