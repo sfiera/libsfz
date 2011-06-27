@@ -252,6 +252,16 @@ TEST_F(SerializeTest, StringTest) {
     EXPECT_THAT(Json::string(""), SerializesTo("\"\""));
     EXPECT_THAT(Json::string("Hello, world!"), SerializesTo("\"Hello, world!\""));
     EXPECT_THAT(Json::string("Multiple\nLines"), SerializesTo("\"Multiple\\nLines\""));
+    EXPECT_THAT(Json::string("Control\001Chars"), SerializesTo("\"Control\\u0001Chars\""));
+
+    EXPECT_THAT(Json::string("\""), SerializesTo("\"\\\"\""));
+    EXPECT_THAT(Json::string("\\"), SerializesTo("\"\\\\\""));
+    EXPECT_THAT(Json::string("/"), SerializesTo("\"\\/\""));
+    EXPECT_THAT(Json::string("\b"), SerializesTo("\"\\b\""));
+    EXPECT_THAT(Json::string("\f"), SerializesTo("\"\\f\""));
+    EXPECT_THAT(Json::string("\n"), SerializesTo("\"\\n\""));
+    EXPECT_THAT(Json::string("\r"), SerializesTo("\"\\r\""));
+    EXPECT_THAT(Json::string("\t"), SerializesTo("\"\\t\""));
 }
 
 TEST_F(SerializeTest, NumberTest) {

@@ -17,6 +17,30 @@ using std::vector;
 
 namespace sfz {
 
+namespace {
+
+const char kEscaped[' '][7] = {
+    "\\u0000", "\\u0001", "\\u0002", "\\u0003", "\\u0004", "\\u0005", "\\u0006", "\\u0007",
+    "\\b",     "\\t",     "\\n",     "\\u0013", "\\f",     "\\r",     "\\u0016", "\\u0017",
+    "\\u0020", "\\u0021", "\\u0022", "\\u0023", "\\u0024", "\\u0025", "\\u0026", "\\u0027",
+    "\\u0030", "\\u0031", "\\u0032", "\\u0033", "\\u0034", "\\u0035", "\\u0036", "\\u0037",
+};
+
+void json_escape(PrintTarget out, const StringSlice& value) {
+    SFZ_FOREACH(Rune rune, value, {
+        if (rune < ' ') {
+            out.push(kEscaped[rune]);
+        } else if (rune == '\"' || rune == '\\' || rune == '/') {
+            out.push(1, '\\');
+            out.push(1, rune);
+        } else {
+            out.push(1, rune);
+        }
+    });
+}
+
+}  // namespace
+
 class Json::Value : public ReferenceCounted {
   public:
     virtual void accept(const JsonVisitor& visitor) const = 0;
@@ -207,7 +231,9 @@ void SerializerVisitor::visit_object(const StringMap<Json>& value) const {
             } else {
                 _out.push(1, ',');
             }
-            print_to(_out, quote(item.first));
+            _out.push(1, '"');
+            json_escape(_out, item.first);
+            _out.push(1, '"');
             _out.push(1, ':');
             item.second.accept(*this);
         });
@@ -232,7 +258,9 @@ void SerializerVisitor::visit_array(const vector<Json>& value) const {
 }
 
 void SerializerVisitor::visit_string(const StringSlice& value) const {
-    print_to(_out, quote(value));
+    _out.push(1, '"');
+    json_escape(_out, value);
+    _out.push(1, '"');
 }
 
 void SerializerVisitor::visit_number(double value) const {
@@ -264,8 +292,9 @@ void PrettyPrinterVisitor::visit_object(const StringMap<Json>& value) const {
             }
             _out.push(1, '\n');
             _out.push(_depth, ' ');
-            print_to(_out, quote(item.first));
-            _out.push(": ");
+            _out.push(1, '"');
+            json_escape(_out, item.first);
+            _out.push("\": ");
             item.second.accept(*this);
         });
         _depth -= 2;
