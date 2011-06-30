@@ -15,9 +15,17 @@ using std::map;
 using std::vector;
 using testing::Eq;
 using testing::InSequence;
+using testing::Not;
 using testing::StrictMock;
 
 namespace sfz {
+
+std::ostream& operator<<(std::ostream& ostr, const Json& json) {
+    String str(json);
+    CString c_str(str);
+    return ostr << c_str.data();
+}
+
 namespace {
 
 class MockJsonVisitor : public JsonVisitor {
@@ -73,7 +81,7 @@ TEST_F(JsonTest, NumberTest) {
 TEST_F(JsonTest, BoolTest) {
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_bool(true));
-    Json::bool_(true).accept(visitor);
+    Json::boolean(true).accept(visitor);
 }
 
 // []
@@ -226,7 +234,7 @@ TEST_F(JsonTest, ComplexObjectTest) {
     StringMap<Json> album;
     album.insert(make_pair("album", Json::string(kAlbum.album)));
     album.insert(make_pair("artist", Json::string(kAlbum.artist)));
-    album.insert(make_pair("compilation", Json::bool_(kAlbum.compilation)));
+    album.insert(make_pair("compilation", Json::boolean(kAlbum.compilation)));
     album.insert(make_pair("tracks", Json::array(tracks)));
 
     Json::object(album).accept(visitor);
@@ -234,40 +242,77 @@ TEST_F(JsonTest, ComplexObjectTest) {
 
 typedef ::testing::Test SerializeTest;
 
-MATCHER_P(SerializesTo, representation, "") {
+MATCHER_P(SerializesTo, expected, "") {
     sfz::String actual(arg);
     CString actual_c_str(actual);
-    sfz::String expected(representation);
     CString expected_c_str(expected);
     *result_listener
         << "actual " << actual_c_str.data() << " vs. expected " << expected_c_str.data();
     return actual == expected;
 }
 
+MATCHER(Parses, "") {
+    Json actual;
+    if (!string_to_json(arg, actual)) {
+        CString arg_c_str(arg);
+        *result_listener << "couldn't parse " << arg_c_str.data();
+        return false;
+    }
+    *result_listener << "parsed to " << actual;
+    return true;
+}
+
+MATCHER_P(ParsesTo, expected, "") {
+    Json actual;
+    if (!string_to_json(arg, actual)) {
+        CString arg_c_str(arg);
+        *result_listener << "couldn't parse " << arg_c_str.data();
+        return false;
+    }
+    *result_listener << "actual " << actual << " vs. expected " << expected;
+    return actual == expected;
+}
+
+void RoundTripBetween(const Json& json, PrintItem text) {
+    String string(text);
+    EXPECT_THAT(json, SerializesTo<StringSlice>(string));
+    EXPECT_THAT(string, ParsesTo(json));
+}
+
 TEST_F(SerializeTest, NullTest) {
-    EXPECT_THAT(Json(), SerializesTo("null"));
+    RoundTripBetween(Json(), "null");
 }
 
 TEST_F(SerializeTest, StringTest) {
-    EXPECT_THAT(Json::string(""), SerializesTo("\"\""));
-    EXPECT_THAT(Json::string("Hello, world!"), SerializesTo("\"Hello, world!\""));
-    EXPECT_THAT(Json::string("Multiple\nLines"), SerializesTo("\"Multiple\\nLines\""));
+    RoundTripBetween(Json::string(""), "\"\"");
+    RoundTripBetween(Json::string("Hello, world!"), "\"Hello, world!\"");
+    RoundTripBetween(Json::string("Multiple\nLines"), "\"Multiple\\nLines\"");
+    RoundTripBetween(Json::string("Control\001Chars"), "\"Control\\u0001Chars\"");
+
+    RoundTripBetween(Json::string("\""), "\"\\\"\"");
+    RoundTripBetween(Json::string("\\"), "\"\\\\\"");
+    RoundTripBetween(Json::string("/"), "\"\\/\"");
+    RoundTripBetween(Json::string("\b"), "\"\\b\"");
+    RoundTripBetween(Json::string("\f"), "\"\\f\"");
+    RoundTripBetween(Json::string("\n"), "\"\\n\"");
+    RoundTripBetween(Json::string("\r"), "\"\\r\"");
+    RoundTripBetween(Json::string("\t"), "\"\\t\"");
 }
 
 TEST_F(SerializeTest, NumberTest) {
-    EXPECT_THAT(Json::number(1.0), SerializesTo(1.0));
-    EXPECT_THAT(Json::number(2.0), SerializesTo(2.0));
-    EXPECT_THAT(Json::number(3.0), SerializesTo(3.0));
+    RoundTripBetween(Json::number(1.0), 1.0);
+    RoundTripBetween(Json::number(2.0), 2.0);
+    RoundTripBetween(Json::number(3.0), 3.0);
 }
 
 TEST_F(SerializeTest, BoolTest) {
-    EXPECT_THAT(Json::bool_(true), SerializesTo("true"));
-    EXPECT_THAT(Json::bool_(false), SerializesTo("false"));
+    RoundTripBetween(Json::boolean(true), "true");
+    RoundTripBetween(Json::boolean(false), "false");
 }
 
 TEST_F(SerializeTest, EmptyArrayTest) {
     vector<Json> a;
-    EXPECT_THAT(Json::array(a), SerializesTo("[]"));
+    RoundTripBetween(Json::array(a), "[]");
 }
 
 TEST_F(SerializeTest, NonEmptyArrayTest) {
@@ -275,12 +320,12 @@ TEST_F(SerializeTest, NonEmptyArrayTest) {
     a.push_back(Json::number(1.0));
     a.push_back(Json::number(2.0));
     a.push_back(Json::number(3.0));
-    EXPECT_THAT(Json::array(a), SerializesTo(format("[{0},{1},{2}]", 1.0, 2.0, 3.0)));
+    RoundTripBetween(Json::array(a), format("[{0},{1},{2}]", 1.0, 2.0, 3.0));
 }
 
 TEST_F(SerializeTest, EmptyObjectTest) {
     StringMap<Json> o;
-    EXPECT_THAT(Json::object(o), SerializesTo("{}"));
+    RoundTripBetween(Json::object(o), "{}");
 }
 
 TEST_F(SerializeTest, NonEmptyObjectTest) {
@@ -288,13 +333,13 @@ TEST_F(SerializeTest, NonEmptyObjectTest) {
     o.insert(make_pair("one", Json::number(1.0)));
     o.insert(make_pair("two", Json::number(2.0)));
     o.insert(make_pair("three", Json::number(3.0)));
-    EXPECT_THAT(Json::object(o), SerializesTo(format(
+    RoundTripBetween(Json::object(o), format(
                 "{{"
                     "\"one\":{0},"
                     "\"three\":{1},"
                     "\"two\":{2}"
                 "}}",
-                1.0, 3.0, 2.0)));
+                1.0, 3.0, 2.0));
 }
 
 TEST_F(SerializeTest, ComplexObjectTest) {
@@ -320,30 +365,115 @@ TEST_F(SerializeTest, ComplexObjectTest) {
     StringMap<Json> album;
     album.insert(make_pair("album", Json::string(kAlbum.album)));
     album.insert(make_pair("artist", Json::string(kAlbum.artist)));
-    album.insert(make_pair("compilation", Json::bool_(kAlbum.compilation)));
+    album.insert(make_pair("compilation", Json::boolean(kAlbum.compilation)));
     album.insert(make_pair("tracks", Json::array(tracks)));
 
-    EXPECT_THAT(Json::object(album), SerializesTo(format(
-                    "{{"
-                        "\"album\":\"Hey Everyone\","
-                        "\"artist\":\"Dananananaykroyd\","
-                        "\"compilation\":false,"
-                        "\"tracks\":["
-                            "{{"
-                                "\"length\":{0},"
-                                "\"title\":\"Hey Everyone\""
-                            "}},"
-                            "{{"
-                                "\"length\":{1},"
-                                "\"title\":\"Watch This!\""
-                            "}},"
-                            "{{"
-                                "\"length\":{2},"
-                                "\"title\":\"The Greater Than Symbol & The Hash\""
-                            "}}"
-                        "]"
-                    "}}",
-                    151.0, 213.0, 281.0)));
+    RoundTripBetween(Json::object(album), format(
+                "{{"
+                    "\"album\":\"Hey Everyone\","
+                    "\"artist\":\"Dananananaykroyd\","
+                    "\"compilation\":false,"
+                    "\"tracks\":["
+                        "{{"
+                            "\"length\":{0},"
+                            "\"title\":\"Hey Everyone\""
+                        "}},"
+                        "{{"
+                            "\"length\":{1},"
+                            "\"title\":\"Watch This!\""
+                        "}},"
+                        "{{"
+                            "\"length\":{2},"
+                            "\"title\":\"The Greater Than Symbol & The Hash\""
+                        "}}"
+                    "]"
+                "}}",
+                151.0, 213.0, 281.0));
+}
+
+TEST_F(SerializeTest, ParseWhitespace) {
+    StringSlice text =
+        "  {  \n"
+        "    \"\"  :  {  }  ,  "
+        "    \" \"  :  {  \"\": \"\"  }  ,  "
+        "    \"  \"  :  [  ]  ,  "
+        "    \"   \"  :  [  \"\"  ]  ,  "
+        "    \"    \"  :  \" \"  ,  "
+        "    \"     \"  :  0  ,  "
+        "    \"      \"  :  true  ,  "
+        "    \"       \"  :  null  "
+        "  }  ";
+    StringMap<Json> object;
+
+    StringMap<Json> inner_object;
+    object.insert(make_pair("", Json::object(inner_object)));
+    inner_object.insert(make_pair("", Json::string("")));
+    object.insert(make_pair(" ", Json::object(inner_object)));
+
+    vector<Json> inner_array;
+    object.insert(make_pair("  ", Json::array(inner_array)));
+    inner_array.push_back(Json::string(""));
+    object.insert(make_pair("   ", Json::array(inner_array)));
+
+    EXPECT_TRUE(object.insert(make_pair("    ", Json::string(" "))).second);
+    EXPECT_TRUE(object.insert(make_pair("     ", Json::number(0))).second);
+    EXPECT_TRUE(object.insert(make_pair("      ", Json::boolean(true))).second);
+    EXPECT_TRUE(object.insert(make_pair("       ", Json())).second);
+
+    EXPECT_THAT(object.size(), Eq<size_t>(8));
+    EXPECT_THAT(text, ParsesTo(Json::object(object)));
+}
+
+TEST_F(SerializeTest, ParseFailure) {
+    ASSERT_THAT("", Not(Parses()));
+    ASSERT_THAT(",", Not(Parses()));
+    ASSERT_THAT("@", Not(Parses()));
+    ASSERT_THAT("1,", Not(Parses()));
+    ASSERT_THAT(",1", Not(Parses()));
+
+    ASSERT_THAT("{", Not(Parses()));
+    ASSERT_THAT("{a:1}", Not(Parses()));
+    ASSERT_THAT("{\"a\"}", Not(Parses()));
+    ASSERT_THAT("{\"a\":", Not(Parses()));
+    ASSERT_THAT("{\"a\":,", Not(Parses()));
+    ASSERT_THAT("{\"a\":@", Not(Parses()));
+    ASSERT_THAT("{\"a\":1", Not(Parses()));
+    ASSERT_THAT("{\"a\":1,", Not(Parses()));
+    ASSERT_THAT("{\"a\":1,}", Not(Parses()));
+
+    ASSERT_THAT("[", Not(Parses()));
+    ASSERT_THAT("[a]", Not(Parses()));
+    ASSERT_THAT("[\"a\"", Not(Parses()));
+    ASSERT_THAT("[\"a\",", Not(Parses()));
+    ASSERT_THAT("[\"a\",]", Not(Parses()));
+    ASSERT_THAT("[\"a\"@", Not(Parses()));
+
+    ASSERT_THAT("\"", Not(Parses()));
+    ASSERT_THAT("\"\\", Not(Parses()));
+    ASSERT_THAT("\"\\\"", Not(Parses()));
+    ASSERT_THAT("\"\\@\"", Not(Parses()));
+    ASSERT_THAT("\"\\u1\"", Not(Parses()));
+    ASSERT_THAT("\"\\u12\"", Not(Parses()));
+    ASSERT_THAT("\"\\u123\"", Not(Parses()));
+
+    ASSERT_THAT("--1", Not(Parses()));
+    ASSERT_THAT(".0", Not(Parses()));
+    ASSERT_THAT(".0.", Not(Parses()));
+    ASSERT_THAT("1u", Not(Parses()));
+    ASSERT_THAT("1..", Not(Parses()));
+    ASSERT_THAT("1.0.", Not(Parses()));
+    ASSERT_THAT("1.0.0", Not(Parses()));
+    ASSERT_THAT("1.0ee", Not(Parses()));
+    ASSERT_THAT("1.0ee", Not(Parses()));
+    ASSERT_THAT("1.0e+-2", Not(Parses()));
+    ASSERT_THAT("1.0e-e", Not(Parses()));
+
+    ASSERT_THAT("t", Not(Parses()));
+    ASSERT_THAT("talse", Not(Parses()));
+    ASSERT_THAT("truer", Not(Parses()));
+    ASSERT_THAT("falser", Not(Parses()));
+    ASSERT_THAT("maybe", Not(Parses()));
+    ASSERT_THAT("NULL", Not(Parses()));
 }
 
 }  // namespace

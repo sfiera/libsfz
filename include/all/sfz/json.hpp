@@ -22,7 +22,7 @@ class Json {
     static Json array(const std::vector<Json>& value);
     static Json string(const PrintItem& value);
     static Json number(double value);
-    static Json bool_(bool value);
+    static Json boolean(bool value);
 
     Json();
     Json(const Json& other);
@@ -32,12 +32,14 @@ class Json {
     void accept(const JsonVisitor& visitor) const;
 
   private:
+    friend bool operator==(const Json& x, const Json& y);
+
     class Value;
     class Object;
     class Array;
     class String;
     class Number;
-    class Bool;
+    class Boolean;
     class Null;
 
     Json(Value* value);
@@ -46,6 +48,9 @@ class Json {
 
     // ALLOW_COPY_AND_ASSIGN
 };
+
+bool operator==(const Json& x, const Json& y);
+bool operator!=(const Json& x, const Json& y);
 
 class JsonVisitor {
   public:
@@ -70,6 +75,8 @@ class JsonDefaultVisitor : public JsonVisitor {
 
     virtual void visit_default(const char* type) const = 0;
 };
+
+bool string_to_json(StringSlice string, Json& out);
 
 JsonPrettyPrinter pretty_print(const Json& value);
 
