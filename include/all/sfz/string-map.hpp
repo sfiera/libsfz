@@ -15,9 +15,7 @@
 
 namespace sfz {
 
-struct StringSliceLess;
-
-template <typename T, typename Compare = StringSliceLess>
+template <typename T, typename Compare = std::less<StringSlice> >
 class StringMap {
   public:
     typedef StringSlice                             key_type;
@@ -111,6 +109,25 @@ class StringMap {
 };
 
 template <typename T, typename Compare>
+bool operator==(const StringMap<T, Compare>& x, const StringMap<T, Compare>& y) {
+    typedef typename StringMap<T, Compare>::const_iterator iterator;
+    iterator x_begin = x.begin(), x_end = x.end(), y_begin = y.begin(), y_end = y.end();
+    while ((x_begin != x_end) && (y_begin != y_end)) {
+        if ((x_begin->first != y_begin->first) || (x_begin->second != y_begin->second)) {
+            return false;
+        }
+        ++x_begin;
+        ++y_begin;
+    }
+    return (x_begin == x_end) && (y_begin == y_end);
+}
+
+template <typename T, typename Compare>
+bool operator!=(const StringMap<T, Compare>& x, const StringMap<T, Compare>& y) {
+    return !(x == y);
+}
+
+template <typename T, typename Compare>
 class StringMap<T, Compare>::iterator : public iterator_base<wrapped_iterator> {
   public:
     iterator() { }
@@ -165,23 +182,6 @@ std::pair<typename StringMap<T, Compare>::iterator, bool> StringMap<T, Compare>:
         return make_pair(iterator(it), false);
     }
 }
-
-struct StringSliceLess {
-    bool operator()(const StringSlice& lhs, const StringSlice& rhs) const {
-        for (StringSlice::const_iterator it = lhs.begin(), jt = rhs.begin(),
-                it_end = rhs.end(), jt_end = rhs.end(); true; ++it, ++jt) {
-            if (jt == jt_end) {
-                return false;
-            } else if (it == it_end) {
-                return true;
-            } else if (*it < *jt) {
-                return true;
-            } else if (*jt < *it) {
-                return false;
-            }
-        }
-    }
-};
 
 }  // namespace sfz
 
