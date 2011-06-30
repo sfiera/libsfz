@@ -32,6 +32,8 @@ class Json {
     void accept(const JsonVisitor& visitor) const;
 
   private:
+    friend bool operator==(const Json& x, const Json& y);
+
     class Value;
     class Object;
     class Array;
@@ -46,6 +48,9 @@ class Json {
 
     // ALLOW_COPY_AND_ASSIGN
 };
+
+bool operator==(const Json& x, const Json& y);
+bool operator!=(const Json& x, const Json& y);
 
 class JsonVisitor {
   public:
@@ -70,6 +75,8 @@ class JsonDefaultVisitor : public JsonVisitor {
 
     virtual void visit_default(const char* type) const = 0;
 };
+
+bool string_to_json(StringSlice string, Json& out);
 
 JsonPrettyPrinter pretty_print(const Json& value);
 
