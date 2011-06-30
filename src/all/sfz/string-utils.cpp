@@ -95,6 +95,28 @@ template bool string_to_int<uint32_t>(StringSlice s, uint32_t& out, int base);
 template bool string_to_int<int64_t>(StringSlice s, int64_t& out, int base);
 template bool string_to_int<uint64_t>(StringSlice s, uint64_t& out, int base);
 
+template <> bool string_to_float<float>(StringSlice s, float& out) {
+    CString c_str(s);
+    char* end;
+    float value = strtof(c_str.data(), &end);
+    if (end == (c_str.data() + c_str.size())) {
+        out = value;
+        return true;
+    }
+    return false;
+}
+
+template <> bool string_to_float<double>(StringSlice s, double& out) {
+    CString c_str(s);
+    char* end;
+    double value = strtof(c_str.data(), &end);
+    if (end == (c_str.data() + c_str.size())) {
+        out = value;
+        return true;
+    }
+    return false;
+}
+
 CString::CString(const StringSlice& string) {
     if (string.find('\0') != StringSlice::npos) {
         throw Exception("Tried to create CString from string with embedded NUL");

@@ -11,6 +11,8 @@
 #include <sfz/string.hpp>
 
 using testing::Eq;
+using testing::NanSensitiveDoubleEq;
+using testing::NanSensitiveFloatEq;
 using testing::Test;
 
 namespace sfz {
@@ -31,7 +33,7 @@ struct TestData {
 class StringUtilitiesTest : public Test {
   protected:
     template <typename T, int size>
-    void Run(const TestData<T> (&inputs)[size]) {
+    void RunInt(const TestData<T> (&inputs)[size]) {
         SFZ_FOREACH(const TestData<T>& input, inputs, {
             T actual;
             if (input.good) {
@@ -40,6 +42,36 @@ class StringUtilitiesTest : public Test {
                 EXPECT_THAT(actual, Eq(input.expected));
             } else {
                 EXPECT_THAT(string_to_int(input.string, actual), Eq(false))
+                    << "input: " << input.string << "; output: " << actual;
+            }
+        });
+    }
+
+    template <typename T, int size>
+    void RunFloat(const TestData<T> (&inputs)[size]) {
+        SFZ_FOREACH(const TestData<T>& input, inputs, {
+            T actual;
+            if (input.good) {
+                EXPECT_THAT(string_to_float(input.string, actual), Eq(true))
+                    << "input: " << input.string;
+                EXPECT_THAT(actual, NanSensitiveFloatEq(input.expected));
+            } else {
+                EXPECT_THAT(string_to_float(input.string, actual), Eq(false))
+                    << "input: " << input.string << "; output: " << actual;
+            }
+        });
+    }
+
+    template <typename T, int size>
+    void RunDouble(const TestData<T> (&inputs)[size]) {
+        SFZ_FOREACH(const TestData<T>& input, inputs, {
+            T actual;
+            if (input.good) {
+                EXPECT_THAT(string_to_float(input.string, actual), Eq(true))
+                    << "input: " << input.string;
+                EXPECT_THAT(actual, NanSensitiveDoubleEq(input.expected));
+            } else {
+                EXPECT_THAT(string_to_float(input.string, actual), Eq(false))
                     << "input: " << input.string << "; output: " << actual;
             }
         });
@@ -66,7 +98,7 @@ TEST_F(StringUtilitiesTest, Int8) {
         {GOOD, "0000000000000000000000127", 127},
         {BAD,  "0000000000000000000000128"},
     };
-    Run(inputs);
+    RunInt(inputs);
 }
 
 TEST_F(StringUtilitiesTest, Int16) {
@@ -89,7 +121,7 @@ TEST_F(StringUtilitiesTest, Int16) {
         {GOOD, "0000000000000000000032767", 32767},
         {BAD,  "0000000000000000000032768"},
     };
-    Run(inputs);
+    RunInt(inputs);
 }
 
 TEST_F(StringUtilitiesTest, Int32) {
@@ -112,7 +144,7 @@ TEST_F(StringUtilitiesTest, Int32) {
         {GOOD, "0000000000000002147483647", 2147483647ull},
         {BAD,  "0000000000000002147483648"},
     };
-    Run(inputs);
+    RunInt(inputs);
 }
 
 TEST_F(StringUtilitiesTest, Int64) {
@@ -135,7 +167,7 @@ TEST_F(StringUtilitiesTest, Int64) {
         {GOOD, "0000009223372036854775807", 9223372036854775807ull},
         {BAD,  "0000009223372036854775808"},
     };
-    Run(inputs);
+    RunInt(inputs);
 }
 
 TEST_F(StringUtilitiesTest, UnsignedInt8) {
@@ -157,7 +189,7 @@ TEST_F(StringUtilitiesTest, UnsignedInt8) {
         {GOOD, "0000000000000000000000255", 255},
         {BAD,  "0000000000000000000000256"},
     };
-    Run(inputs);
+    RunInt(inputs);
 }
 
 TEST_F(StringUtilitiesTest, UnsignedInt16) {
@@ -179,7 +211,7 @@ TEST_F(StringUtilitiesTest, UnsignedInt16) {
         {GOOD, "0000000000000000000065535", 65535},
         {BAD,  "0000000000000000000065536"},
     };
-    Run(inputs);
+    RunInt(inputs);
 }
 
 TEST_F(StringUtilitiesTest, UnsignedInt32) {
@@ -201,7 +233,7 @@ TEST_F(StringUtilitiesTest, UnsignedInt32) {
         {GOOD, "0000000000000004294967295", 4294967295ull},
         {BAD,  "0000000000000004294967296"},
     };
-    Run(inputs);
+    RunInt(inputs);
 }
 
 TEST_F(StringUtilitiesTest, UnsignedInt64) {
@@ -223,7 +255,35 @@ TEST_F(StringUtilitiesTest, UnsignedInt64) {
         {GOOD, "0000018446744073709551615", 18446744073709551615ull},
         {BAD,  "0000018446744073709551616"},
     };
-    Run(inputs);
+    RunInt(inputs);
+}
+
+TEST_F(StringUtilitiesTest, Float) {
+    TestData<float> inputs[] = {
+        {GOOD, "0",         0},
+        {GOOD, "1",         1},
+        {GOOD, "-1",        -1},
+        {GOOD, "1.5",       1.5},
+        {GOOD, "1e10",      1e10},
+        {GOOD, "infinity",  std::numeric_limits<float>::infinity()},
+        {GOOD, "-infinity", -std::numeric_limits<float>::infinity()},
+        {GOOD, "nan",       std::numeric_limits<float>::quiet_NaN()},
+    };
+    RunFloat(inputs);
+}
+
+TEST_F(StringUtilitiesTest, Double) {
+    TestData<double> inputs[] = {
+        {GOOD, "0",         0},
+        {GOOD, "1",         1},
+        {GOOD, "-1",        -1},
+        {GOOD, "1.5",       1.5},
+        {GOOD, "1e10",      1e10},
+        {GOOD, "infinity",  std::numeric_limits<float>::infinity()},
+        {GOOD, "-infinity", -std::numeric_limits<float>::infinity()},
+        {GOOD, "nan",       std::numeric_limits<float>::quiet_NaN()},
+    };
+    RunDouble(inputs);
 }
 
 }  // namespace
