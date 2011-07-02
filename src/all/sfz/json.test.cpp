@@ -251,6 +251,15 @@ MATCHER_P(SerializesTo, expected, "") {
     return actual == expected;
 }
 
+MATCHER_P(PrettyPrintsTo, expected, "") {
+    sfz::String actual(pretty_print(arg));
+    CString actual_c_str(actual);
+    CString expected_c_str(expected);
+    *result_listener
+        << "actual " << actual_c_str.data() << " vs. expected " << expected_c_str.data();
+    return actual == expected;
+}
+
 MATCHER(Parses, "") {
     Json actual;
     if (!string_to_json(arg, actual)) {
@@ -389,6 +398,27 @@ TEST_F(SerializeTest, ComplexObjectTest) {
                     "]"
                 "}}",
                 151.0, 213.0, 281.0));
+
+    ASSERT_THAT(Json::object(album), PrettyPrintsTo(
+                "{\n"
+                "  \"album\": \"Hey Everyone\",\n"
+                "  \"artist\": \"Dananananaykroyd\",\n"
+                "  \"compilation\": false,\n"
+                "  \"tracks\": [\n"
+                "    {\n"
+                "      \"length\": 151.000000,\n"
+                "      \"title\": \"Hey Everyone\"\n"
+                "    },\n"
+                "    {\n"
+                "      \"length\": 213.000000,\n"
+                "      \"title\": \"Watch This!\"\n"
+                "    },\n"
+                "    {\n"
+                "      \"length\": 281.000000,\n"
+                "      \"title\": \"The Greater Than Symbol & The Hash\"\n"
+                "    }\n"
+                "  ]\n"
+                "}"));
 }
 
 TEST_F(SerializeTest, ParseWhitespace) {
