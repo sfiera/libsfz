@@ -584,7 +584,7 @@ namespace {
 
 class SerializerVisitor : public JsonVisitor {
   public:
-    explicit SerializerVisitor(PrintTarget out);
+    explicit SerializerVisitor(PrintTarget& out);
 
     virtual void visit_object(const StringMap<Json>& value) const;
     virtual void visit_array(const vector<Json>& value) const;
@@ -599,7 +599,7 @@ class SerializerVisitor : public JsonVisitor {
 
 class PrettyPrinterVisitor : public SerializerVisitor {
   public:
-    explicit PrettyPrinterVisitor(int& depth, PrintTarget out);
+    explicit PrettyPrinterVisitor(int& depth, PrintTarget& out);
 
     virtual void visit_object(const StringMap<Json>& value) const;
     virtual void visit_array(const vector<Json>& value) const;
@@ -608,7 +608,7 @@ class PrettyPrinterVisitor : public SerializerVisitor {
     int& _depth;
 };
 
-SerializerVisitor::SerializerVisitor(PrintTarget out)
+SerializerVisitor::SerializerVisitor(PrintTarget& out)
     : _out(out) { }
 
 void SerializerVisitor::visit_object(const StringMap<Json>& value) const {
@@ -665,7 +665,7 @@ void SerializerVisitor::visit_null() const {
     _out.push("null");
 }
 
-PrettyPrinterVisitor::PrettyPrinterVisitor(int& depth, PrintTarget out)
+PrettyPrinterVisitor::PrettyPrinterVisitor(int& depth, PrintTarget& out)
     : SerializerVisitor(out),
       _depth(depth) { }
 
