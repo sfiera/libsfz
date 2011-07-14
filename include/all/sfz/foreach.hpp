@@ -6,7 +6,6 @@
 #ifndef SFZ_FOREACH_HPP_
 #define SFZ_FOREACH_HPP_
 
-#include <sfz/algorithm.hpp>
 #include <sfz/macros.hpp>
 
 #   if (_MSC_VER >= 1600) && (_MSC_VER < 1700)
@@ -105,12 +104,12 @@ class Range {
     // ALLOW_COPY_AND_ASSIGN
 };
 
-template <typename T>
-int compare(RangeIterator<T> x, RangeIterator<T> y) {
-    return compare(*x, *y);
-}
-
-SFZ_OPERATORS_BASED_ON_COMPARE_T(template <typename T>, RangeIterator<T>)
+template <typename T> bool operator==(RangeIterator<T> x, RangeIterator<T> y) { return *x == *y; }
+template <typename T> bool operator!=(RangeIterator<T> x, RangeIterator<T> y) { return *x != *y; }
+template <typename T> bool operator< (RangeIterator<T> x, RangeIterator<T> y) { return *x <  *y; }
+template <typename T> bool operator<=(RangeIterator<T> x, RangeIterator<T> y) { return *x <= *y; }
+template <typename T> bool operator> (RangeIterator<T> x, RangeIterator<T> y) { return *x >  *y; }
+template <typename T> bool operator>=(RangeIterator<T> x, RangeIterator<T> y) { return *x >= *y; }
 
 template <typename T>
 Range<T> range(T begin, T end) {

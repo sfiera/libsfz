@@ -128,6 +128,8 @@ class String {
 
   private:
     friend class StringSlice;
+    friend bool operator==(const String& x, const String& y);
+    friend bool operator< (const String& x, const String& y);
 
     void initialize(size_t capacity);
 
@@ -244,10 +246,10 @@ class StringSlice {
 
         value_type operator[](int n) const { return *(*this + n); }
 
-        friend int compare(const StringSlice::iterator& x, const StringSlice::iterator& y);
-
       private:
         friend class StringSlice;
+        friend bool operator==(const StringSlice::iterator& x, const StringSlice::iterator& y);
+        friend bool operator<(const StringSlice::iterator& x, const StringSlice::iterator& y);
         iterator(const uint8_t* it, int encoding);
 
         const uint8_t* _it;
@@ -276,30 +278,32 @@ inline void print_to(PrintTarget out, const StringSlice& s) { out.push(s); }
 void swap(String& x, String& y);
 void swap(StringSlice& x, StringSlice& y);
 
-int compare(const String& x, const String& y);
-int compare(const StringSlice& x, const StringSlice& y);
-int compare(const StringSlice::iterator& x, const StringSlice::iterator& y);
-
 bool operator==(const String& x, const String& y);
-bool operator!=(const String& x, const String& y);
+inline bool operator!=(const String& x, const String& y) { return !(x == y); }
 bool operator< (const String& x, const String& y);
-bool operator<=(const String& x, const String& y);
-bool operator> (const String& x, const String& y);
-bool operator>=(const String& x, const String& y);
+inline bool operator<=(const String& x, const String& y) { return !(y < x); }
+inline bool operator> (const String& x, const String& y) { return y < x; }
+inline bool operator>=(const String& x, const String& y) { return !(x < y); }
 
 bool operator==(const StringSlice& x, const StringSlice& y);
-bool operator!=(const StringSlice& x, const StringSlice& y);
+inline bool operator!=(const StringSlice& x, const StringSlice& y) { return !(x == y); }
 bool operator< (const StringSlice& x, const StringSlice& y);
-bool operator<=(const StringSlice& x, const StringSlice& y);
-bool operator> (const StringSlice& x, const StringSlice& y);
-bool operator>=(const StringSlice& x, const StringSlice& y);
+inline bool operator<=(const StringSlice& x, const StringSlice& y) { return !(y < x); }
+inline bool operator> (const StringSlice& x, const StringSlice& y) { return y < x; }
+inline bool operator>=(const StringSlice& x, const StringSlice& y) { return !(x < y); }
 
-bool operator==(const StringSlice::iterator& x, const StringSlice::iterator& y);
-bool operator!=(const StringSlice::iterator& x, const StringSlice::iterator& y);
-bool operator< (const StringSlice::iterator& x, const StringSlice::iterator& y);
-bool operator<=(const StringSlice::iterator& x, const StringSlice::iterator& y);
-bool operator> (const StringSlice::iterator& x, const StringSlice::iterator& y);
-bool operator>=(const StringSlice::iterator& x, const StringSlice::iterator& y);
+inline bool operator==(const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return x._it == y._it; }
+inline bool operator!=(const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return !(x == y); }
+inline bool operator< (const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return x._it < y._it; }
+inline bool operator<=(const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return !(y < x); }
+inline bool operator> (const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return y < x; }
+inline bool operator>=(const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return !(x < y); }
 
 }  // namespace sfz
 

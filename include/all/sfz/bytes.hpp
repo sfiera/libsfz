@@ -162,22 +162,19 @@ inline void write_to(WriteTarget out, const BytesSlice& bytes) { out.push(bytes)
 void swap(Bytes& x, Bytes& y);
 void swap(BytesSlice& x, BytesSlice& y);
 
-int compare(const Bytes& x, const Bytes& y);
-int compare(const BytesSlice& x, const BytesSlice& y);
-
-bool operator==(const Bytes& x, const Bytes& y);
-bool operator!=(const Bytes& x, const Bytes& y);
-bool operator< (const Bytes& x, const Bytes& y);
-bool operator<=(const Bytes& x, const Bytes& y);
-bool operator> (const Bytes& x, const Bytes& y);
-bool operator>=(const Bytes& x, const Bytes& y);
-
 bool operator==(const BytesSlice& x, const BytesSlice& y);
-bool operator!=(const BytesSlice& x, const BytesSlice& y);
+inline bool operator!=(const BytesSlice& x, const BytesSlice& y) { return !(x == y); }
 bool operator< (const BytesSlice& x, const BytesSlice& y);
-bool operator<=(const BytesSlice& x, const BytesSlice& y);
-bool operator> (const BytesSlice& x, const BytesSlice& y);
-bool operator>=(const BytesSlice& x, const BytesSlice& y);
+inline bool operator<=(const BytesSlice& x, const BytesSlice& y) { return !(y < x); }
+inline bool operator> (const BytesSlice& x, const BytesSlice& y) { return y < x; }
+inline bool operator>=(const BytesSlice& x, const BytesSlice& y) { return !(x < y); }
+
+inline bool operator==(const Bytes& x, const Bytes& y) { return x.slice() == y.slice(); }
+inline bool operator!=(const Bytes& x, const Bytes& y) { return x.slice() != y.slice(); }
+inline bool operator< (const Bytes& x, const Bytes& y) { return x.slice() < y.slice(); }
+inline bool operator<=(const Bytes& x, const Bytes& y) { return x.slice() <= y.slice(); }
+inline bool operator> (const Bytes& x, const Bytes& y) { return x.slice() > y.slice(); }
+inline bool operator>=(const Bytes& x, const Bytes& y) { return x.slice() >= y.slice(); }
 
 }  // namespace sfz
 

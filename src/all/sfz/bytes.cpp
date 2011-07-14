@@ -303,27 +303,17 @@ void swap(BytesSlice& x, BytesSlice& y) {
     swap(x._size, y._size);
 }
 
-// Equality operators.
-
-int compare(const Bytes& x, const Bytes& y) {
-    return compare(BytesSlice(x), BytesSlice(y));
+bool operator==(const BytesSlice& x, const BytesSlice& y) {
+    return (x.size() == y.size())
+        && (memcmp(x.data(), y.data(), x.size()) == 0);
 }
 
-int compare(const BytesSlice& x, const BytesSlice& y) {
-    int result = memcmp(x.data(), y.data(), min(x.size(), y.size()));
-    if (result) {
-        return result;
-    }
+bool operator<(const BytesSlice& x, const BytesSlice& y) {
     if (x.size() < y.size()) {
-        return -1;
-    } else if (x.size() > y.size()) {
-        return 1;
+        return memcmp(x.data(), y.data(), x.size()) <= 0;
     } else {
-        return 0;
+        return memcmp(x.data(), y.data(), y.size()) < 0;
     }
 }
-
-SFZ_OPERATORS_BASED_ON_COMPARE(Bytes)
-SFZ_OPERATORS_BASED_ON_COMPARE(BytesSlice)
 
 }  // namespace sfz

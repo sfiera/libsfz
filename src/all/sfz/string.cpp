@@ -7,7 +7,6 @@
 
 #include <string.h>
 #include <algorithm>
-#include <sfz/algorithm.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/foreach.hpp>
@@ -372,35 +371,43 @@ void swap(StringSlice& x, StringSlice& y) {
     swap(x._size, y._size);
 }
 
-int compare(const String& x, const String& y) {
-    return compare(StringSlice(x), StringSlice(y));
+bool operator==(const String& x, const String& y) {
+    return (x._size == y._size)
+        && (memcmp(x._data.get(), y._data.get(), x._size) == 0);
 }
 
-int compare(const StringSlice& x, const StringSlice& y) {
-    using sfz::compare;
-
-    for (StringSlice::iterator xit = x.begin(), yit = y.begin(), xend = x.end(), yend = y.end();
-            true; ++xit, ++yit) {
-        if ((xit == xend) && (yit == yend)) {
-            return 0;
-        } else if (xit == xend) {
-            return -1;
-        } else if (yit == yend) {
-            return 1;
-        } else if (compare(*xit, *yit) != 0) {
-            return compare(*xit, *yit);
-        }
+bool operator<(const String& x, const String& y) {
+    if (x._size < y._size) {
+        return memcmp(x._data.get(), y._data.get(), x._size) <= 0;
+    } else {
+        return memcmp(x._data.get(), y._data.get(), y._size) < 0;
     }
 }
 
-int compare(const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    using sfz::compare;
-
-    return sfz::compare(x._it, y._it);
+bool operator==(const StringSlice& x, const StringSlice& y) {
+    if (x.size() != y.size()) {
+        return false;
+    }
+    StringSlice::iterator x_begin = x.begin(), y_begin = y.begin(), x_end = x.end();
+    while (x_begin != x_end) {
+        if (*x_begin++ != *y_begin++) {
+            return false;
+        }
+    }
+    return true;
 }
 
-SFZ_OPERATORS_BASED_ON_COMPARE(String)
-SFZ_OPERATORS_BASED_ON_COMPARE(StringSlice)
-SFZ_OPERATORS_BASED_ON_COMPARE(StringSlice::iterator)
+bool operator<(const StringSlice& x, const StringSlice& y) {
+    StringSlice::iterator x_begin = x.begin(), x_end = x.end();
+    StringSlice::iterator y_begin = y.begin(), y_end = y.end();
+    while ((x_begin != x_end) && (y_begin != y_end)) {
+        if (*x_begin != *y_begin) {
+            return *x_begin < *y_begin;
+        }
+        ++x_begin;
+        ++y_begin;
+    }
+    return y_begin != y_end;
+}
 
 }  // namespace sfz
