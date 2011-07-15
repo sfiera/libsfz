@@ -117,6 +117,18 @@ template <> bool string_to_float<double>(StringSlice s, double& out) {
     return false;
 }
 
+bool partition(StringSlice& found, StringSlice separator, StringSlice& input) {
+    StringSlice::size_type at = input.find(separator);
+    if (at == StringSlice::npos) {
+        found = input;
+        input = StringSlice();
+        return false;
+    }
+    found = input.slice(0, at);
+    input = input.slice(at + separator.size());
+    return true;
+}
+
 CString::CString(const StringSlice& string) {
     if (string.find('\0') != StringSlice::npos) {
         throw Exception("Tried to create CString from string with embedded NUL");
