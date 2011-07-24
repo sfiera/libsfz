@@ -90,6 +90,7 @@ def build(bld):
             arch="x86_64 i386 ppc",
         )
 
+    test("algorithm")
     test("bytes")
     test("digest")
     test("encoding")

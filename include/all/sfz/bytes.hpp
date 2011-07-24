@@ -162,6 +162,8 @@ inline void write_to(WriteTarget out, const BytesSlice& bytes) { out.push(bytes)
 void swap(Bytes& x, Bytes& y);
 void swap(BytesSlice& x, BytesSlice& y);
 
+inline void copy(Bytes& to, const Bytes& from) { to.assign(from); }
+
 bool operator==(const BytesSlice& x, const BytesSlice& y);
 inline bool operator!=(const BytesSlice& x, const BytesSlice& y) { return !(x == y); }
 bool operator< (const BytesSlice& x, const BytesSlice& y);
