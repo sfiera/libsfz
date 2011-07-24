@@ -6,6 +6,7 @@
 #ifndef SFZ_SFZ_HPP_
 #define SFZ_SFZ_HPP_
 
+#include <sfz/algorithm.hpp>
 #include <sfz/bytes.hpp>
 #include <sfz/digest.hpp>
 #include <sfz/encoding.hpp>
