@@ -8,6 +8,7 @@
 
 #include <map>
 #include <vector>
+#include <sfz/algorithm.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/print.hpp>
 #include <sfz/string.hpp>
@@ -44,15 +45,24 @@ class Parser {
     DISALLOW_COPY_AND_ASSIGN(Parser);
 };
 
-Action store(String& arg);
-Action store_const(bool& arg, bool constant);
-Action store_const(int& arg, int constant);
-Action store_const(String& arg, PrintItem constant);
-Action increment(int& arg);
+template <typename To>
+Action store(To& to);
+
+template <typename To, typename Constant>
+Action store_const(To& to, const Constant& constant);
+
+template <typename To>
+Action increment(To& to);
 
 class Action {
   public:
-    class Impl;
+    class Impl {
+      public:
+        virtual ~Impl() { }
+        virtual bool takes_value() const = 0;
+        virtual void process() const { }
+        virtual void process(StringSlice value) const { }
+    };
 
     Action(const linked_ptr<Impl>& impl);
     Action(const Action& other);
@@ -82,6 +92,58 @@ class Argument {
 
     DISALLOW_COPY_AND_ASSIGN(Argument);
 };
+
+void store_argument(bool& to, StringSlice value);
+
+void store_argument(int8_t& to, StringSlice value);
+void store_argument(uint8_t& to, StringSlice value);
+void store_argument(int16_t& to, StringSlice value);
+void store_argument(uint16_t& to, StringSlice value);
+void store_argument(int32_t& to, StringSlice value);
+void store_argument(uint32_t& to, StringSlice value);
+void store_argument(int64_t& to, StringSlice value);
+void store_argument(uint64_t& to, StringSlice value);
+
+template <typename To>
+struct StoreAction : public Action::Impl {
+    StoreAction(To& to): to(to) { }
+    virtual bool takes_value() const { return true; }
+    virtual void process(StringSlice value) const { store_argument(to, value); }
+    To& to;
+};
+
+template <typename To>
+Action store(To& to) {
+    return linked_ptr<Action::Impl>(new StoreAction<To>(to));
+}
+
+template <typename To>
+struct StoreConstAction : public Action::Impl {
+    template <typename Constant>
+    StoreConstAction(To& to, Constant constant): to(to), constant(constant) { }
+    virtual bool takes_value() const { return false; }
+    virtual void process() const { copy(to, constant); }
+    To& to;
+    To constant;
+};
+
+template <typename To, typename Constant>
+Action store_const(To& to, const Constant& constant) {
+    return linked_ptr<Action::Impl>(new StoreConstAction<To>(to, constant));
+}
+
+template <typename To>
+struct IncrementAction : public Action::Impl {
+    IncrementAction(To& arg): arg(arg) { }
+    virtual bool takes_value() const { return false; }
+    virtual void process() const { ++arg; }
+    To& arg;
+};
+
+template <typename To>
+Action increment(To& to) {
+    return linked_ptr<Action::Impl>(new IncrementAction<To>(to));
+}
 
 }  // namespace args
 }  // namespace sfz

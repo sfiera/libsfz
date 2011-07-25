@@ -231,78 +231,6 @@ void Parser::parse_args(int argc, const char* const* argv) const {
 void Parser::usage(StringSlice program_name) const {
 }
 
-class Action::Impl {
-  public:
-    virtual ~Impl() { }
-    virtual bool takes_value() const = 0;
-    virtual void process() const { }
-    virtual void process(StringSlice value) const { }
-};
-
-namespace {
-
-struct StoreAction : public Action::Impl {
-    StoreAction(String& arg): arg(arg) { }
-    virtual bool takes_value() const { return true; }
-    virtual void process(StringSlice value) const { arg.assign(value); }
-    String& arg;
-};
-
-}  // namespace
-
-Action store(String& arg) {
-    return linked_ptr<Action::Impl>(new StoreAction(arg));
-}
-
-namespace {
-
-template <typename T>
-struct StoreConstAction : public Action::Impl {
-    StoreConstAction(T& arg, T constant): arg(arg), constant(constant) { }
-    virtual bool takes_value() const { return false; }
-    virtual void process() const { arg = constant; }
-    T& arg;
-    T constant;
-};
-
-template <>
-struct StoreConstAction<String> : public Action::Impl {
-    StoreConstAction(String& arg, PrintItem constant): arg(arg), constant(constant) { }
-    virtual bool takes_value() const { return false; }
-    virtual void process() const { arg.assign(constant); }
-    String& arg;
-    String constant;
-};
-
-}  // namespace
-
-Action store_const(bool& arg, bool constant) {
-    return linked_ptr<Action::Impl>(new StoreConstAction<bool>(arg, constant));
-}
-
-Action store_const(int& arg, int constant) {
-    return linked_ptr<Action::Impl>(new StoreConstAction<int>(arg, constant));
-}
-
-Action store_const(String& arg, PrintItem constant) {
-    return linked_ptr<Action::Impl>(new StoreConstAction<String>(arg, constant));
-}
-
-namespace {
-
-struct IncrementAction : public Action::Impl {
-    IncrementAction(int& arg): arg(arg) { }
-    virtual bool takes_value() const { return false; }
-    virtual void process() const { arg += 1; }
-    int& arg;
-};
-
-}  // namespace
-
-Action increment(int& arg) {
-    return linked_ptr<Action::Impl>(new IncrementAction(arg));
-}
-
 Action::Action(const linked_ptr<Impl>& impl): _impl(impl) { }
 Action::Action(const Action& other): _impl(other._impl) { }
 Action& Action::operator=(const Action& other) { _impl = other._impl; return *this; }
@@ -318,6 +246,32 @@ Argument& Argument::help(PrintItem s) {
     _help.assign(s);
     return *this;
 }
+
+void store_argument(bool& to, StringSlice value) {
+    if (value == "true") {
+        to = true;
+    } else if (value == "false") {
+        to = false;
+    } else {
+        throw Exception("bad boolean");
+    }
+}
+
+template <typename T>
+void store_integral_argument(T& to, StringSlice value) {
+    if (!string_to_int(value, to, 10)) {
+        throw Exception("bad integer");
+    }
+}
+
+void store_argument(int8_t& to, StringSlice value) { store_integral_argument(to, value); }
+void store_argument(uint8_t& to, StringSlice value) { store_integral_argument(to, value); }
+void store_argument(int16_t& to, StringSlice value) { store_integral_argument(to, value); }
+void store_argument(uint16_t& to, StringSlice value) { store_integral_argument(to, value); }
+void store_argument(int32_t& to, StringSlice value) { store_integral_argument(to, value); }
+void store_argument(uint32_t& to, StringSlice value) { store_integral_argument(to, value); }
+void store_argument(int64_t& to, StringSlice value) { store_integral_argument(to, value); }
+void store_argument(uint64_t& to, StringSlice value) { store_integral_argument(to, value); }
 
 }  // namespace args
 }  // namespace sfz

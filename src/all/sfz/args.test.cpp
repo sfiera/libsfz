@@ -338,11 +338,14 @@ TEST_F(ArgsTest, ArgumentsFail) {
 class CutTool {
   public:
     CutTool():
+            _limit(std::numeric_limits<int64_t>::max()),
             _delimiter("\t") { }
 
     void add_to(args::Parser& parser) {
         parser.add_argument("string", store(_string))
             .help("string to split");
+        parser.add_argument("-l", "--limit", store(_limit))
+            .help("split at most this many times");
         parser.add_argument("-d", "--delimiter", store(_delimiter))
             .help("use this as the field delimiter instead of tab");
     }
@@ -350,16 +353,23 @@ class CutTool {
     vector<StringSlice>& cut() {
         StringSlice remainder = _string;
         bool next = true;
+        int splits = 1;
         while (next) {
             StringSlice token;
             next = partition(token, _delimiter, remainder);
             _result.push_back(token);
+            ++splits;
+            if (splits >= _limit) {
+                _result.push_back(remainder);
+                break;
+            }
         }
         return _result;
     }
 
   private:
     String _string;
+    int64_t _limit;
     String _delimiter;
 
     vector<StringSlice> _result;
@@ -387,8 +397,8 @@ TEST_F(ArgsTest, CutLong) {
     args::Parser parser("Arguments all");
     CutTool opts;
     opts.add_to(parser);
-    pass(parser, "args", "--delimiter=an", "A man, a plan, a canal, Panama");
-    ASSERT_THAT(opts.cut(), ElementsAre("A m", ", a pl", ", a c", "al, P", "ama"));
+    pass(parser, "args", "--delimiter=an", "A man, a plan, a canal, Panama", "-l4");
+    ASSERT_THAT(opts.cut(), ElementsAre("A m", ", a pl", ", a c", "al, Panama"));
 }
 
 }  // namespace
