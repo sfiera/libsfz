@@ -11,6 +11,7 @@
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
+#include <sfz/optional.hpp>
 #include <sfz/string.hpp>
 
 using sfz::args::store;
@@ -257,9 +258,9 @@ TEST_F(ArgsTest, LongOptionsAll) {
 }
 
 struct ArgumentsOnly {
-    String one;
-    String two;
-    String three;
+    Optional<String> one;
+    Optional<String> two;
+    Optional<String> three;
 
     ArgumentsOnly() { }
 
@@ -281,9 +282,9 @@ TEST_F(ArgsTest, ArgumentsEmpty) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "args");
-    EXPECT_THAT(opts.one, Eq<StringSlice>(""));
-    EXPECT_THAT(opts.two, Eq<StringSlice>(""));
-    EXPECT_THAT(opts.three, Eq<StringSlice>(""));
+    EXPECT_THAT(opts.one.has(), Eq(false));
+    EXPECT_THAT(opts.two.has(), Eq(false));
+    EXPECT_THAT(opts.three.has(), Eq(false));
 }
 
 TEST_F(ArgsTest, ArgumentsSome) {
@@ -291,9 +292,9 @@ TEST_F(ArgsTest, ArgumentsSome) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "args", "1", "2");
-    EXPECT_THAT(opts.one, Eq<StringSlice>("1"));
-    EXPECT_THAT(opts.two, Eq<StringSlice>("2"));
-    EXPECT_THAT(opts.three, Eq<StringSlice>(""));
+    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
+    EXPECT_THAT(opts.three.has(), Eq(false));
 }
 
 TEST_F(ArgsTest, ArgumentsAll) {
@@ -301,9 +302,9 @@ TEST_F(ArgsTest, ArgumentsAll) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "args", "1", "2", "3");
-    EXPECT_THAT(opts.one, Eq<StringSlice>("1"));
-    EXPECT_THAT(opts.two, Eq<StringSlice>("2"));
-    EXPECT_THAT(opts.three, Eq<StringSlice>("3"));
+    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
+    EXPECT_THAT(*opts.three, Eq<StringSlice>("3"));
 }
 
 TEST_F(ArgsTest, ArgumentsDash) {
@@ -311,9 +312,9 @@ TEST_F(ArgsTest, ArgumentsDash) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "args", "1", "-", "3");
-    EXPECT_THAT(opts.one, Eq<StringSlice>("1"));
-    EXPECT_THAT(opts.two, Eq<StringSlice>("-"));
-    EXPECT_THAT(opts.three, Eq<StringSlice>("3"));
+    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.two, Eq<StringSlice>("-"));
+    EXPECT_THAT(*opts.three, Eq<StringSlice>("3"));
 }
 
 TEST_F(ArgsTest, ArgumentsDashDash) {
@@ -321,9 +322,9 @@ TEST_F(ArgsTest, ArgumentsDashDash) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "args", "1", "--", "-2", "--3");
-    EXPECT_THAT(opts.one, Eq<StringSlice>("1"));
-    EXPECT_THAT(opts.two, Eq<StringSlice>("-2"));
-    EXPECT_THAT(opts.three, Eq<StringSlice>("--3"));
+    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.two, Eq<StringSlice>("-2"));
+    EXPECT_THAT(*opts.three, Eq<StringSlice>("--3"));
 }
 
 TEST_F(ArgsTest, ArgumentsFail) {

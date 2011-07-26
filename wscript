@@ -101,6 +101,7 @@ def build(bld):
     test("io")
     test("json")
     test("memory")
+    test("optional")
     test("os")
     test("print")
     test("read")
