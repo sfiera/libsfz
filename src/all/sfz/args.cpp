@@ -96,16 +96,20 @@ class Parser::State {
         return _spec._long_options_by_name.find(option) != _spec._long_options_by_name.end();
     }
 
+    const Argument& long_option(StringSlice option) {
+        return *_spec._long_options_by_name.find(option)->second;
+    }
+
     bool long_option_takes_value(StringSlice option) {
-        return _spec._long_options_by_name.find(option)->second->_action.takes_value();
+        return long_option(option)._action.takes_value();
     }
 
     void process_long_option(StringSlice option) {
-        _spec._long_options_by_name.find(option)->second->_action.process();
+        long_option(option)._action.process();
     }
 
     void process_long_option(StringSlice option, StringSlice value) {
-        _spec._long_options_by_name.find(option)->second->_action.process(value);
+        long_option(option)._action.process(value);
     }
 
     void parse_short_option(StringSlice token) {
@@ -132,16 +136,20 @@ class Parser::State {
         return _spec._short_options_by_name.find(option) != _spec._short_options_by_name.end();
     }
 
+    const Argument& short_option(Rune option) {
+        return *_spec._short_options_by_name.find(option)->second;
+    }
+
     bool short_option_takes_value(Rune option) {
-        return _spec._short_options_by_name.find(option)->second->_action.takes_value();
+        return short_option(option)._action.takes_value();
     }
 
     void process_short_option(Rune option) {
-        _spec._short_options_by_name.find(option)->second->_action.process();
+        short_option(option)._action.process();
     }
 
     void process_short_option(Rune option, StringSlice value) {
-        _spec._short_options_by_name.find(option)->second->_action.process(value);
+        short_option(option)._action.process(value);
     }
 
     void process_argument(StringSlice value) {
