@@ -80,15 +80,22 @@ class Action {
 class Argument {
   public:
     Argument& help(PrintItem s);
+    Argument& required();
+    Argument& nargs(int n);
+    Argument& min_args(int n);
+    Argument& max_args(int n);
 
   private:
     friend class Parser;
     friend class Parser::State;
 
-    Argument(Action action);
+    Argument(bool option, Action action);
 
-    Action _action;
+    const bool _option;
+    const Action _action;
     String _help;
+    int _min_args;
+    int _max_args;
 
     DISALLOW_COPY_AND_ASSIGN(Argument);
 };
@@ -130,6 +137,22 @@ struct StoreConstAction : public Action::Impl {
 template <typename To, typename Constant>
 Action store_const(To& to, const Constant& constant) {
     return linked_ptr<Action::Impl>(new StoreConstAction<To>(to, constant));
+}
+
+template <typename ToElement>
+struct AppendAction : public Action::Impl {
+    AppendAction(std::vector<ToElement>& to): to(to) { }
+    virtual bool takes_value() const { return true; }
+    virtual void process(StringSlice value) const {
+        to.push_back(ToElement());
+        store_argument(to.back(), value);
+    }
+    std::vector<ToElement>& to;
+};
+
+template <typename ToElement>
+Action append(std::vector<ToElement>& to) {
+    return linked_ptr<Action::Impl>(new AppendAction<ToElement>(to));
 }
 
 template <typename To>

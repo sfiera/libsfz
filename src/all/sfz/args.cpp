@@ -12,6 +12,7 @@
 #include <sfz/format.hpp>
 #include <sfz/string-utils.hpp>
 
+using std::map;
 using std::vector;
 
 namespace sfz {
@@ -41,7 +42,7 @@ class Parser::State {
             _spec(spec),
             _program_name(program_name),
             _expecting_value(false),
-            _argument_index(0) { }
+            _argument(_spec._argument_specs.begin()) { }
 
     void parse_args(const vector<StringSlice>& args) {
         bool saw_dash_dash = false;
@@ -67,6 +68,12 @@ class Parser::State {
         if (_expecting_value) {
             String string_option(1, _option_expected);
             throw Exception(format("Expecting value for option \"-{0}\"", string_option));
+        }
+        while (_argument != _spec._argument_specs.end()) {
+            if ((*_argument)->_min_args > 0) {
+                throw Exception("Missing required argument");
+            }
+            ++_argument;
         }
     }
 
@@ -153,11 +160,15 @@ class Parser::State {
     }
 
     void process_argument(StringSlice value) {
-        if (_argument_index >= _spec._argument_specs.size()) {
+        if (_argument == _spec._argument_specs.end()) {
             throw Exception("too many arguments");
         }
-        _spec._argument_specs[_argument_index]->_action.process(value);
-        ++_argument_index;
+        (*_argument)->_action.process(value);
+        int& nargs = _nargs[_argument->get()];
+        ++nargs;
+        if (nargs == (*_argument)->_max_args) {
+            ++_argument;
+        }
     }
 
   private:
@@ -167,7 +178,8 @@ class Parser::State {
     Rune _option_expected;
     bool _expecting_value;
 
-    size_t _argument_index;
+    vector<linked_ptr<Argument> >::const_iterator _argument;
+    map<Argument*, int> _nargs;
 
     DISALLOW_COPY_AND_ASSIGN(State);
 };
@@ -182,18 +194,18 @@ Argument& Parser::add_argument(PrintItem name, Action action) {
     }
     if (printed_name.at(0) == '-') {
         if (is_valid_short_option(printed_name)) {
-            linked_ptr<Argument> arg(new Argument(action));
+            linked_ptr<Argument> arg(new Argument(true, action));
             _short_options_by_name[printed_name.at(1)] = arg;
             return *arg;
         } else if (is_valid_long_option(printed_name)) {
-            linked_ptr<Argument> arg(new Argument(action));
+            linked_ptr<Argument> arg(new Argument(true, action));
             _long_options_by_name[printed_name] = arg;
             return *arg;
         } else {
             throw Exception("invalid argument name");
         }
     } else {
-        linked_ptr<Argument> arg(new Argument(action));
+        linked_ptr<Argument> arg(new Argument(false, action));
         _argument_specs.push_back(arg);
         return *arg;
     }
@@ -207,7 +219,7 @@ Argument& Parser::add_argument(PrintItem short_name, PrintItem long_name, Action
     } else if (!is_valid_long_option(printed_long_name)) {
         throw Exception("invalid argument name");
     }
-    linked_ptr<Argument> arg(new Argument(action));
+    linked_ptr<Argument> arg(new Argument(true, action));
     _short_options_by_name[printed_short_name.at(1)] = arg;
     _long_options_by_name[printed_long_name] = arg;
     return *arg;
@@ -247,11 +259,44 @@ bool Action::takes_value() const { return _impl->takes_value(); }
 void Action::process() const { return _impl->process(); }
 void Action::process(StringSlice value) const { return _impl->process(value); }
 
-Argument::Argument(Action action):
-        _action(action) { }
+Argument::Argument(bool option, Action action):
+        _option(option),
+        _action(action),
+        _min_args(0),
+        _max_args(1) { }
 
 Argument& Argument::help(PrintItem s) {
     _help.assign(s);
+    return *this;
+}
+
+Argument& Argument::required() {
+    if (_option) {
+        throw Exception("called required() on an option");
+    }
+    return nargs(1);
+}
+
+Argument& Argument::nargs(int n) {
+    if (_option) {
+        throw Exception("called nargs() on an option");
+    }
+    return min_args(n).max_args(n);
+}
+
+Argument& Argument::min_args(int n) {
+    if (_option) {
+        throw Exception("called min_args() on an option");
+    }
+    _min_args = n;
+    return *this;
+}
+
+Argument& Argument::max_args(int n) {
+    if (_option) {
+        throw Exception("called max_args() on an option");
+    }
+    _max_args = n;
     return *this;
 }
 

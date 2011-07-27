@@ -14,6 +14,7 @@
 #include <sfz/optional.hpp>
 #include <sfz/string.hpp>
 
+using sfz::args::append;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::args::increment;
@@ -260,17 +261,19 @@ TEST_F(ArgsTest, LongOptionsAll) {
 struct ArgumentsOnly {
     Optional<String> one;
     Optional<String> two;
-    Optional<String> three;
+    vector<int> three;
 
     ArgumentsOnly() { }
 
     void add_to(args::Parser& parser) {
         parser.add_argument("one", store(one))
-            .help("first argument");
+            .help("first argument")
+            .required();
         parser.add_argument("two", store(two))
             .help("second argument");
-        parser.add_argument("three", store(three))
-            .help("third argument");
+        parser.add_argument("three", append(three))
+            .help("third argument")
+            .max_args(3);
     }
 
   private:
@@ -281,30 +284,47 @@ TEST_F(ArgsTest, ArgumentsEmpty) {
     args::Parser parser("Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args");
-    EXPECT_THAT(opts.one.has(), Eq(false));
-    EXPECT_THAT(opts.two.has(), Eq(false));
-    EXPECT_THAT(opts.three.has(), Eq(false));
+    fail(parser, "args");
 }
 
-TEST_F(ArgsTest, ArgumentsSome) {
+TEST_F(ArgsTest, ArgumentsOne) {
+    args::Parser parser("Arguments only");
+    ArgumentsOnly opts;
+    opts.add_to(parser);
+    pass(parser, "args", "1");
+    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(opts.two.has(), Eq(false));
+    EXPECT_THAT(opts.three, ElementsAre());
+}
+
+TEST_F(ArgsTest, ArgumentsTwo) {
     args::Parser parser("Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "args", "1", "2");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
-    EXPECT_THAT(opts.three.has(), Eq(false));
+    EXPECT_THAT(opts.three, ElementsAre());
 }
 
-TEST_F(ArgsTest, ArgumentsAll) {
+TEST_F(ArgsTest, ArgumentsThree) {
     args::Parser parser("Arguments all");
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "args", "1", "2", "3");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
-    EXPECT_THAT(*opts.three, Eq<StringSlice>("3"));
+    EXPECT_THAT(opts.three, ElementsAre(3));
+}
+
+TEST_F(ArgsTest, ArgumentsAll) {
+    args::Parser parser("Arguments all");
+    ArgumentsOnly opts;
+    opts.add_to(parser);
+    pass(parser, "args", "1", "2", "3", "4", "5");
+    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
+    EXPECT_THAT(opts.three, ElementsAre(3, 4, 5));
 }
 
 TEST_F(ArgsTest, ArgumentsDash) {
@@ -314,17 +334,17 @@ TEST_F(ArgsTest, ArgumentsDash) {
     pass(parser, "args", "1", "-", "3");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("-"));
-    EXPECT_THAT(*opts.three, Eq<StringSlice>("3"));
+    EXPECT_THAT(opts.three, ElementsAre(3));
 }
 
 TEST_F(ArgsTest, ArgumentsDashDash) {
     args::Parser parser("Arguments all");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args", "1", "--", "-2", "--3");
+    pass(parser, "args", "1", "--", "--2", "-3");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
-    EXPECT_THAT(*opts.two, Eq<StringSlice>("-2"));
-    EXPECT_THAT(*opts.three, Eq<StringSlice>("--3"));
+    EXPECT_THAT(*opts.two, Eq<StringSlice>("--2"));
+    EXPECT_THAT(opts.three, ElementsAre(-3));
 }
 
 TEST_F(ArgsTest, ArgumentsFail) {
@@ -333,7 +353,7 @@ TEST_F(ArgsTest, ArgumentsFail) {
     opts.add_to(parser);
     fail(parser, "args", "-s");
     fail(parser, "args", "--long");
-    fail(parser, "args", "1", "2", "3", "4");
+    fail(parser, "args", "1", "2", "3", "4", "5", "6");
 }
 
 class CutTool {
