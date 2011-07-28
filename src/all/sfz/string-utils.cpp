@@ -129,6 +129,22 @@ bool partition(StringSlice& found, StringSlice separator, StringSlice& input) {
     return true;
 }
 
+void upper(String& s) {
+    for (String::iterator begin = s.begin(), end = s.end(); begin != end; ++begin) {
+        if (*begin <= Rune(std::numeric_limits<wchar_t>::max())) {
+            *begin = towupper(*begin);
+        }
+    }
+}
+
+void lower(String& s) {
+    for (String::iterator begin = s.begin(), end = s.end(); begin != end; ++begin) {
+        if (*begin <= Rune(std::numeric_limits<wchar_t>::max())) {
+            *begin = towlower(*begin);
+        }
+    }
+}
+
 CString::CString(const StringSlice& string) {
     if (string.find('\0') != StringSlice::npos) {
         throw Exception("Tried to create CString from string with embedded NUL");

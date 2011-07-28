@@ -19,10 +19,12 @@ namespace args {
 
 class Action;
 class Argument;
+struct ParserUsage;
 
 class Parser {
   public:
-    Parser(PrintItem description);
+    Parser(PrintItem program_name, PrintItem description);
+    Parser(const char* program_name, PrintItem description);
 
     Argument& add_argument(PrintItem name, Action action);
     Argument& add_argument(PrintItem short_name, PrintItem long_name, Action action);
@@ -30,14 +32,19 @@ class Parser {
     void parse_args(const std::vector<StringSlice>& args) const;
     void parse_args(int argc, const char* const* argv) const;
 
-    void usage(StringSlice program_name) const;
+    ParserUsage usage() const;
 
   private:
     friend class Argument;
+    friend void print_to(PrintTarget out, ParserUsage usage);
 
     class State;
 
+    void print_usage_to(PrintTarget out) const;
+
+    const String _program_name;
     const String _description;
+
     std::vector<linked_ptr<Argument> > _argument_specs;
     std::map<Rune, linked_ptr<Argument> > _short_options_by_name;
     StringMap<linked_ptr<Argument> > _long_options_by_name;
@@ -80,6 +87,7 @@ class Action {
 class Argument {
   public:
     Argument& help(PrintItem s);
+    Argument& metavar(PrintItem s);
     Argument& required();
     Argument& nargs(int n);
     Argument& min_args(int n);
@@ -93,6 +101,7 @@ class Argument {
 
     const bool _option;
     const Action _action;
+    String _metavar;
     String _help;
     int _min_args;
     int _max_args;
@@ -167,6 +176,11 @@ template <typename To>
 Action increment(To& to) {
     return linked_ptr<Action::Impl>(new IncrementAction<To>(to));
 }
+
+struct ParserUsage {
+    const Parser& parser;
+};
+void print_to(PrintTarget out, ParserUsage usage);
 
 }  // namespace args
 }  // namespace sfz

@@ -13,6 +13,7 @@
 #include <sfz/string-utils.hpp>
 
 using std::map;
+using std::pair;
 using std::vector;
 
 namespace sfz {
@@ -38,16 +39,14 @@ bool is_valid_long_option(StringSlice s) {
 
 class Parser::State {
   public:
-    State(const Parser& spec, StringSlice program_name):
+    State(const Parser& spec):
             _spec(spec),
-            _program_name(program_name),
             _expecting_value(false),
             _argument(_spec._argument_specs.begin()) { }
 
     void parse_args(const vector<StringSlice>& args) {
         bool saw_dash_dash = false;
-        SFZ_FOREACH(size_t i, range<size_t>(1, args.size()), {
-            StringSlice token = args.at(i);
+        SFZ_FOREACH(StringSlice token, args, {
             if (_expecting_value) {
                 process_short_option(_option_expected, token);
                 _expecting_value = false;
@@ -173,7 +172,6 @@ class Parser::State {
 
   private:
     const Parser& _spec;
-    const StringSlice _program_name;
 
     Rune _option_expected;
     bool _expecting_value;
@@ -184,7 +182,12 @@ class Parser::State {
     DISALLOW_COPY_AND_ASSIGN(State);
 };
 
-Parser::Parser(PrintItem description):
+Parser::Parser(PrintItem program_name, PrintItem description):
+        _program_name(program_name),
+        _description(description) { }
+
+Parser::Parser(const char* program_name, PrintItem description):
+        _program_name(utf8::decode(program_name)),
         _description(description) { }
 
 Argument& Parser::add_argument(PrintItem name, Action action) {
@@ -196,10 +199,14 @@ Argument& Parser::add_argument(PrintItem name, Action action) {
         if (is_valid_short_option(printed_name)) {
             linked_ptr<Argument> arg(new Argument(true, action));
             _short_options_by_name[printed_name.at(1)] = arg;
+            arg->_metavar.assign(printed_name.slice(1));
+            upper(arg->_metavar);
             return *arg;
         } else if (is_valid_long_option(printed_name)) {
             linked_ptr<Argument> arg(new Argument(true, action));
             _long_options_by_name[printed_name] = arg;
+            arg->_metavar.assign(printed_name.slice(2));
+            upper(arg->_metavar);
             return *arg;
         } else {
             throw Exception("invalid argument name");
@@ -207,6 +214,7 @@ Argument& Parser::add_argument(PrintItem name, Action action) {
     } else {
         linked_ptr<Argument> arg(new Argument(false, action));
         _argument_specs.push_back(arg);
+        arg->_metavar.assign(printed_name);
         return *arg;
     }
 }
@@ -222,14 +230,13 @@ Argument& Parser::add_argument(PrintItem short_name, PrintItem long_name, Action
     linked_ptr<Argument> arg(new Argument(true, action));
     _short_options_by_name[printed_short_name.at(1)] = arg;
     _long_options_by_name[printed_long_name] = arg;
+    arg->_metavar.assign(printed_long_name.slice(2));
+    upper(arg->_metavar);
     return *arg;
 }
 
 void Parser::parse_args(const vector<StringSlice>& args) const {
-    if (args.size() < 1) {
-        throw Exception("must have at least 1 arg");
-    }
-    State(*this, args[0]).parse_args(args);
+    State(*this).parse_args(args);
 }
 
 void Parser::parse_args(int argc, const char* const* argv) const {
@@ -248,7 +255,61 @@ void Parser::parse_args(int argc, const char* const* argv) const {
     parse_args(args);
 }
 
-void Parser::usage(StringSlice program_name) const {
+ParserUsage Parser::usage() const {
+    ParserUsage result = {*this};
+    return result;
+}
+
+void Parser::print_usage_to(PrintTarget out) const {
+    typedef pair<Rune, linked_ptr<Argument> > ShortArg;
+    typedef pair<StringSlice, linked_ptr<Argument> > LongArg;
+
+    print(out, _program_name);
+
+    bool has_argless_options = false;
+    SFZ_FOREACH(const ShortArg& arg, _short_options_by_name, {
+        if (!arg.second->_action.takes_value()) {
+            if (!has_argless_options) {
+                print(out, " [-");
+                has_argless_options = true;
+            }
+            out.push(1, arg.first);
+        }
+    });
+    if (has_argless_options) {
+        print(out, "]");
+    }
+
+    SFZ_FOREACH(const ShortArg& arg, _short_options_by_name, {
+        if (arg.second->_action.takes_value()) {
+            String rune(1, arg.first);
+            print(out, format(" [-{0} {1}]", rune, arg.second->_metavar));
+        }
+    });
+
+    SFZ_FOREACH(const LongArg& arg, _long_options_by_name, {
+        if (arg.second->_action.takes_value()) {
+            print(out, format(" [{0}={1}]", arg.first, arg.second->_metavar));
+        } else {
+            print(out, format(" [{0}]", arg.first));
+        }
+    });
+
+    int nesting = 0;
+    SFZ_FOREACH(const linked_ptr<Argument>& arg, _argument_specs, {
+        SFZ_FOREACH(int i, range(arg->_min_args), {
+            print(out, format(" {0}", arg->_metavar));
+        });
+        if (arg->_max_args == std::numeric_limits<int>::max()) {
+            print(out, format(" [{0}...]", arg->_metavar));
+        } else {
+            SFZ_FOREACH(int i, range(arg->_max_args - arg->_min_args), {
+                ++nesting;
+                print(out, format(" [{0}", arg->_metavar));
+            });
+        }
+    });
+    out.push(nesting, ']');
 }
 
 Action::Action(const linked_ptr<Impl>& impl): _impl(impl) { }
@@ -267,6 +328,11 @@ Argument::Argument(bool option, Action action):
 
 Argument& Argument::help(PrintItem s) {
     _help.assign(s);
+    return *this;
+}
+
+Argument& Argument::metavar(PrintItem s) {
+    _metavar.assign(s);
     return *this;
 }
 
@@ -325,6 +391,10 @@ void store_argument(int32_t& to, StringSlice value) { store_integral_argument(to
 void store_argument(uint32_t& to, StringSlice value) { store_integral_argument(to, value); }
 void store_argument(int64_t& to, StringSlice value) { store_integral_argument(to, value); }
 void store_argument(uint64_t& to, StringSlice value) { store_integral_argument(to, value); }
+
+void print_to(PrintTarget out, ParserUsage usage) {
+    usage.parser.print_usage_to(out);
+}
 
 }  // namespace args
 }  // namespace sfz

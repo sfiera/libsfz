@@ -31,7 +31,7 @@ class ArgsTest : public Test {
   public:
     void pass(
             const args::Parser& parser,
-            const char* argv0, const char* argv1 = NULL, const char* argv2 = NULL,
+            const char* argv0 = NULL, const char* argv1 = NULL, const char* argv2 = NULL,
             const char* argv3 = NULL, const char* argv4 = NULL, const char* argv5 = NULL,
             const char* argv6 = NULL, const char* argv7 = NULL, const char* argv8 = NULL) {
         const char* const argv[] = {argv0, argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8};
@@ -41,7 +41,7 @@ class ArgsTest : public Test {
 
     void fail(
             const args::Parser& parser,
-            const char* argv0, const char* argv1 = NULL, const char* argv2 = NULL,
+            const char* argv0 = NULL, const char* argv1 = NULL, const char* argv2 = NULL,
             const char* argv3 = NULL, const char* argv4 = NULL, const char* argv5 = NULL,
             const char* argv6 = NULL, const char* argv7 = NULL, const char* argv8 = NULL) {
         const char* const argv[] = {argv0, argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8};
@@ -50,13 +50,28 @@ class ArgsTest : public Test {
     }
 };
 
+MATCHER_P(PrintsAs, output, "") {
+    String actual(arg);
+    CString actual_c_str(actual);
+    String expected(output);
+    CString expected_c_str(expected);
+    if (actual == expected) {
+        *result_listener << actual_c_str.data() << " == " << expected_c_str.data();
+        return true;
+    } else {
+        *result_listener << actual_c_str.data() << " != " << expected_c_str.data();
+        return false;
+    }
+}
+
 TEST_F(ArgsTest, Empty) {
-    args::Parser parser("Empty parser");
-    pass(parser, "empty");
-    pass(parser, "empty", "--");
-    fail(parser, "empty", "non-empty");
-    fail(parser, "empty", "-v");
-    fail(parser, "empty", "--verbose");
+    args::Parser parser("empty", "Empty parser");
+    EXPECT_THAT(parser.usage(), PrintsAs("empty"));
+    pass(parser);
+    pass(parser, "--");
+    fail(parser, "non-empty");
+    fail(parser, "-v");
+    fail(parser, "--verbose");
 }
 
 struct ShortOptions {
@@ -107,15 +122,19 @@ struct ShortOptions {
             .help("increase verbosity level");
 
         parser.add_argument("-x", store(extension))
+            .metavar("EXT")
             .help("use extension");
 
         parser.add_argument("-i", store(input))
+            .metavar("FILE")
             .help("input file");
 
         parser.add_argument("-o", store(output))
+            .metavar("FILE")
             .help("output file");
 
         parser.add_argument("-t", store(type))
+            .metavar("TYPE")
             .help("type of output");
     }
 
@@ -123,11 +142,19 @@ struct ShortOptions {
     DISALLOW_COPY_AND_ASSIGN(ShortOptions);
 };
 
-TEST_F(ArgsTest, ShortOptionsNone) {
-    args::Parser parser("Short options only");
+TEST_F(ArgsTest, ShortOptionsHelp) {
+    args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    pass(parser, "short");
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
+                    "short [-!?gkmnvæ秋] [-i FILE] [-o FILE] [-t TYPE] [-x EXT]")));
+}
+
+TEST_F(ArgsTest, ShortOptionsNone) {
+    args::Parser parser("short", "Short options only");
+    ShortOptions opts;
+    opts.add_to(parser);
+    pass(parser);
 
     EXPECT_THAT(opts.commit, Eq(true));
     EXPECT_THAT(opts.aesc, Eq(false));
@@ -142,10 +169,10 @@ TEST_F(ArgsTest, ShortOptionsNone) {
 }
 
 TEST_F(ArgsTest, ShortOptionsSeparate) {
-    args::Parser parser("Short options only");
+    args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    pass(parser, "short", "-n", "-v", "-o", "out", "-i", "in", "-v");
+    pass(parser, "-n", "-v", "-o", "out", "-i", "in", "-v");
 
     EXPECT_THAT(opts.commit, Eq(false));
     EXPECT_THAT(opts.aesc, Eq(false));
@@ -160,10 +187,10 @@ TEST_F(ArgsTest, ShortOptionsSeparate) {
 }
 
 TEST_F(ArgsTest, ShortOptionsAll) {
-    args::Parser parser("Short options only");
+    args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    pass(parser, "short", "-næ秋", "-kmg", "-?!", "-vvvv", "-xtxt", "-iin", "-oout", "-tTEXT");
+    pass(parser, "-næ秋", "-kmg", "-?!", "-vvvv", "-xtxt", "-iin", "-oout", "-tTEXT");
 
     EXPECT_THAT(opts.commit, Eq(false));
     EXPECT_THAT(opts.aesc, Eq(true));
@@ -178,18 +205,18 @@ TEST_F(ArgsTest, ShortOptionsAll) {
 }
 
 TEST_F(ArgsTest, ShortOptionsFail) {
-    args::Parser parser("Short options only");
+    args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    fail(parser, "short", "extra");
-    fail(parser, "short", "-a");
-    fail(parser, "short", "-t");
-    fail(parser, "short", "--t");
-    fail(parser, "short", "--t=TEXT");
+    fail(parser, "extra");
+    fail(parser, "-a");
+    fail(parser, "-t");
+    fail(parser, "--t");
+    fail(parser, "--t=TEXT");
 
-    fail(parser, "short", "-kmg", "-iin", "-oout", "extra");
-    fail(parser, "short", "-kmg", "-iin", "-oout", "-a");
-    fail(parser, "short", "-kmg", "-iin", "-oout", "--t");
+    fail(parser, "-kmg", "-iin", "-oout", "extra");
+    fail(parser, "-kmg", "-iin", "-oout", "-a");
+    fail(parser, "-kmg", "-iin", "-oout", "--t");
 }
 
 struct Greeter {
@@ -241,19 +268,29 @@ struct Greeter {
     DISALLOW_COPY_AND_ASSIGN(Greeter);
 };
 
-TEST_F(ArgsTest, LongOptionsNone) {
-    args::Parser parser("Greeter");
+TEST_F(ArgsTest, LongOptionsHelp) {
+    args::Parser parser("greet", "Greeter");
     Greeter opts;
     opts.add_to(parser);
-    pass(parser, "greet");
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
+                    "greet [--again] [--exclamation-point] [--hello] [--name=NAME] [--normal] "
+                    "[--ελληνικά] [--日本語]")));
+}
+
+
+TEST_F(ArgsTest, LongOptionsNone) {
+    args::Parser parser("greet", "Greeter");
+    Greeter opts;
+    opts.add_to(parser);
+    pass(parser);
     EXPECT_THAT(opts.make_greeting(), Eq<StringSlice>("Hello, world!\n"));
 }
 
 TEST_F(ArgsTest, LongOptionsAll) {
-    args::Parser parser("Greeter");
+    args::Parser parser("greet", "Greeter");
     Greeter opts;
     opts.add_to(parser);
-    pass(parser, "greet", "--again", "--ελληνικά", "--name=Ελένη", "--normal", "--again");
+    pass(parser, "--again", "--ελληνικά", "--name=Ελένη", "--normal", "--again");
     String expected(utf8::decode("Καλημέρα, Ελένη.\nΚαλημέρα, Ελένη.\nΚαλημέρα, Ελένη.\n"));
     EXPECT_THAT(opts.make_greeting(), Eq<StringSlice>(expected));
 }
@@ -280,80 +317,88 @@ struct ArgumentsOnly {
     DISALLOW_COPY_AND_ASSIGN(ArgumentsOnly);
 };
 
-TEST_F(ArgsTest, ArgumentsEmpty) {
-    args::Parser parser("Arguments only");
+TEST_F(ArgsTest, ArgumentsHelp) {
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    fail(parser, "args");
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
+                    "args one [two [three [three [three]]]]")));
+}
+
+TEST_F(ArgsTest, ArgumentsEmpty) {
+    args::Parser parser("args", "Arguments only");
+    ArgumentsOnly opts;
+    opts.add_to(parser);
+    fail(parser);
 }
 
 TEST_F(ArgsTest, ArgumentsOne) {
-    args::Parser parser("Arguments only");
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args", "1");
+    pass(parser, "1");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(opts.two.has(), Eq(false));
     EXPECT_THAT(opts.three, ElementsAre());
 }
 
 TEST_F(ArgsTest, ArgumentsTwo) {
-    args::Parser parser("Arguments only");
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args", "1", "2");
+    pass(parser, "1", "2");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
     EXPECT_THAT(opts.three, ElementsAre());
 }
 
 TEST_F(ArgsTest, ArgumentsThree) {
-    args::Parser parser("Arguments all");
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args", "1", "2", "3");
+    pass(parser, "1", "2", "3");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
     EXPECT_THAT(opts.three, ElementsAre(3));
 }
 
 TEST_F(ArgsTest, ArgumentsAll) {
-    args::Parser parser("Arguments all");
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args", "1", "2", "3", "4", "5");
+    pass(parser, "1", "2", "3", "4", "5");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
     EXPECT_THAT(opts.three, ElementsAre(3, 4, 5));
 }
 
 TEST_F(ArgsTest, ArgumentsDash) {
-    args::Parser parser("Arguments all");
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args", "1", "-", "3");
+    pass(parser, "1", "-", "3");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("-"));
     EXPECT_THAT(opts.three, ElementsAre(3));
 }
 
 TEST_F(ArgsTest, ArgumentsDashDash) {
-    args::Parser parser("Arguments all");
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    pass(parser, "args", "1", "--", "--2", "-3");
+    pass(parser, "1", "--", "--2", "-3");
     EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("--2"));
     EXPECT_THAT(opts.three, ElementsAre(-3));
 }
 
 TEST_F(ArgsTest, ArgumentsFail) {
-    args::Parser parser("Arguments all");
+    args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    fail(parser, "args", "-s");
-    fail(parser, "args", "--long");
-    fail(parser, "args", "1", "2", "3", "4", "5", "6");
+    fail(parser, "-s");
+    fail(parser, "--long");
+    fail(parser, "1", "2", "3", "4", "5", "6");
 }
 
 class CutTool {
@@ -364,10 +409,12 @@ class CutTool {
 
     void add_to(args::Parser& parser) {
         parser.add_argument("string", store(_string))
+            .required()
             .help("string to split");
         parser.add_argument("-l", "--limit", store(_limit))
             .help("split at most this many times");
         parser.add_argument("-d", "--delimiter", store(_delimiter))
+            .metavar("DELIM")
             .help("use this as the field delimiter instead of tab");
     }
 
@@ -398,27 +445,35 @@ class CutTool {
     DISALLOW_COPY_AND_ASSIGN(CutTool);
 };
 
-TEST_F(ArgsTest, CutSimple) {
-    args::Parser parser("Arguments all");
+TEST_F(ArgsTest, CutHelp) {
+    args::Parser parser("cut", "A tool like cut(1)");
     CutTool opts;
     opts.add_to(parser);
-    pass(parser, "args", "1\t2\t3");
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
+                    "cut [-d DELIM] [-l LIMIT] [--delimiter=DELIM] [--limit=LIMIT] string")));
+}
+
+TEST_F(ArgsTest, CutSimple) {
+    args::Parser parser("cut", "A tool like cut(1)");
+    CutTool opts;
+    opts.add_to(parser);
+    pass(parser, "1\t2\t3");
     ASSERT_THAT(opts.cut(), ElementsAre("1", "2", "3"));
 }
 
 TEST_F(ArgsTest, CutShort) {
-    args::Parser parser("Arguments all");
+    args::Parser parser("cut", "A tool like cut(1)");
     CutTool opts;
     opts.add_to(parser);
-    pass(parser, "args", "doo-wop", "-d-");
+    pass(parser, "doo-wop", "-d-");
     ASSERT_THAT(opts.cut(), ElementsAre("doo", "wop"));
 }
 
 TEST_F(ArgsTest, CutLong) {
-    args::Parser parser("Arguments all");
+    args::Parser parser("cut", "A tool like cut(1)");
     CutTool opts;
     opts.add_to(parser);
-    pass(parser, "args", "--delimiter=an", "A man, a plan, a canal, Panama", "-l4");
+    pass(parser, "--delimiter=an", "A man, a plan, a canal, Panama", "-l4");
     ASSERT_THAT(opts.cut(), ElementsAre("A m", ", a pl", ", a c", "al, Panama"));
 }
 

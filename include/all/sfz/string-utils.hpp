@@ -23,6 +23,9 @@ bool string_to_float(StringSlice s, T& out);
 
 bool partition(StringSlice& found, StringSlice separator, StringSlice& input);
 
+void upper(String& s);
+void lower(String& s);
+
 class CString {
   public:
     CString(const StringSlice& string);
