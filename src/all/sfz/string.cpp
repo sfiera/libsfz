@@ -373,7 +373,7 @@ void swap(StringSlice& x, StringSlice& y) {
 
 bool operator==(const String& x, const String& y) {
     return (x._size == y._size)
-        && (memcmp(x._data.get(), y._data.get(), x._size) == 0);
+        && (memcmp(x._data.get(), y._data.get(), x._size * sizeof(Rune)) == 0);
 }
 
 bool operator<(const String& x, const String& y) {
