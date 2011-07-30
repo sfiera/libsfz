@@ -20,6 +20,7 @@ def build(bld):
     bld.stlib(
         target="libsfz/libsfz",
         source=[
+            "src/all/sfz/args.cpp",
             "src/all/sfz/bytes.cpp",
             "src/all/sfz/digest.cpp",
             "src/all/sfz/encoding.cpp",
@@ -91,6 +92,7 @@ def build(bld):
         )
 
     test("algorithm")
+    test("args")
     test("bytes")
     test("digest")
     test("encoding")
@@ -99,6 +101,7 @@ def build(bld):
     test("io")
     test("json")
     test("memory")
+    test("optional")
     test("os")
     test("print")
     test("read")

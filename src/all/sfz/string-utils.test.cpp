@@ -7,6 +7,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sfz/encoding.hpp>
 #include <sfz/foreach.hpp>
 #include <sfz/string.hpp>
 
@@ -74,6 +75,30 @@ class StringUtilitiesTest : public Test {
                 EXPECT_THAT(string_to_float(input.string, actual), Eq(false))
                     << "input: " << input.string << "; output: " << actual;
             }
+        });
+    }
+
+    template <typename T, int size>
+    void RunUpper(const TestData<T> (&inputs)[size]) {
+        SFZ_FOREACH(const TestData<T>& input, inputs, {
+            String actual(utf8::decode(input.string));
+            String expected(utf8::decode(input.expected));
+            upper(actual);
+            CString actual_c_str(actual);
+            EXPECT_THAT(actual, Eq<StringSlice>(expected))
+                << "input: " << input.string << "; actual: " << actual_c_str.data();
+        });
+    }
+
+    template <typename T, int size>
+    void RunLower(const TestData<T> (&inputs)[size]) {
+        SFZ_FOREACH(const TestData<T>& input, inputs, {
+            String actual(utf8::decode(input.string));
+            String expected(utf8::decode(input.expected));
+            lower(actual);
+            CString actual_c_str(actual);
+            EXPECT_THAT(actual, Eq<StringSlice>(expected))
+                << "input: " << input.string << "; actual: " << actual_c_str.data();
         });
     }
 };
@@ -284,6 +309,32 @@ TEST_F(StringUtilitiesTest, Double) {
         {GOOD, "nan",       std::numeric_limits<float>::quiet_NaN()},
     };
     RunDouble(inputs);
+}
+
+TEST_F(StringUtilitiesTest, Upper) {
+    TestData<const char*> inputs[] = {
+        {GOOD, "", ""},
+        {GOOD, "a", "A"},
+        {GOOD, "Na", "NA"},
+        {GOOD, "WTF", "WTF"},
+        {GOOD, "w00t", "W00T"},
+        {GOOD, "Ελένη", "Ελένη"},
+        {GOOD, "林さん", "林さん"},
+    };
+    RunUpper(inputs);
+}
+
+TEST_F(StringUtilitiesTest, Lower) {
+    TestData<const char*> inputs[] = {
+        {GOOD, "", ""},
+        {GOOD, "A", "a"},
+        {GOOD, "Na", "na"},
+        {GOOD, "ill", "ill"},
+        {GOOD, "HNO2", "hno2"},
+        {GOOD, "Ελένη", "Ελένη"},
+        {GOOD, "林さん", "林さん"},
+    };
+    RunLower(inputs);
 }
 
 }  // namespace

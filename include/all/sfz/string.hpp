@@ -280,6 +280,8 @@ void swap(StringSlice& x, StringSlice& y);
 
 inline void copy(String& to, const String& from) { to.assign(from); }
 
+inline void store_argument(String& to, StringSlice from) { to.assign(from); }
+
 bool operator==(const String& x, const String& y);
 inline bool operator!=(const String& x, const String& y) { return !(x == y); }
 bool operator< (const String& x, const String& y);
