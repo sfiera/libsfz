@@ -7,6 +7,7 @@
 #define SFZ_SFZ_HPP_
 
 #include <sfz/algorithm.hpp>
+#include <sfz/args.hpp>
 #include <sfz/bytes.hpp>
 #include <sfz/digest.hpp>
 #include <sfz/encoding.hpp>
@@ -18,13 +19,14 @@
 #include <sfz/json.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/memory.hpp>
+#include <sfz/optional.hpp>
 #include <sfz/os.hpp>
 #include <sfz/print.hpp>
 #include <sfz/read.hpp>
 #include <sfz/ref-count.hpp>
-#include <sfz/string.hpp>
 #include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>
+#include <sfz/string.hpp>
 #include <sfz/write.hpp>
 
 #endif  // SFZ_SFZ_HPP_
