@@ -25,6 +25,17 @@ using testing::Eq;
 using testing::Test;
 
 namespace sfz {
+
+void PrintTo(const String& s, std::ostream* ostr) {
+    CString c_str(s);
+    *ostr << c_str.data();
+}
+
+void PrintTo(StringSlice s, std::ostream* ostr) {
+    CString c_str(s);
+    *ostr << c_str.data();
+}
+
 namespace {
 
 class ArgsTest : public Test {
@@ -36,17 +47,21 @@ class ArgsTest : public Test {
             const char* argv6 = NULL, const char* argv7 = NULL, const char* argv8 = NULL) {
         const char* const argv[] = {argv0, argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8};
         int argc = find(argv, argv + 9, static_cast<const char*>(NULL)) - argv;
-        parser.parse_args(argc, argv);
+        String error;
+        EXPECT_THAT(parser.parse_args(argc, argv, error), Eq(true));
     }
 
     void fail(
+            const char* message,
             const args::Parser& parser,
             const char* argv0 = NULL, const char* argv1 = NULL, const char* argv2 = NULL,
             const char* argv3 = NULL, const char* argv4 = NULL, const char* argv5 = NULL,
             const char* argv6 = NULL, const char* argv7 = NULL, const char* argv8 = NULL) {
         const char* const argv[] = {argv0, argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8};
         int argc = find(argv, argv + 9, static_cast<const char*>(NULL)) - argv;
-        EXPECT_THROW(parser.parse_args(argc, argv), Exception);
+        String error;
+        EXPECT_THAT(parser.parse_args(argc, argv, error), Eq(false));
+        EXPECT_THAT(error, Eq<StringSlice>(message));
     }
 };
 
@@ -69,9 +84,9 @@ TEST_F(ArgsTest, Empty) {
     EXPECT_THAT(parser.usage(), PrintsAs("empty"));
     pass(parser);
     pass(parser, "--");
-    fail(parser, "non-empty");
-    fail(parser, "-v");
-    fail(parser, "--verbose");
+    fail("too many arguments", parser, "non-empty");
+    fail("illegal option: -v", parser, "-v");
+    fail("illegal option: --verbose", parser, "--verbose");
 }
 
 struct ShortOptions {
@@ -87,6 +102,7 @@ struct ShortOptions {
     String input;
     String output;
     String type;
+    uint16_t quality;
 
     ShortOptions():
             commit(true),
@@ -94,7 +110,8 @@ struct ShortOptions {
             aki(false),
             units(1),
             punctuation("."),
-            verbosity(0) { }
+            verbosity(0),
+            quality(5) { }
 
     void add_to(args::Parser& parser) {
         parser.add_argument("-n", store_const(commit, false))
@@ -136,6 +153,10 @@ struct ShortOptions {
         parser.add_argument("-t", store(type))
             .metavar("TYPE")
             .help("type of output");
+
+        parser.add_argument("-q", store(quality))
+            .metavar("QUALITY")
+            .help("quality");
     }
 
   private:
@@ -147,7 +168,7 @@ TEST_F(ArgsTest, ShortOptionsHelp) {
     ShortOptions opts;
     opts.add_to(parser);
     EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
-                    "short [-!?gkmnvæ秋] [-i FILE] [-o FILE] [-t TYPE] [-x EXT]")));
+                    "short [-!?gkmnvæ秋] [-i FILE] [-o FILE] [-q QUALITY] [-t TYPE] [-x EXT]")));
 }
 
 TEST_F(ArgsTest, ShortOptionsNone) {
@@ -166,13 +187,14 @@ TEST_F(ArgsTest, ShortOptionsNone) {
     EXPECT_THAT(opts.input, Eq<StringSlice>(""));
     EXPECT_THAT(opts.output, Eq<StringSlice>(""));
     EXPECT_THAT(opts.type, Eq<StringSlice>(""));
+    EXPECT_THAT(opts.quality, Eq(5));
 }
 
 TEST_F(ArgsTest, ShortOptionsSeparate) {
     args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    pass(parser, "-n", "-v", "-o", "out", "-i", "in", "-v");
+    pass(parser, "-n", "-v", "-o", "out", "-i", "in", "-v", "-q" "7");
 
     EXPECT_THAT(opts.commit, Eq(false));
     EXPECT_THAT(opts.aesc, Eq(false));
@@ -184,13 +206,14 @@ TEST_F(ArgsTest, ShortOptionsSeparate) {
     EXPECT_THAT(opts.input, Eq<StringSlice>("in"));
     EXPECT_THAT(opts.output, Eq<StringSlice>("out"));
     EXPECT_THAT(opts.type, Eq<StringSlice>(""));
+    EXPECT_THAT(opts.quality, Eq(7));
 }
 
 TEST_F(ArgsTest, ShortOptionsAll) {
     args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    pass(parser, "-næ秋", "-kmg", "-?!", "-vvvv", "-xtxt", "-iin", "-oout", "-tTEXT");
+    pass(parser, "-næ秋", "-kmg", "-?!", "-vvvv", "-xtxt", "-iin", "-oout", "-tTEXT", "-q9");
 
     EXPECT_THAT(opts.commit, Eq(false));
     EXPECT_THAT(opts.aesc, Eq(true));
@@ -202,21 +225,32 @@ TEST_F(ArgsTest, ShortOptionsAll) {
     EXPECT_THAT(opts.input, Eq<StringSlice>("in"));
     EXPECT_THAT(opts.output, Eq<StringSlice>("out"));
     EXPECT_THAT(opts.type, Eq<StringSlice>("TEXT"));
+    EXPECT_THAT(opts.quality, Eq(9));
 }
 
 TEST_F(ArgsTest, ShortOptionsFail) {
     args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    fail(parser, "extra");
-    fail(parser, "-a");
-    fail(parser, "-t");
-    fail(parser, "--t");
-    fail(parser, "--t=TEXT");
+    fail("too many arguments", parser, "extra");
+    fail("illegal option: -a", parser, "-a");
+    fail("option requires an argument: -t", parser, "-t");
+    fail("illegal option: --t", parser, "--t");
+    fail("illegal option: --t", parser, "--t=TEXT");
 
-    fail(parser, "-kmg", "-iin", "-oout", "extra");
-    fail(parser, "-kmg", "-iin", "-oout", "-a");
-    fail(parser, "-kmg", "-iin", "-oout", "--t");
+    fail("too many arguments", parser, "-kmg", "-iin", "-oout", "extra");
+    fail("illegal option: -a", parser, "-kmg", "-iin", "-oout", "-a");
+    fail("illegal option: --t", parser, "-kmg", "-iin", "-oout", "--t");
+
+    opts.verbosity = std::numeric_limits<int>::max() - 1;
+    pass(parser, "-v");
+    fail("integer overflow: -v", parser, "-vv");
+    fail("integer overflow: -v", parser, "-vvv");
+
+    fail("invalid integer: -q \"x\"", parser, "-qx");
+    fail("invalid integer: -q \"x\"", parser, "-q", "x");
+    fail("invalid integer: -q \"-1\"", parser, "-q", "-1");
+    fail("integer overflow: -q \"65536\"", parser, "-q", "65536");
 }
 
 struct Greeter {
@@ -329,7 +363,7 @@ TEST_F(ArgsTest, ArgumentsEmpty) {
     args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    fail(parser);
+    fail("not enough arguments", parser);
 }
 
 TEST_F(ArgsTest, ArgumentsOne) {
@@ -396,9 +430,9 @@ TEST_F(ArgsTest, ArgumentsFail) {
     args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    fail(parser, "-s");
-    fail(parser, "--long");
-    fail(parser, "1", "2", "3", "4", "5", "6");
+    fail("illegal option: -s", parser, "-s");
+    fail("illegal option: --long", parser, "--long");
+    fail("too many arguments", parser, "1", "2", "3", "4", "5", "6");
 }
 
 class CutTool {

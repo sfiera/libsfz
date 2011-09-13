@@ -39,61 +39,81 @@ bool is_valid_long_option(StringSlice s) {
 
 class Parser::State {
   public:
-    State(const Parser& spec):
+    State(const Parser& spec, PrintTarget error):
             _spec(spec),
+            _error(error),
             _expecting_value(false),
             _argument(_spec._argument_specs.begin()) { }
 
-    void parse_args(const vector<StringSlice>& args) {
+    bool parse_args(const vector<StringSlice>& args) {
         bool saw_dash_dash = false;
         SFZ_FOREACH(StringSlice token, args, {
             if (_expecting_value) {
-                process_short_option(_option_expected, token);
+                if (!process_short_option(_option_expected, token)) {
+                    return false;
+                }
                 _expecting_value = false;
             } else if (saw_dash_dash) {
-                process_argument(token);
+                if (!process_argument(token)) {
+                    return false;
+                }
             } else if (token == "--") {
                 saw_dash_dash = true;
             } else if (starts_with(token, "--")) {
-                parse_long_option(token);
+                if (!parse_long_option(token)) {
+                    return false;
+                }
             } else if (token == "-") {
-                process_argument(token);
+                if (!process_argument(token)) {
+                    return false;
+                }
             } else if (starts_with(token, "-")) {
-                parse_short_option(token.slice(1));
+                if (!parse_short_option(token.slice(1))) {
+                    return false;
+                }
             } else {
-                process_argument(token);
+                if (!process_argument(token)) {
+                    return false;
+                }
             }
         });
         if (_expecting_value) {
             String string_option(1, _option_expected);
-            throw Exception(format("Expecting value for option \"-{0}\"", string_option));
+            print(_error, format("option requires an argument: -{0}", string_option));
+            return false;
         }
         while (_argument != _spec._argument_specs.end()) {
             if ((*_argument)->_min_args > 0) {
-                throw Exception("Missing required argument");
+                print(_error, "not enough arguments");
+                return false;
             }
             ++_argument;
         }
+        return true;
     }
 
-    void parse_long_option(StringSlice token) {
+    bool parse_long_option(StringSlice token) {
         StringSlice option;
         if (partition(option, "=", token)) {
             StringSlice value = token;
             if (!long_option_exists(option)) {
-                throw Exception(format("no such long option {0}", option));
+                print(_error, format("illegal option: {0}", option));
+                return false;
             } else if (!long_option_takes_value(option)) {
-                throw Exception(format("long option {0} doesn't take value", option));
+                print(_error, format("option does not allow an argument: {0}", option));
+                return false;
             } else {
-                process_long_option(option, value);
+                return process_long_option(option, value);
             }
         } else {
             if (!long_option_exists(option)) {
-                throw Exception(format("no such long option {0}", option));
+                print(_error, format("illegal option: {0}", option));
+                return false;
             } else if (long_option_takes_value(option)) {
-                throw Exception(format("long option --{0} takes value", option));
+                print(_error, format("option requires an argument: {0}", option));
+                return false;
             } else {
-                process_long_option(option);
+                return process_long_option(option);
             }
         }
     }
@@ -110,32 +130,44 @@ class Parser::State {
         return long_option(option)._action.takes_value();
     }
 
-    void process_long_option(StringSlice option) {
-        long_option(option)._action.process();
+    bool process_long_option(StringSlice option) {
+        if (!long_option(option)._action.process(_error)) {
+            print(_error, format(": {0}", option));
+            return false;
+        }
+        return true;
     }
 
-    void process_long_option(StringSlice option, StringSlice value) {
-        long_option(option)._action.process(value);
+    bool process_long_option(StringSlice option, StringSlice value) {
+        if (!long_option(option)._action.process(value, _error)) {
+            print(_error, format(": {0}={1}", option, quote(value)));
+            return false;
+        }
+        return true;
     }
 
-    void parse_short_option(StringSlice token) {
+    bool parse_short_option(StringSlice token) {
         Rune option = token.at(0);
         StringSlice remainder = token.slice(1);
         if (!short_option_exists(option)) {
-            throw Exception(format("no such short option -{0}", option));
+            print(_error, format("illegal option: -{0}", token.slice(0, 1)));
+            return false;
         } else if (short_option_takes_value(option)) {
             if (remainder.empty()) {
                 _option_expected = option;
                 _expecting_value = true;
             } else {
-                process_short_option(option, remainder);
+                return process_short_option(option, remainder);
             }
         } else {
-            process_short_option(option);
+            if (!process_short_option(option)) {
+                return false;
+            }
             if (!remainder.empty()) {
-                parse_short_option(remainder);
+                return parse_short_option(remainder);
             }
         }
+        return true;
     }
 
     bool short_option_exists(Rune option) {
@@ -150,28 +182,43 @@ class Parser::State {
         return short_option(option)._action.takes_value();
     }
 
-    void process_short_option(Rune option) {
-        short_option(option)._action.process();
-    }
-
-    void process_short_option(Rune option, StringSlice value) {
-        short_option(option)._action.process(value);
-    }
-
-    void process_argument(StringSlice value) {
-        if (_argument == _spec._argument_specs.end()) {
-            throw Exception("too many arguments");
+    bool process_short_option(Rune option) {
+        if (!short_option(option)._action.process(_error)) {
+            String s(1, option);
+            print(_error, format(": -{0}", s));
+            return false;
         }
-        (*_argument)->_action.process(value);
+        return true;
+    }
+
+    bool process_short_option(Rune option, StringSlice value) {
+        if (!short_option(option)._action.process(value, _error)) {
+            String s(1, option);
+            print(_error, format(": -{0} {1}", s, quote(value)));
+            return false;
+        }
+        return true;
+    }
+
+    bool process_argument(StringSlice value) {
+        if (_argument == _spec._argument_specs.end()) {
+            print(_error, "too many arguments");
+            return false;
+        }
+        if (!(*_argument)->_action.process(value, _error)) {
+            return false;
+        }
         int& nargs = _nargs[_argument->get()];
         ++nargs;
         if (nargs == (*_argument)->_max_args) {
             ++_argument;
         }
+        return true;
     }
 
   private:
     const Parser& _spec;
+    PrintTarget _error;
 
     Rune _option_expected;
     bool _expecting_value;
@@ -235,11 +282,11 @@ Argument& Parser::add_argument(PrintItem short_name, PrintItem long_name, Action
     return *arg;
 }
 
-void Parser::parse_args(const vector<StringSlice>& args) const {
-    State(*this).parse_args(args);
+bool Parser::parse_args(const vector<StringSlice>& args, PrintTarget error) const {
+    return State(*this, error).parse_args(args);
 }
 
-void Parser::parse_args(int argc, const char* const* argv) const {
+bool Parser::parse_args(int argc, const char* const* argv, PrintTarget error) const {
     String storage;
     vector<size_t> cuts(argc, 0);
     SFZ_FOREACH(size_t i, range(argc), {
@@ -252,7 +299,7 @@ void Parser::parse_args(int argc, const char* const* argv) const {
         args[i] = storage.slice(begin, cuts[i] - begin);
         begin = cuts[i];
     });
-    parse_args(args);
+    return parse_args(args, error);
 }
 
 ParserUsage Parser::usage() const {
@@ -317,8 +364,8 @@ Action::Action(const Action& other): _impl(other._impl) { }
 Action& Action::operator=(const Action& other) { _impl = other._impl; return *this; }
 Action::~Action() { }
 bool Action::takes_value() const { return _impl->takes_value(); }
-void Action::process() const { return _impl->process(); }
-void Action::process(StringSlice value) const { return _impl->process(value); }
+bool Action::process(PrintTarget error) const { return _impl->process(error); }
+bool Action::process(StringSlice value, PrintTarget error) const { return _impl->process(value, error); }
 
 Argument::Argument(bool option, Action action):
         _option(option),
@@ -366,35 +413,43 @@ Argument& Argument::max_args(int n) {
     return *this;
 }
 
-void store_argument(bool& to, StringSlice value) {
+bool store_argument(bool& to, StringSlice value, PrintTarget error) {
     if (value == "true") {
         to = true;
+        return true;
     } else if (value == "false") {
         to = false;
+        return true;
     } else {
-        throw Exception("bad boolean");
+        print(error, "must be true or false");
+        return false;
     }
 }
 
 template <typename T>
-void store_integral_argument(T& to, StringSlice value) {
-    switch (string_to_int(value, to).failure) {
+bool store_integral_argument(T& to, StringSlice value, PrintTarget error) {
+    StringToIntResult result = string_to_int(value, to);
+    switch (result.failure) {
       case StringToIntResult::NONE:
-        return;
+        return true;
       case StringToIntResult::INVALID_LITERAL:
+        print(error, "invalid integer");
+        return false;
       case StringToIntResult::INTEGER_OVERFLOW:
-        throw Exception("bad integer");
+        print(error, "integer overflow");
+        return false;
     }
+    return false;
 }
 
-void store_argument(int8_t& to, StringSlice value) { store_integral_argument(to, value); }
-void store_argument(uint8_t& to, StringSlice value) { store_integral_argument(to, value); }
-void store_argument(int16_t& to, StringSlice value) { store_integral_argument(to, value); }
-void store_argument(uint16_t& to, StringSlice value) { store_integral_argument(to, value); }
-void store_argument(int32_t& to, StringSlice value) { store_integral_argument(to, value); }
-void store_argument(uint32_t& to, StringSlice value) { store_integral_argument(to, value); }
-void store_argument(int64_t& to, StringSlice value) { store_integral_argument(to, value); }
-void store_argument(uint64_t& to, StringSlice value) { store_integral_argument(to, value); }
+bool store_argument(int8_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(uint8_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(int16_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(uint16_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(int32_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(uint32_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(int64_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(uint64_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
 
 void print_to(PrintTarget out, ParserUsage usage) {
     usage.parser.print_usage_to(out);

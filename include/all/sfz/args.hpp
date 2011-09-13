@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <sfz/algorithm.hpp>
+#include <sfz/exception.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/print.hpp>
 #include <sfz/string.hpp>
@@ -29,8 +30,8 @@ class Parser {
     Argument& add_argument(PrintItem name, Action action);
     Argument& add_argument(PrintItem short_name, PrintItem long_name, Action action);
 
-    void parse_args(const std::vector<StringSlice>& args) const;
-    void parse_args(int argc, const char* const* argv) const;
+    bool parse_args(const std::vector<StringSlice>& args, PrintTarget error) const;
+    bool parse_args(int argc, const char* const* argv, PrintTarget error) const;
 
     ParserUsage usage() const;
 
@@ -67,8 +68,14 @@ class Action {
       public:
         virtual ~Impl() { }
         virtual bool takes_value() const = 0;
-        virtual void process() const { }
-        virtual void process(StringSlice value) const { }
+        virtual bool process(PrintTarget error) const {
+            print(error, "not implemented");
+            return false;
+        }
+        virtual bool process(StringSlice value, PrintTarget error) const {
+            print(error, "not implemented");
+            return false;
+        }
     };
 
     Action(const linked_ptr<Impl>& impl);
@@ -77,8 +84,8 @@ class Action {
     ~Action();
 
     bool takes_value() const;
-    void process() const;
-    void process(StringSlice value) const;
+    bool process(PrintTarget error) const;
+    bool process(StringSlice value, PrintTarget error) const;
 
   private:
     linked_ptr<Impl> _impl;
@@ -109,22 +116,22 @@ class Argument {
     DISALLOW_COPY_AND_ASSIGN(Argument);
 };
 
-void store_argument(bool& to, StringSlice value);
+bool store_argument(bool& to, StringSlice value, PrintTarget error);
 
-void store_argument(int8_t& to, StringSlice value);
-void store_argument(uint8_t& to, StringSlice value);
-void store_argument(int16_t& to, StringSlice value);
-void store_argument(uint16_t& to, StringSlice value);
-void store_argument(int32_t& to, StringSlice value);
-void store_argument(uint32_t& to, StringSlice value);
-void store_argument(int64_t& to, StringSlice value);
-void store_argument(uint64_t& to, StringSlice value);
+bool store_argument(int8_t& to, StringSlice value, PrintTarget error);
+bool store_argument(uint8_t& to, StringSlice value, PrintTarget error);
+bool store_argument(int16_t& to, StringSlice value, PrintTarget error);
+bool store_argument(uint16_t& to, StringSlice value, PrintTarget error);
+bool store_argument(int32_t& to, StringSlice value, PrintTarget error);
+bool store_argument(uint32_t& to, StringSlice value, PrintTarget error);
+bool store_argument(int64_t& to, StringSlice value, PrintTarget error);
+bool store_argument(uint64_t& to, StringSlice value, PrintTarget error);
 
 template <typename To>
 struct StoreAction : public Action::Impl {
     StoreAction(To& to): to(to) { }
     virtual bool takes_value() const { return true; }
-    virtual void process(StringSlice value) const { store_argument(to, value); }
+    virtual bool process(StringSlice value, PrintTarget error) const { return store_argument(to, value, error); }
     To& to;
 };
 
@@ -138,7 +145,7 @@ struct StoreConstAction : public Action::Impl {
     template <typename Constant>
     StoreConstAction(To& to, Constant constant): to(to), constant(constant) { }
     virtual bool takes_value() const { return false; }
-    virtual void process() const { copy(to, constant); }
+    virtual bool process(PrintTarget error) const { copy(to, constant); return true; }
     To& to;
     To constant;
 };
@@ -152,9 +159,10 @@ template <typename ToElement>
 struct AppendAction : public Action::Impl {
     AppendAction(std::vector<ToElement>& to): to(to) { }
     virtual bool takes_value() const { return true; }
-    virtual void process(StringSlice value) const {
+    virtual bool process(StringSlice value, PrintTarget error) const {
         to.push_back(ToElement());
-        store_argument(to.back(), value);
+        store_argument(to.back(), value, error);
+        return true;
     }
     std::vector<ToElement>& to;
 };
@@ -168,7 +176,14 @@ template <typename To>
 struct IncrementAction : public Action::Impl {
     IncrementAction(To& arg): arg(arg) { }
     virtual bool takes_value() const { return false; }
-    virtual void process() const { ++arg; }
+    virtual bool process(PrintTarget error) const {
+        if (arg == std::numeric_limits<To>::max()) {
+            print(error, "integer overflow");
+            return false;
+        }
+        ++arg;
+        return true;
+    }
     To& arg;
 };
 

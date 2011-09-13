@@ -51,7 +51,7 @@ class Optional {
 template <typename T> void copy(Optional<T>& to, const T& from);
 template <typename T> void copy(Optional<T>& to, const Optional<T>& from);
 
-template <typename T> void store_argument(Optional<T>& to, StringSlice from);
+template <typename T> bool store_argument(Optional<T>& to, StringSlice from);
 
 template <typename T>
 Optional<T>::Optional():
@@ -162,9 +162,15 @@ void copy(Optional<T>& to, const Optional<T>& from) {
 }
 
 template <typename T>
-void store_argument(Optional<T>& to, StringSlice from) {
+bool store_argument(Optional<T>& to, StringSlice from, PrintTarget error) {
+    using std::swap;
     to.set();
-    store_argument(*to, from);
+    T value;
+    if (!store_argument(value, from, error)) {
+        return false;
+    }
+    swap(*to, value);
+    return true;
 }
 
 }  // namespace sfz
