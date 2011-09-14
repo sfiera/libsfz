@@ -378,7 +378,11 @@ void store_argument(bool& to, StringSlice value) {
 
 template <typename T>
 void store_integral_argument(T& to, StringSlice value) {
-    if (!string_to_int(value, to, 10)) {
+    switch (string_to_int(value, to).failure) {
+      case StringToIntResult::NONE:
+        return;
+      case StringToIntResult::INVALID_LITERAL:
+      case StringToIntResult::INTEGER_OVERFLOW:
         throw Exception("bad integer");
     }
 }
