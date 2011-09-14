@@ -15,8 +15,22 @@ namespace sfz {
 
 class StringSlice;
 
+struct StringToIntResult {
+    enum Failure {
+        NONE,
+        INVALID_LITERAL,
+        INTEGER_OVERFLOW,
+    };
+    Failure failure;
+    const char* integer_name;
+    int base;
+
+    operator bool() const { return failure == NONE; }
+};
+void print_to(PrintTarget out, const StringToIntResult& desc);
+
 template <typename T>
-bool string_to_int(StringSlice s, T& out, int base = 10);
+StringToIntResult string_to_int(StringSlice s, T& out, int base = 10);
 
 template <typename T>
 bool string_to_float(StringSlice s, T& out);
