@@ -33,6 +33,7 @@ class Parser {
     bool parse_args(const std::vector<StringSlice>& args, PrintTarget error) const;
     bool parse_args(int argc, const char* const* argv, PrintTarget error) const;
 
+    const String& program_name() const;
     ParserUsage usage() const;
 
   private:

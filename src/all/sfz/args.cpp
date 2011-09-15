@@ -302,6 +302,10 @@ bool Parser::parse_args(int argc, const char* const* argv, PrintTarget error) co
     return parse_args(args, error);
 }
 
+const String& Parser::program_name() const {
+    return _program_name;
+}
+
 ParserUsage Parser::usage() const {
     ParserUsage result = {*this};
     return result;
