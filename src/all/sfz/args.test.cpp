@@ -27,12 +27,14 @@ using testing::Test;
 namespace sfz {
 
 void PrintTo(const String& s, std::ostream* ostr) {
-    CString c_str(s);
+    String quoted(quote(s));
+    CString c_str(quoted);
     *ostr << c_str.data();
 }
 
 void PrintTo(StringSlice s, std::ostream* ostr) {
-    CString c_str(s);
+    String quoted(quote(s));
+    CString c_str(quoted);
     *ostr << c_str.data();
 }
 
@@ -48,7 +50,10 @@ class ArgsTest : public Test {
         const char* const argv[] = {argv0, argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8};
         int argc = find(argv, argv + 9, static_cast<const char*>(NULL)) - argv;
         String error;
-        EXPECT_THAT(parser.parse_args(argc, argv, error), Eq(true));
+        EXPECT_THAT(parser.parse_args(argc, argv, error), Eq(true))
+            << argv0 << " " << argv1 << " " << argv2 << " "
+            << argv3 << " " << argv4 << " " << argv5 << " "
+            << argv6 << " " << argv7 << " " << argv8;
     }
 
     void fail(
@@ -60,8 +65,14 @@ class ArgsTest : public Test {
         const char* const argv[] = {argv0, argv1, argv2, argv3, argv4, argv5, argv6, argv7, argv8};
         int argc = find(argv, argv + 9, static_cast<const char*>(NULL)) - argv;
         String error;
-        EXPECT_THAT(parser.parse_args(argc, argv, error), Eq(false));
-        EXPECT_THAT(error, Eq<StringSlice>(message));
+        ASSERT_THAT(parser.parse_args(argc, argv, error), Eq(false))
+            << argv0 << " " << argv1 << " " << argv2 << " "
+            << argv3 << " " << argv4 << " " << argv5 << " "
+            << argv6 << " " << argv7 << " " << argv8;
+        EXPECT_THAT(error, Eq<StringSlice>(message))
+            << argv0 << " " << argv1 << " " << argv2 << " "
+            << argv3 << " " << argv4 << " " << argv5 << " "
+            << argv6 << " " << argv7 << " " << argv8;
     }
 };
 
@@ -84,7 +95,7 @@ TEST_F(ArgsTest, Empty) {
     EXPECT_THAT(parser.usage(), PrintsAs("empty"));
     pass(parser);
     pass(parser, "--");
-    fail("too many arguments", parser, "non-empty");
+    fail("extra arguments found: \"non-empty\"", parser, "non-empty");
     fail("illegal option: -v", parser, "-v");
     fail("illegal option: --verbose", parser, "--verbose");
 }
@@ -232,25 +243,25 @@ TEST_F(ArgsTest, ShortOptionsFail) {
     args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    fail("too many arguments", parser, "extra");
+    fail("extra arguments found: \"extra\"", parser, "extra");
     fail("illegal option: -a", parser, "-a");
-    fail("option requires an argument: -t", parser, "-t");
+    fail("option -t: argument required", parser, "-t");
     fail("illegal option: --t", parser, "--t");
     fail("illegal option: --t", parser, "--t=TEXT");
 
-    fail("too many arguments", parser, "-kmg", "-iin", "-oout", "extra");
+    fail("extra arguments found: \"extra\"", parser, "-kmg", "-iin", "-oout", "extra");
     fail("illegal option: -a", parser, "-kmg", "-iin", "-oout", "-a");
     fail("illegal option: --t", parser, "-kmg", "-iin", "-oout", "--t");
 
     opts.verbosity = std::numeric_limits<int>::max() - 1;
     pass(parser, "-v");
-    fail("integer overflow: -v", parser, "-vv");
-    fail("integer overflow: -v", parser, "-vvv");
+    fail("option -v: integer overflow", parser, "-vv");
+    fail("option -v: integer overflow", parser, "-vvv");
 
-    fail("invalid integer: -q \"x\"", parser, "-qx");
-    fail("invalid integer: -q \"x\"", parser, "-q", "x");
-    fail("invalid integer: -q \"-1\"", parser, "-q", "-1");
-    fail("integer overflow: -q \"65536\"", parser, "-q", "65536");
+    fail("option -q: invalid integer: \"x\"", parser, "-qx");
+    fail("option -q: invalid integer: \"x\"", parser, "-q", "x");
+    fail("option -q: invalid integer: \"-1\"", parser, "-q", "-1");
+    fail("option -q: integer overflow: \"65536\"", parser, "-q", "65536");
 }
 
 struct Greeter {
@@ -332,7 +343,7 @@ TEST_F(ArgsTest, LongOptionsAll) {
 struct ArgumentsOnly {
     Optional<String> one;
     Optional<String> two;
-    vector<int> three;
+    vector<int32_t> three;
 
     ArgumentsOnly() { }
 
@@ -363,7 +374,7 @@ TEST_F(ArgsTest, ArgumentsEmpty) {
     args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    fail("not enough arguments", parser);
+    fail("too few arguments", parser);
 }
 
 TEST_F(ArgsTest, ArgumentsOne) {
@@ -432,7 +443,13 @@ TEST_F(ArgsTest, ArgumentsFail) {
     opts.add_to(parser);
     fail("illegal option: -s", parser, "-s");
     fail("illegal option: --long", parser, "--long");
-    fail("too many arguments", parser, "1", "2", "3", "4", "5", "6");
+    fail("argument three: invalid integer: \"x\"", parser, "1", "2", "x");
+    fail("argument three: invalid integer: \"x\"", parser, "1", "2", "3", "4", "x");
+    fail("argument three: integer overflow: \"2147483648\"",
+            parser, "1", "2", "3", "4", "2147483648");
+    fail("extra arguments found: \"6\"", parser, "1", "2", "3", "4", "5", "6");
+    fail("extra arguments found: \"6\" \"7\" \"8\"",
+            parser, "1", "2", "3", "4", "5", "6", "7", "8");
 }
 
 class CutTool {

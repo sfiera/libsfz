@@ -43,12 +43,15 @@ class Parser::State {
             _spec(spec),
             _error(error),
             _expecting_value(false),
+            _arguments_saturated(false),
             _argument(_spec._argument_specs.begin()) { }
 
     bool parse_args(const vector<StringSlice>& args) {
         bool saw_dash_dash = false;
         SFZ_FOREACH(StringSlice token, args, {
-            if (_expecting_value) {
+            if (_arguments_saturated) {
+                print(_error, format(" {0}", quote(token)));
+            } else if (_expecting_value) {
                 if (!process_short_option(_option_expected, token)) {
                     return false;
                 }
@@ -77,14 +80,16 @@ class Parser::State {
                 }
             }
         });
-        if (_expecting_value) {
+        if (_arguments_saturated) {
+            return false;
+        } else if (_expecting_value) {
             String string_option(1, _option_expected);
-            print(_error, format("option requires an argument: -{0}", string_option));
+            print(_error, format("option -{0}: argument required", string_option));
             return false;
         }
         while (_argument != _spec._argument_specs.end()) {
             if ((*_argument)->_min_args > 0) {
-                print(_error, "not enough arguments");
+                print(_error, "too few arguments");
                 return false;
             }
             ++_argument;
@@ -131,16 +136,16 @@ class Parser::State {
     }
 
     bool process_long_option(StringSlice option) {
-        if (!long_option(option)._action.process(_error)) {
-            print(_error, format(": {0}", option));
+        if (!long_option(option)._action.process(_action_error)) {
+            print(_error, format("option {0}: {1}", option, _action_error));
             return false;
         }
         return true;
     }
 
     bool process_long_option(StringSlice option, StringSlice value) {
-        if (!long_option(option)._action.process(value, _error)) {
-            print(_error, format(": {0}={1}", option, quote(value)));
+        if (!long_option(option)._action.process(value, _action_error)) {
+            print(_error, format("option {0}: {1}: {2}", option, _action_error, quote(value)));
             return false;
         }
         return true;
@@ -183,18 +188,18 @@ class Parser::State {
     }
 
     bool process_short_option(Rune option) {
-        if (!short_option(option)._action.process(_error)) {
+        if (!short_option(option)._action.process(_action_error)) {
             String s(1, option);
-            print(_error, format(": -{0}", s));
+            print(_error, format("option -{0}: {1}", s, _action_error));
             return false;
         }
         return true;
     }
 
     bool process_short_option(Rune option, StringSlice value) {
-        if (!short_option(option)._action.process(value, _error)) {
+        if (!short_option(option)._action.process(value, _action_error)) {
             String s(1, option);
-            print(_error, format(": -{0} {1}", s, quote(value)));
+            print(_error, format("option -{0}: {1}: {2}", s, _action_error, quote(value)));
             return false;
         }
         return true;
@@ -202,10 +207,13 @@ class Parser::State {
 
     bool process_argument(StringSlice value) {
         if (_argument == _spec._argument_specs.end()) {
-            print(_error, "too many arguments");
-            return false;
+            print(_error, format("extra arguments found: {0}", quote(value)));
+            _arguments_saturated = true;
+            return true;
         }
-        if (!(*_argument)->_action.process(value, _error)) {
+        if (!(*_argument)->_action.process(value, _action_error)) {
+            print(_error, format("argument {0}: {1}: {2}",
+                        (*_argument)->_metavar, _action_error, quote(value)));
             return false;
         }
         int& nargs = _nargs[_argument->get()];
@@ -219,9 +227,11 @@ class Parser::State {
   private:
     const Parser& _spec;
     PrintTarget _error;
+    String _action_error;
 
     Rune _option_expected;
     bool _expecting_value;
+    bool _arguments_saturated;
 
     vector<linked_ptr<Argument> >::const_iterator _argument;
     map<Argument*, int> _nargs;

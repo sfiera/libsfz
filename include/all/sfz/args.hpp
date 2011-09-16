@@ -161,8 +161,11 @@ struct AppendAction : public Action::Impl {
     AppendAction(std::vector<ToElement>& to): to(to) { }
     virtual bool takes_value() const { return true; }
     virtual bool process(StringSlice value, PrintTarget error) const {
-        to.push_back(ToElement());
-        store_argument(to.back(), value, error);
+        ToElement next;
+        if (!store_argument(next, value, error)) {
+            return false;
+        }
+        to.push_back(next);
         return true;
     }
     std::vector<ToElement>& to;
