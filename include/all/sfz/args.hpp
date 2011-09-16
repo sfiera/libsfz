@@ -21,6 +21,7 @@ namespace args {
 class Action;
 class Argument;
 struct ParserUsage;
+struct ParserHelp;
 
 class Parser {
   public:
@@ -35,19 +36,23 @@ class Parser {
 
     const String& program_name() const;
     ParserUsage usage() const;
+    ParserHelp help() const;
 
   private:
     friend class Argument;
     friend void print_to(PrintTarget out, ParserUsage usage);
+    friend void print_to(PrintTarget out, ParserHelp help);
 
     class State;
 
     void print_usage_to(PrintTarget out) const;
+    void print_help_to(PrintTarget out) const;
 
     const String _program_name;
     const String _description;
 
     std::vector<linked_ptr<Argument> > _argument_specs;
+    std::vector<linked_ptr<Argument> > _option_specs;
     std::map<Rune, linked_ptr<Argument> > _short_options_by_name;
     StringMap<linked_ptr<Argument> > _long_options_by_name;
 
@@ -105,9 +110,19 @@ class Argument {
     friend class Parser;
     friend class Parser::State;
 
-    Argument(bool option, Action action);
+    enum Type {
+        ARGUMENT,
+        SHORT_OPTION,
+        LONG_OPTION,
+        BOTH_OPTION,
+    };
 
-    const bool _option;
+    Argument(Type type, const StringSlice& short_option_name,
+            const StringSlice& long_option_name, Action action);
+
+    const Type _type;
+    const String _short_option_name;
+    const String _long_option_name;
     const Action _action;
     String _metavar;
     String _help;
@@ -196,10 +211,10 @@ Action increment(To& to) {
     return linked_ptr<Action::Impl>(new IncrementAction<To>(to));
 }
 
-struct ParserUsage {
-    const Parser& parser;
-};
+struct ParserUsage { const Parser& parser; };
+struct ParserHelp { const Parser& parser; };
 void print_to(PrintTarget out, ParserUsage usage);
+void print_to(PrintTarget out, ParserHelp help);
 
 }  // namespace args
 }  // namespace sfz

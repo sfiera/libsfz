@@ -21,6 +21,15 @@ namespace args {
 
 namespace {
 
+struct PrintableRune { Rune r; };
+PrintableRune rune(Rune r) {
+    PrintableRune rune = {r};
+    return rune;
+}
+void print_to(PrintTarget out, PrintableRune rune) {
+    out.push(1, rune.r);
+}
+
 bool starts_with(StringSlice string, StringSlice prefix) {
     return (string.size() >= prefix.size())
         && (string.slice(0, prefix.size()) == prefix);
@@ -254,13 +263,17 @@ Argument& Parser::add_argument(PrintItem name, Action action) {
     }
     if (printed_name.at(0) == '-') {
         if (is_valid_short_option(printed_name)) {
-            linked_ptr<Argument> arg(new Argument(true, action));
+            linked_ptr<Argument> arg(
+                    new Argument(Argument::SHORT_OPTION, printed_name, "", action));
+            _option_specs.push_back(arg);
             _short_options_by_name[printed_name.at(1)] = arg;
             arg->_metavar.assign(printed_name.slice(1));
             upper(arg->_metavar);
             return *arg;
         } else if (is_valid_long_option(printed_name)) {
-            linked_ptr<Argument> arg(new Argument(true, action));
+            linked_ptr<Argument> arg(
+                    new Argument(Argument::LONG_OPTION, "", printed_name, action));
+            _option_specs.push_back(arg);
             _long_options_by_name[printed_name] = arg;
             arg->_metavar.assign(printed_name.slice(2));
             upper(arg->_metavar);
@@ -269,7 +282,8 @@ Argument& Parser::add_argument(PrintItem name, Action action) {
             throw Exception("invalid argument name");
         }
     } else {
-        linked_ptr<Argument> arg(new Argument(false, action));
+        linked_ptr<Argument> arg(
+                new Argument(Argument::ARGUMENT, "", "", action));
         _argument_specs.push_back(arg);
         arg->_metavar.assign(printed_name);
         return *arg;
@@ -284,7 +298,9 @@ Argument& Parser::add_argument(PrintItem short_name, PrintItem long_name, Action
     } else if (!is_valid_long_option(printed_long_name)) {
         throw Exception("invalid argument name");
     }
-    linked_ptr<Argument> arg(new Argument(true, action));
+    linked_ptr<Argument> arg(
+            new Argument(Argument::BOTH_OPTION, printed_short_name, printed_long_name, action));
+    _option_specs.push_back(arg);
     _short_options_by_name[printed_short_name.at(1)] = arg;
     _long_options_by_name[printed_long_name] = arg;
     arg->_metavar.assign(printed_long_name.slice(2));
@@ -321,6 +337,11 @@ ParserUsage Parser::usage() const {
     return result;
 }
 
+ParserHelp Parser::help() const {
+    ParserHelp result = {*this};
+    return result;
+}
+
 void Parser::print_usage_to(PrintTarget out) const {
     typedef pair<Rune, linked_ptr<Argument> > ShortArg;
     typedef pair<StringSlice, linked_ptr<Argument> > LongArg;
@@ -343,8 +364,7 @@ void Parser::print_usage_to(PrintTarget out) const {
 
     SFZ_FOREACH(const ShortArg& arg, _short_options_by_name, {
         if (arg.second->_action.takes_value()) {
-            String rune(1, arg.first);
-            print(out, format(" [-{0} {1}]", rune, arg.second->_metavar));
+            print(out, format(" [-{0} {1}]", rune(arg.first), arg.second->_metavar));
         }
     });
 
@@ -373,6 +393,82 @@ void Parser::print_usage_to(PrintTarget out) const {
     out.push(nesting, ']');
 }
 
+void Parser::print_help_to(PrintTarget out) const {
+    print(out, format("usage: {0}\n\n{1}\n", usage(), _description));
+
+    if (!_argument_specs.empty()) {
+        print(out, "\narguments:\n");
+        SFZ_FOREACH(const linked_ptr<Argument>& arg, _argument_specs, {
+            print(out, format("  {0}", arg->_metavar));
+            if (!arg->_help.empty()) {
+                int padding = 22 - arg->_metavar.size();
+                if (padding <= 0) {
+                    print(out, "\n                        ");
+                } else {
+                    out.push(padding, ' ');
+                }
+                print(out, arg->_help);
+            }
+            print(out, "\n");
+        });
+    }
+
+    if (!_option_specs.empty()) {
+        print(out, "\noptions:\n");
+        SFZ_FOREACH(const linked_ptr<Argument>& arg, _option_specs, {
+            int padding = 24;
+            switch (arg->_type) {
+              case Argument::SHORT_OPTION:
+                if (arg->_action.takes_value()) {
+                    print(out, format("  {0} {1}", arg->_short_option_name, arg->_metavar));
+                    padding -= 3 + arg->_short_option_name.size() + arg->_metavar.size();
+                } else {
+                    print(out, format("  {0}", arg->_short_option_name));
+                    padding -= 2 + arg->_short_option_name.size();
+                }
+                break;
+
+              case Argument::LONG_OPTION:
+                if (arg->_action.takes_value()) {
+                    print(out, format("      {0}={1}", arg->_long_option_name, arg->_metavar));
+                    padding -= 7 + arg->_long_option_name.size() + arg->_metavar.size();
+                } else {
+                    print(out, format("      {0}", arg->_long_option_name));
+                    padding -= 6 + arg->_long_option_name.size();
+                }
+                break;
+
+              case Argument::BOTH_OPTION:
+                if (arg->_action.takes_value()) {
+                    print(out, format("  {0}, {1}={2}", arg->_short_option_name,
+                            arg->_long_option_name, arg->_metavar));
+                    padding -= 5 + arg->_short_option_name.size() + arg->_long_option_name.size() +
+                        arg->_metavar.size();
+                } else {
+                    print(out, format("  {0}, {1}", arg->_short_option_name,
+                                arg->_long_option_name));
+                    padding -= 4 + arg->_short_option_name.size() + arg->_long_option_name.size();
+                }
+                break;
+
+              default:
+                break;
+            }
+
+            if (!arg->_help.empty()) {
+                if (padding <= 0) {
+                    out.push(1, '\n');
+                    out.push(24, ' ');
+                } else {
+                    out.push(padding, ' ');
+                }
+                print(out, arg->_help);
+            }
+            print(out, "\n");
+        });
+    }
+}
+
 Action::Action(const linked_ptr<Impl>& impl): _impl(impl) { }
 Action::Action(const Action& other): _impl(other._impl) { }
 Action& Action::operator=(const Action& other) { _impl = other._impl; return *this; }
@@ -381,8 +477,12 @@ bool Action::takes_value() const { return _impl->takes_value(); }
 bool Action::process(PrintTarget error) const { return _impl->process(error); }
 bool Action::process(StringSlice value, PrintTarget error) const { return _impl->process(value, error); }
 
-Argument::Argument(bool option, Action action):
-        _option(option),
+Argument::Argument(
+        Type type, const StringSlice& short_option_name,
+        const StringSlice& long_option_name, Action action):
+        _type(type),
+        _short_option_name(short_option_name),
+        _long_option_name(long_option_name),
         _action(action),
         _min_args(0),
         _max_args(1) { }
@@ -398,21 +498,21 @@ Argument& Argument::metavar(PrintItem s) {
 }
 
 Argument& Argument::required() {
-    if (_option) {
+    if (_type != ARGUMENT) {
         throw Exception("called required() on an option");
     }
     return nargs(1);
 }
 
 Argument& Argument::nargs(int n) {
-    if (_option) {
+    if (_type != ARGUMENT) {
         throw Exception("called nargs() on an option");
     }
     return min_args(n).max_args(n);
 }
 
 Argument& Argument::min_args(int n) {
-    if (_option) {
+    if (_type != ARGUMENT) {
         throw Exception("called min_args() on an option");
     }
     _min_args = n;
@@ -420,7 +520,7 @@ Argument& Argument::min_args(int n) {
 }
 
 Argument& Argument::max_args(int n) {
-    if (_option) {
+    if (_type != ARGUMENT) {
         throw Exception("called max_args() on an option");
     }
     _max_args = n;
@@ -467,6 +567,10 @@ bool store_argument(uint64_t& to, StringSlice value, PrintTarget error) { return
 
 void print_to(PrintTarget out, ParserUsage usage) {
     usage.parser.print_usage_to(out);
+}
+
+void print_to(PrintTarget out, ParserHelp help) {
+    help.parser.print_help_to(out);
 }
 
 }  // namespace args

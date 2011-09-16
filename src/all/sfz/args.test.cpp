@@ -78,9 +78,11 @@ class ArgsTest : public Test {
 
 MATCHER_P(PrintsAs, output, "") {
     String actual(arg);
-    CString actual_c_str(actual);
+    String actual_quoted(quote(actual));
+    CString actual_c_str(actual_quoted);
     String expected(output);
-    CString expected_c_str(expected);
+    String expected_quoted(quote(expected));
+    CString expected_c_str(expected_quoted);
     if (actual == expected) {
         *result_listener << actual_c_str.data() << " == " << expected_c_str.data();
         return true;
@@ -92,7 +94,16 @@ MATCHER_P(PrintsAs, output, "") {
 
 TEST_F(ArgsTest, Empty) {
     args::Parser parser("empty", "Empty parser");
+
     EXPECT_THAT(parser.usage(), PrintsAs("empty"));
+
+    const char* help =
+        "usage: empty"
+        "\n"
+        "\nEmpty parser"
+        "\n";
+    EXPECT_THAT(parser.help(), PrintsAs(help));
+
     pass(parser);
     pass(parser, "--");
     fail("extra arguments found: \"non-empty\"", parser, "non-empty");
@@ -128,8 +139,7 @@ struct ShortOptions {
         parser.add_argument("-n", store_const(commit, false))
             .help("dry run");
 
-        parser.add_argument(utf8::decode("-æ"), store_const(aesc, true))
-            .help(utf8::decode("æsc"));
+        parser.add_argument(utf8::decode("-æ"), store_const(aesc, true));
 
         parser.add_argument(utf8::decode("-秋"), store_const(aki, true))
             .help("harvest time comes and the leaves change");
@@ -166,8 +176,7 @@ struct ShortOptions {
             .help("type of output");
 
         parser.add_argument("-q", store(quality))
-            .metavar("QUALITY")
-            .help("quality");
+            .metavar("QUALITY");
     }
 
   private:
@@ -178,8 +187,34 @@ TEST_F(ArgsTest, ShortOptionsHelp) {
     args::Parser parser("short", "Short options only");
     ShortOptions opts;
     opts.add_to(parser);
-    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
-                    "short [-!?gkmnvæ秋] [-i FILE] [-o FILE] [-q QUALITY] [-t TYPE] [-x EXT]")));
+
+    const char* usage =
+        "short [-!?gkmnvæ秋] [-i FILE] [-o FILE] [-q QUALITY] [-t TYPE] [-x EXT]";
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(usage)));
+
+    const char* help =
+        "usage: short [-!?gkmnvæ秋] [-i FILE] [-o FILE] [-q QUALITY] [-t TYPE] [-x EXT]"
+        "\n"
+        "\nShort options only"
+        "\n"
+        "\noptions:"
+        "\n  -n                    dry run"
+        "\n  -æ"
+        // TODO(sfiera): take wide character width into account.
+        "\n  -秋                    harvest time comes and the leaves change"
+        "\n  -k                    print units in kilobytes"
+        "\n  -m                    print units in megabytes"
+        "\n  -g                    print units in gigabytes"
+        "\n  -?                    hunchback - bent over and curved"
+        "\n  -!                    soldier - standing straight and at attention"
+        "\n  -v                    increase verbosity level"
+        "\n  -x EXT                use extension"
+        "\n  -i FILE               input file"
+        "\n  -o FILE               output file"
+        "\n  -t TYPE               type of output"
+        "\n  -q QUALITY"
+        "\n";
+    EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
 }
 
 TEST_F(ArgsTest, ShortOptionsNone) {
@@ -289,8 +324,7 @@ struct Greeter {
         parser.add_argument("--name", store(_name))
             .help("name of person to greet");
 
-        parser.add_argument("--again", increment(_times))
-            .help("greet an additional time");
+        parser.add_argument("--again", increment(_times));
     }
 
     StringSlice make_greeting() {
@@ -317,11 +351,31 @@ TEST_F(ArgsTest, LongOptionsHelp) {
     args::Parser parser("greet", "Greeter");
     Greeter opts;
     opts.add_to(parser);
-    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
-                    "greet [--again] [--exclamation-point] [--hello] [--name=NAME] [--normal] "
-                    "[--ελληνικά] [--日本語]")));
-}
 
+    const char* usage =
+        "greet [--again] [--exclamation-point] [--hello] [--name=NAME] [--normal] "
+        "[--ελληνικά] [--日本語]";
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(usage)));
+
+    const char* help =
+        "usage: greet [--again] [--exclamation-point] [--hello] [--name=NAME] [--normal] "
+            "[--ελληνικά] [--日本語]"
+        "\n"
+        "\nGreeter"
+        "\n"
+        "\noptions:"
+        "\n      --normal          greet with a period"
+        "\n      --exclamation-point"
+        "\n                        greet with an exclamation point"
+        "\n      --hello           greet in English"
+        "\n      --ελληνικά        greet in Greek"
+        // TODO(sfiera): take wide character width into account.
+        "\n      --日本語             greet in Japanese"
+        "\n      --name=NAME       name of person to greet"
+        "\n      --again"
+        "\n";
+    EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
+}
 
 TEST_F(ArgsTest, LongOptionsNone) {
     args::Parser parser("greet", "Greeter");
@@ -351,8 +405,7 @@ struct ArgumentsOnly {
         parser.add_argument("one", store(one))
             .help("first argument")
             .required();
-        parser.add_argument("two", store(two))
-            .help("second argument");
+        parser.add_argument("two", store(two));
         parser.add_argument("three", append(three))
             .help("third argument")
             .max_args(3);
@@ -366,8 +419,21 @@ TEST_F(ArgsTest, ArgumentsHelp) {
     args::Parser parser("args", "Arguments only");
     ArgumentsOnly opts;
     opts.add_to(parser);
-    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
-                    "args one [two [three [three [three]]]]")));
+
+    const char* usage = "args one [two [three [three [three]]]]";
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(usage)));
+
+    const char* help =
+        "usage: args one [two [three [three [three]]]]"
+        "\n"
+        "\nArguments only"
+        "\n"
+        "\narguments:"
+        "\n  one                   first argument"
+        "\n  two"
+        "\n  three                 third argument"
+        "\n";
+    EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
 }
 
 TEST_F(ArgsTest, ArgumentsEmpty) {
@@ -500,8 +566,24 @@ TEST_F(ArgsTest, CutHelp) {
     args::Parser parser("cut", "A tool like cut(1)");
     CutTool opts;
     opts.add_to(parser);
-    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(
-                    "cut [-d DELIM] [-l LIMIT] [--delimiter=DELIM] [--limit=LIMIT] string")));
+
+    const char* usage =
+        "cut [-d DELIM] [-l LIMIT] [--delimiter=DELIM] [--limit=LIMIT] string";
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(usage)));
+
+    const char* help =
+        "usage: cut [-d DELIM] [-l LIMIT] [--delimiter=DELIM] [--limit=LIMIT] string"
+        "\n"
+        "\nA tool like cut(1)"
+        "\n"
+        "\narguments:"
+        "\n  string                string to split"
+        "\n"
+        "\noptions:"
+        "\n  -l, --limit=LIMIT     split at most this many times"
+        "\n  -d, --delimiter=DELIM use this as the field delimiter instead of tab"
+        "\n";
+    EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
 }
 
 TEST_F(ArgsTest, CutSimple) {
