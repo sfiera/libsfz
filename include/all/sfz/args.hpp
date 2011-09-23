@@ -236,6 +236,9 @@ Action increment(To& to) {
     return linked_ptr<Action::Impl>(new IncrementAction<To>(to));
 }
 
+Action help(const Parser& parser, int exit_code);
+Action version(StringSlice string);
+
 inline Action noop() { return linked_ptr<Action::Impl>(); }
 
 struct ParserUsage { const Parser& parser; };

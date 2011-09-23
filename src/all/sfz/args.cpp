@@ -717,5 +717,34 @@ void print_to(PrintTarget out, ParserHelp help) {
     help.parser.print_help_to(out);
 }
 
+struct HelpAction : public Action::Impl {
+    HelpAction(const Parser& parser, int exit_code): parser(parser), exit_code(exit_code) { }
+    virtual bool takes_value() const { return false; }
+    virtual bool process(PrintTarget error) const {
+        print(io::err, parser.help());
+        exit(exit_code);
+    }
+    const Parser& parser;
+    int exit_code;
+};
+
+Action help(const Parser& parser, int exit_code) {
+    return linked_ptr<Action::Impl>(new HelpAction(parser, exit_code));
+}
+
+struct VersionAction : public Action::Impl {
+    VersionAction(StringSlice string): string(string) { }
+    virtual bool takes_value() const { return false; }
+    virtual bool process(PrintTarget error) const {
+        print(io::err, string);
+        exit(0);
+    }
+    StringSlice string;
+};
+
+Action version(StringSlice string) {
+    return linked_ptr<Action::Impl>(new VersionAction(string));
+}
+
 }  // namespace args
 }  // namespace sfz
