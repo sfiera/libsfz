@@ -10,6 +10,7 @@
 #include <sfz/exception.hpp>
 #include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
+#include <sfz/io.hpp>
 #include <sfz/string-utils.hpp>
 
 using std::map;
@@ -20,6 +21,37 @@ namespace sfz {
 namespace args {
 
 namespace {
+
+struct Indented {
+    PrintTarget out;
+    int32_t indent;
+    bool line_started;
+
+    void push(StringSlice string) {
+        StringSlice line;
+        while (partition(line, "\n", string)) {
+            if (!line_started && !line.empty()) {
+                out.push(indent, ' ');
+            }
+            out.push(line);
+            out.push(1, '\n');
+            line_started = false;
+        }
+        if (!line_started && !line.empty()) {
+            out.push(indent, ' ');
+            line_started = true;
+        }
+        out.push(line);
+        line_started = !line.empty();
+    }
+
+    void push(size_t num, Rune rune) {
+        out.push(num, rune);
+        if (rune == '\n') {
+            line_started = false;
+        }
+    }
+};
 
 struct PrintableRune { Rune r; };
 PrintableRune rune(Rune r) {
@@ -55,9 +87,16 @@ class Parser::State {
             _arguments_saturated(false),
             _argument(_spec._argument_specs.begin()) { }
 
-    bool parse_args(const vector<StringSlice>& args) {
+    bool parse_args(
+            // TODO(sfiera): use an array slice.
+            vector<StringSlice>::const_iterator begin,
+            vector<StringSlice>::const_iterator end) {
+        if (!_spec._action.process(_error)) {
+            return false;
+        }
         bool saw_dash_dash = false;
-        SFZ_FOREACH(StringSlice token, args, {
+        for ( ; begin != end; ++begin) {
+            const StringSlice token = *begin;
             if (_arguments_saturated) {
                 print(_error, format(" {0}", quote(token)));
             } else if (_expecting_value) {
@@ -65,30 +104,25 @@ class Parser::State {
                     return false;
                 }
                 _expecting_value = false;
-            } else if (saw_dash_dash) {
-                if (!process_argument(token)) {
-                    return false;
-                }
-            } else if (token == "--") {
+            } else if (!saw_dash_dash && (token == "--")) {
                 saw_dash_dash = true;
-            } else if (starts_with(token, "--")) {
+            } else if (!saw_dash_dash && starts_with(token, "--")) {
                 if (!parse_long_option(token)) {
                     return false;
                 }
-            } else if (token == "-") {
-                if (!process_argument(token)) {
-                    return false;
-                }
-            } else if (starts_with(token, "-")) {
+            } else if (!saw_dash_dash && starts_with(token, "-") && (token != "-")) {
                 if (!parse_short_option(token.slice(1))) {
                     return false;
                 }
             } else {
+                if (!args_remaining() && _spec.has_subparsers()) {
+                    return process_subparser(token, ++begin, end);
+                }
                 if (!process_argument(token)) {
                     return false;
                 }
             }
-        });
+        }
         if (_arguments_saturated) {
             return false;
         } else if (_expecting_value) {
@@ -96,7 +130,7 @@ class Parser::State {
             print(_error, format("option -{0}: argument required", string_option));
             return false;
         }
-        while (_argument != _spec._argument_specs.end()) {
+        while (args_remaining()) {
             if ((*_argument)->_min_args > 0) {
                 print(_error, "too few arguments");
                 return false;
@@ -106,24 +140,28 @@ class Parser::State {
         return true;
     }
 
+    bool args_remaining() {
+        return _argument != _spec._argument_specs.end();
+    }
+
     bool parse_long_option(StringSlice token) {
         StringSlice option;
         if (partition(option, "=", token)) {
             StringSlice value = token;
-            if (!long_option_exists(option)) {
+            if (!_spec.has_long_option(option)) {
                 print(_error, format("illegal option: {0}", option));
                 return false;
-            } else if (!long_option_takes_value(option)) {
+            } else if (!_spec.long_option_takes_value(option)) {
                 print(_error, format("option does not allow an argument: {0}", option));
                 return false;
             } else {
                 return process_long_option(option, value);
             }
         } else {
-            if (!long_option_exists(option)) {
+            if (!_spec.has_long_option(option)) {
                 print(_error, format("illegal option: {0}", option));
                 return false;
-            } else if (long_option_takes_value(option)) {
+            } else if (_spec.long_option_takes_value(option)) {
                 print(_error, format("option requires an argument: {0}", option));
                 return false;
             } else {
@@ -132,20 +170,8 @@ class Parser::State {
         }
     }
 
-    bool long_option_exists(StringSlice option) {
-        return _spec._long_options_by_name.find(option) != _spec._long_options_by_name.end();
-    }
-
-    const Argument& long_option(StringSlice option) {
-        return *_spec._long_options_by_name.find(option)->second;
-    }
-
-    bool long_option_takes_value(StringSlice option) {
-        return long_option(option)._action.takes_value();
-    }
-
     bool process_long_option(StringSlice option) {
-        if (!long_option(option)._action.process(_action_error)) {
+        if (!_spec.long_option(option)._action.process(_action_error)) {
             print(_error, format("option {0}: {1}", option, _action_error));
             return false;
         }
@@ -153,7 +179,7 @@ class Parser::State {
     }
 
     bool process_long_option(StringSlice option, StringSlice value) {
-        if (!long_option(option)._action.process(value, _action_error)) {
+        if (!_spec.long_option(option)._action.process(value, _action_error)) {
             print(_error, format("option {0}: {1}: {2}", option, _action_error, quote(value)));
             return false;
         }
@@ -163,10 +189,10 @@ class Parser::State {
     bool parse_short_option(StringSlice token) {
         Rune option = token.at(0);
         StringSlice remainder = token.slice(1);
-        if (!short_option_exists(option)) {
+        if (!_spec.has_short_option(option)) {
             print(_error, format("illegal option: -{0}", token.slice(0, 1)));
             return false;
-        } else if (short_option_takes_value(option)) {
+        } else if (_spec.short_option_takes_value(option)) {
             if (remainder.empty()) {
                 _option_expected = option;
                 _expecting_value = true;
@@ -184,20 +210,8 @@ class Parser::State {
         return true;
     }
 
-    bool short_option_exists(Rune option) {
-        return _spec._short_options_by_name.find(option) != _spec._short_options_by_name.end();
-    }
-
-    const Argument& short_option(Rune option) {
-        return *_spec._short_options_by_name.find(option)->second;
-    }
-
-    bool short_option_takes_value(Rune option) {
-        return short_option(option)._action.takes_value();
-    }
-
     bool process_short_option(Rune option) {
-        if (!short_option(option)._action.process(_action_error)) {
+        if (!_spec.short_option(option)._action.process(_action_error)) {
             String s(1, option);
             print(_error, format("option -{0}: {1}", s, _action_error));
             return false;
@@ -206,7 +220,7 @@ class Parser::State {
     }
 
     bool process_short_option(Rune option, StringSlice value) {
-        if (!short_option(option)._action.process(value, _action_error)) {
+        if (!_spec.short_option(option)._action.process(value, _action_error)) {
             String s(1, option);
             print(_error, format("option -{0}: {1}: {2}", s, _action_error, quote(value)));
             return false;
@@ -233,6 +247,19 @@ class Parser::State {
         return true;
     }
 
+    bool process_subparser(
+            StringSlice token,
+            vector<StringSlice>::const_iterator begin,
+            vector<StringSlice>::const_iterator end) {
+        if (_spec.has_subparser(token)) {
+            State substate(_spec.subparser(token), _error);
+            return substate.parse_args(begin, end);
+        } else {
+            print(_error, format("{0} is not a {1} command", quote(token), _spec.name()));
+            return false;
+        }
+    }
+
   private:
     const Parser& _spec;
     PrintTarget _error;
@@ -248,13 +275,23 @@ class Parser::State {
     DISALLOW_COPY_AND_ASSIGN(State);
 };
 
-Parser::Parser(PrintItem program_name, PrintItem description):
-        _program_name(program_name),
-        _description(description) { }
+Parser::Parser(PrintItem program_name, PrintItem description, Action action):
+        _parent(NULL),
+        _name(program_name),
+        _description(description),
+        _action(action) { }
 
-Parser::Parser(const char* program_name, PrintItem description):
-        _program_name(utf8::decode(program_name)),
-        _description(description) { }
+Parser::Parser(const char* program_name, PrintItem description, Action action):
+        _parent(NULL),
+        _name(utf8::decode(program_name)),
+        _description(description),
+        _action(action) { }
+
+Parser::Parser(Parser* const parent, PrintItem name, PrintItem description, Action action):
+        _parent(parent),
+        _name(name),
+        _description(description),
+        _action(action) { }
 
 Argument& Parser::add_argument(PrintItem name, Action action) {
     String printed_name(name);
@@ -308,8 +345,22 @@ Argument& Parser::add_argument(PrintItem short_name, PrintItem long_name, Action
     return *arg;
 }
 
+Parser& Parser::add_subparser(PrintItem name, PrintItem description, Action action) {
+    String printed_name(name);
+    if (printed_name.empty() || (printed_name.at(0) == '-')) {
+        throw Exception("invalid subcommand name");
+    }
+    if (has_subparser(printed_name)) {
+        throw Exception("duplicate command name");
+    }
+    linked_ptr<Parser> subparser(new Parser(this, printed_name, description, action));
+    _subparsers.push_back(subparser);
+    _subparsers_by_name[printed_name] = subparser;
+    return *subparser;
+}
+
 bool Parser::parse_args(const vector<StringSlice>& args, PrintTarget error) const {
-    return State(*this, error).parse_args(args);
+    return State(*this, error).parse_args(args.begin(), args.end());
 }
 
 bool Parser::parse_args(int argc, const char* const* argv, PrintTarget error) const {
@@ -328,8 +379,8 @@ bool Parser::parse_args(int argc, const char* const* argv, PrintTarget error) co
     return parse_args(args, error);
 }
 
-const String& Parser::program_name() const {
-    return _program_name;
+const String& Parser::name() const {
+    return _name;
 }
 
 ParserUsage Parser::usage() const {
@@ -346,7 +397,7 @@ void Parser::print_usage_to(PrintTarget out) const {
     typedef pair<Rune, linked_ptr<Argument> > ShortArg;
     typedef pair<StringSlice, linked_ptr<Argument> > LongArg;
 
-    print(out, _program_name);
+    print(out, _name);
 
     bool has_argless_options = false;
     SFZ_FOREACH(const ShortArg& arg, _short_options_by_name, {
@@ -391,61 +442,68 @@ void Parser::print_usage_to(PrintTarget out) const {
         }
     });
     out.push(nesting, ']');
+
+    if (has_subparsers()) {
+        print(out, " [command]");
+    }
 }
 
 void Parser::print_help_to(PrintTarget out) const {
-    print(out, format("usage: {0}\n\n{1}\n", usage(), _description));
+    print(out, format("usage: {0}\n", usage()));
+    Indented body = {out, 2};
+    print(body, format("\n{0}\n", _description));
 
     if (!_argument_specs.empty()) {
-        print(out, "\narguments:\n");
+        print(body, "\narguments:\n");
         SFZ_FOREACH(const linked_ptr<Argument>& arg, _argument_specs, {
-            print(out, format("  {0}", arg->_metavar));
+            print(body, format("  {0}", arg->_metavar));
             if (!arg->_help.empty()) {
-                int padding = 22 - arg->_metavar.size();
+                int padding = 20 - arg->_metavar.size();
                 if (padding <= 0) {
-                    print(out, "\n                        ");
+                    body.push(1, '\n');
+                    body.push(22, ' ');
                 } else {
-                    out.push(padding, ' ');
+                    body.push(padding, ' ');
                 }
-                print(out, arg->_help);
+                print(body, arg->_help);
             }
-            print(out, "\n");
+            print(body, "\n");
         });
     }
 
     if (!_option_specs.empty()) {
-        print(out, "\noptions:\n");
+        print(body, "\noptions:\n");
         SFZ_FOREACH(const linked_ptr<Argument>& arg, _option_specs, {
-            int padding = 24;
+            int padding = 22;
             switch (arg->_type) {
               case Argument::SHORT_OPTION:
                 if (arg->_action.takes_value()) {
-                    print(out, format("  {0} {1}", arg->_short_option_name, arg->_metavar));
+                    print(body, format("  {0} {1}", arg->_short_option_name, arg->_metavar));
                     padding -= 3 + arg->_short_option_name.size() + arg->_metavar.size();
                 } else {
-                    print(out, format("  {0}", arg->_short_option_name));
+                    print(body, format("  {0}", arg->_short_option_name));
                     padding -= 2 + arg->_short_option_name.size();
                 }
                 break;
 
               case Argument::LONG_OPTION:
                 if (arg->_action.takes_value()) {
-                    print(out, format("      {0}={1}", arg->_long_option_name, arg->_metavar));
+                    print(body, format("      {0}={1}", arg->_long_option_name, arg->_metavar));
                     padding -= 7 + arg->_long_option_name.size() + arg->_metavar.size();
                 } else {
-                    print(out, format("      {0}", arg->_long_option_name));
+                    print(body, format("      {0}", arg->_long_option_name));
                     padding -= 6 + arg->_long_option_name.size();
                 }
                 break;
 
               case Argument::BOTH_OPTION:
                 if (arg->_action.takes_value()) {
-                    print(out, format("  {0}, {1}={2}", arg->_short_option_name,
+                    print(body, format("  {0}, {1}={2}", arg->_short_option_name,
                             arg->_long_option_name, arg->_metavar));
                     padding -= 5 + arg->_short_option_name.size() + arg->_long_option_name.size() +
                         arg->_metavar.size();
                 } else {
-                    print(out, format("  {0}, {1}", arg->_short_option_name,
+                    print(body, format("  {0}, {1}", arg->_short_option_name,
                                 arg->_long_option_name));
                     padding -= 4 + arg->_short_option_name.size() + arg->_long_option_name.size();
                 }
@@ -457,25 +515,99 @@ void Parser::print_help_to(PrintTarget out) const {
 
             if (!arg->_help.empty()) {
                 if (padding <= 0) {
-                    out.push(1, '\n');
-                    out.push(24, ' ');
+                    body.push(1, '\n');
+                    body.push(22, ' ');
                 } else {
-                    out.push(padding, ' ');
+                    body.push(padding, ' ');
                 }
-                print(out, arg->_help);
+                print(body, arg->_help);
             }
-            print(out, "\n");
+            print(body, "\n");
         });
     }
+
+    if (has_subparsers()) {
+        print(body, "\ncommands:\n");
+        SFZ_FOREACH(const linked_ptr<Parser>& arg, _subparsers, {
+            String usage(arg->usage());
+            print(body, format("  {0}", usage));
+            if (!arg->_description.empty()) {
+                int padding = 20 - usage.size();
+                if (padding <= 0) {
+                    body.push(1, '\n');
+                    body.push(22, ' ');
+                } else {
+                    body.push(padding, ' ');
+                }
+                print(body, arg->_description);
+            }
+            print(body, "\n");
+        });
+    }
+}
+
+bool Parser::has_long_option(StringSlice option) const {
+    return (_long_options_by_name.find(option) != _long_options_by_name.end())
+        || ((_parent != NULL) && (_parent->has_long_option(option)));
+}
+
+const Argument& Parser::long_option(StringSlice option) const {
+    if (_long_options_by_name.find(option) != _long_options_by_name.end()) {
+        return *_long_options_by_name.find(option)->second;
+    } else {
+        return _parent->long_option(option);
+    }
+}
+
+bool Parser::long_option_takes_value(StringSlice option) const {
+    return long_option(option)._action.takes_value();
+}
+
+bool Parser::has_short_option(Rune option) const {
+    return (_short_options_by_name.find(option) != _short_options_by_name.end())
+        || ((_parent != NULL) && (_parent->has_short_option(option)));
+}
+
+const Argument& Parser::short_option(Rune option) const {
+    if (_short_options_by_name.find(option) != _short_options_by_name.end()) {
+        return *_short_options_by_name.find(option)->second;
+    } else {
+        return _parent->short_option(option);
+    }
+}
+
+bool Parser::short_option_takes_value(Rune option) const {
+    return short_option(option)._action.takes_value();
+}
+
+bool Parser::has_subparsers() const {
+    return !_subparsers.empty();
+}
+
+bool Parser::has_subparser(StringSlice name) const {
+    return _subparsers_by_name.find(name) != _subparsers_by_name.end();
+}
+
+const Parser& Parser::subparser(StringSlice name) const {
+    return *_subparsers_by_name.find(name)->second;
 }
 
 Action::Action(const linked_ptr<Impl>& impl): _impl(impl) { }
 Action::Action(const Action& other): _impl(other._impl) { }
 Action& Action::operator=(const Action& other) { _impl = other._impl; return *this; }
 Action::~Action() { }
-bool Action::takes_value() const { return _impl->takes_value(); }
-bool Action::process(PrintTarget error) const { return _impl->process(error); }
-bool Action::process(StringSlice value, PrintTarget error) const { return _impl->process(value, error); }
+
+bool Action::takes_value() const {
+    return (_impl.get() != NULL) && _impl->takes_value();
+}
+
+bool Action::process(PrintTarget error) const {
+    return (_impl.get() == NULL) || _impl->process(error);
+}
+
+bool Action::process(StringSlice value, PrintTarget error) const {
+    return _impl->process(value, error);
+}
 
 Argument::Argument(
         Type type, const StringSlice& short_option_name,
@@ -556,6 +688,16 @@ bool store_integral_argument(T& to, StringSlice value, PrintTarget error) {
     return false;
 }
 
+template <typename T>
+bool store_float_argument(T& to, StringSlice value, PrintTarget error) {
+    if (string_to_float(value, to)) {
+        return true;
+    } else {
+        print(error, "invalid number");
+        return false;
+    }
+}
+
 bool store_argument(int8_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
 bool store_argument(uint8_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
 bool store_argument(int16_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
@@ -564,6 +706,8 @@ bool store_argument(int32_t& to, StringSlice value, PrintTarget error) { return 
 bool store_argument(uint32_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
 bool store_argument(int64_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
 bool store_argument(uint64_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
+bool store_argument(float& to, StringSlice value, PrintTarget error) { return store_float_argument(to, value, error); }
+bool store_argument(double& to, StringSlice value, PrintTarget error) { return store_float_argument(to, value, error); }
 
 void print_to(PrintTarget out, ParserUsage usage) {
     usage.parser.print_usage_to(out);

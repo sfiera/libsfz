@@ -38,6 +38,16 @@ void PrintTo(StringSlice s, std::ostream* ostr) {
     *ostr << c_str.data();
 }
 
+std::ostream& operator<<(std::ostream& ostr, const String& s) {
+    CString c_str(s);
+    return ostr << c_str.data();
+}
+
+std::ostream& operator<<(std::ostream& ostr, StringSlice s) {
+    CString c_str(s);
+    return ostr << c_str.data();
+}
+
 namespace {
 
 class ArgsTest : public Test {
@@ -51,9 +61,10 @@ class ArgsTest : public Test {
         int argc = find(argv, argv + 9, static_cast<const char*>(NULL)) - argv;
         String error;
         EXPECT_THAT(parser.parse_args(argc, argv, error), Eq(true))
+            << error << " ("
             << argv0 << " " << argv1 << " " << argv2 << " "
             << argv3 << " " << argv4 << " " << argv5 << " "
-            << argv6 << " " << argv7 << " " << argv8;
+            << argv6 << " " << argv7 << " " << argv8 << ")";
     }
 
     void fail(
@@ -100,7 +111,7 @@ TEST_F(ArgsTest, Empty) {
     const char* help =
         "usage: empty"
         "\n"
-        "\nEmpty parser"
+        "\n  Empty parser"
         "\n";
     EXPECT_THAT(parser.help(), PrintsAs(help));
 
@@ -195,24 +206,24 @@ TEST_F(ArgsTest, ShortOptionsHelp) {
     const char* help =
         "usage: short [-!?gkmnvæ秋] [-i FILE] [-o FILE] [-q QUALITY] [-t TYPE] [-x EXT]"
         "\n"
-        "\nShort options only"
+        "\n  Short options only"
         "\n"
-        "\noptions:"
-        "\n  -n                    dry run"
-        "\n  -æ"
+        "\n  options:"
+        "\n    -n                  dry run"
+        "\n    -æ"
         // TODO(sfiera): take wide character width into account.
-        "\n  -秋                    harvest time comes and the leaves change"
-        "\n  -k                    print units in kilobytes"
-        "\n  -m                    print units in megabytes"
-        "\n  -g                    print units in gigabytes"
-        "\n  -?                    hunchback - bent over and curved"
-        "\n  -!                    soldier - standing straight and at attention"
-        "\n  -v                    increase verbosity level"
-        "\n  -x EXT                use extension"
-        "\n  -i FILE               input file"
-        "\n  -o FILE               output file"
-        "\n  -t TYPE               type of output"
-        "\n  -q QUALITY"
+        "\n    -秋                  harvest time comes and the leaves change"
+        "\n    -k                  print units in kilobytes"
+        "\n    -m                  print units in megabytes"
+        "\n    -g                  print units in gigabytes"
+        "\n    -?                  hunchback - bent over and curved"
+        "\n    -!                  soldier - standing straight and at attention"
+        "\n    -v                  increase verbosity level"
+        "\n    -x EXT              use extension"
+        "\n    -i FILE             input file"
+        "\n    -o FILE             output file"
+        "\n    -t TYPE             type of output"
+        "\n    -q QUALITY"
         "\n";
     EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
 }
@@ -361,18 +372,18 @@ TEST_F(ArgsTest, LongOptionsHelp) {
         "usage: greet [--again] [--exclamation-point] [--hello] [--name=NAME] [--normal] "
             "[--ελληνικά] [--日本語]"
         "\n"
-        "\nGreeter"
+        "\n  Greeter"
         "\n"
-        "\noptions:"
-        "\n      --normal          greet with a period"
-        "\n      --exclamation-point"
+        "\n  options:"
+        "\n        --normal        greet with a period"
+        "\n        --exclamation-point"
         "\n                        greet with an exclamation point"
-        "\n      --hello           greet in English"
-        "\n      --ελληνικά        greet in Greek"
+        "\n        --hello         greet in English"
+        "\n        --ελληνικά      greet in Greek"
         // TODO(sfiera): take wide character width into account.
-        "\n      --日本語             greet in Japanese"
-        "\n      --name=NAME       name of person to greet"
-        "\n      --again"
+        "\n        --日本語           greet in Japanese"
+        "\n        --name=NAME     name of person to greet"
+        "\n        --again"
         "\n";
     EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
 }
@@ -426,12 +437,12 @@ TEST_F(ArgsTest, ArgumentsHelp) {
     const char* help =
         "usage: args one [two [three [three [three]]]]"
         "\n"
-        "\nArguments only"
+        "\n  Arguments only"
         "\n"
-        "\narguments:"
-        "\n  one                   first argument"
-        "\n  two"
-        "\n  three                 third argument"
+        "\n  arguments:"
+        "\n    one                 first argument"
+        "\n    two"
+        "\n    three               third argument"
         "\n";
     EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
 }
@@ -574,14 +585,15 @@ TEST_F(ArgsTest, CutHelp) {
     const char* help =
         "usage: cut [-d DELIM] [-l LIMIT] [--delimiter=DELIM] [--limit=LIMIT] string"
         "\n"
-        "\nA tool like cut(1)"
+        "\n  A tool like cut(1)"
         "\n"
-        "\narguments:"
-        "\n  string                string to split"
+        "\n  arguments:"
+        "\n    string              string to split"
         "\n"
-        "\noptions:"
-        "\n  -l, --limit=LIMIT     split at most this many times"
-        "\n  -d, --delimiter=DELIM use this as the field delimiter instead of tab"
+        "\n  options:"
+        "\n    -l, --limit=LIMIT   split at most this many times"
+        "\n    -d, --delimiter=DELIM"
+        "\n                        use this as the field delimiter instead of tab"
         "\n";
     EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
 }
@@ -608,6 +620,132 @@ TEST_F(ArgsTest, CutLong) {
     opts.add_to(parser);
     pass(parser, "--delimiter=an", "A man, a plan, a canal, Panama", "-l4");
     ASSERT_THAT(opts.cut(), ElementsAre("A m", ", a pl", ", a c", "al, Panama"));
+}
+
+struct Calculator {
+    Calculator() {
+        reset();
+    }
+
+    void reset() {
+        _x = 0;
+        _y = 0;
+        _op = 0;
+        _int_division = false;
+    }
+
+    void add_to(args::Parser& parser) {
+        parser.add_argument("x", store(_x))
+            .help("first argument")
+            .required();
+
+        parser.add_subparser(
+                "abs", "take absolute value", store_const(_op, 'a'));
+
+        args::Parser& plus = parser.add_subparser(
+                "plus", "add arguments", store_const(_op, '+'));
+        plus.add_argument("y", store(_y))
+            .help("second argument")
+            .required();
+
+        args::Parser& div = parser.add_subparser(
+                "div", "divide arguments", store_const(_op, '/'));
+        div.add_argument("--int", store_const(_int_division, true));
+        div.add_argument("y", store(_y))
+            .help("second argument")
+            .required();
+    }
+
+    double value() const {
+        double result;
+        switch (_op) {
+          case 'a':
+            result = abs(_x);
+            break;
+          case '+':
+            result = _x + _y;
+            break;
+          case '/':
+            if (_int_division) {
+                result = int64_t(_x) / int64_t(_y);
+            } else {
+                result = _x / _y;
+            }
+            break;
+          default:
+            return _x;
+        }
+        return result;
+    }
+
+  private:
+    double _x;
+    double _y;
+    char _op;
+    bool _int_division;
+
+    DISALLOW_COPY_AND_ASSIGN(Calculator);
+};
+
+TEST_F(ArgsTest, CalculatorHelp) {
+    args::Parser parser("calc", "Perform calculation");
+    Calculator calc;
+    calc.add_to(parser);
+
+    const char* usage =
+        "calc x [command]";
+    EXPECT_THAT(parser.usage(), PrintsAs(utf8::decode(usage)));
+
+    const char* help =
+        "usage: calc x [command]"
+        "\n"
+        "\n  Perform calculation"
+        "\n"
+        "\n  arguments:"
+        "\n    x                   first argument"
+        "\n"
+        "\n  commands:"
+        "\n    abs                 take absolute value"
+        "\n    plus y              add arguments"
+        "\n    div [--int] y       divide arguments"
+        "\n";
+    EXPECT_THAT(parser.help(), PrintsAs(utf8::decode(help)));
+}
+
+TEST_F(ArgsTest, CalculatorMinimal) {
+    args::Parser parser("calc", "Perform calculation");
+    Calculator calc;
+    calc.add_to(parser);
+    pass(parser, "5", "abs");
+    EXPECT_THAT(calc.value(), Eq(5));
+
+    calc.reset();
+    pass(parser, "--", "-4", "abs");
+    EXPECT_THAT(calc.value(), Eq(4));
+
+    calc.reset();
+    pass(parser, "1", "plus", "2");
+    EXPECT_THAT(calc.value(), Eq(3));
+
+    calc.reset();
+    pass(parser, "4", "div", "2");
+    EXPECT_THAT(calc.value(), Eq(2));
+}
+
+TEST_F(ArgsTest, CalculatorOptions) {
+    args::Parser parser("calc", "Perform calculation");
+    Calculator calc;
+    calc.add_to(parser);
+    pass(parser, "5", "div", "--int", "2");
+    EXPECT_THAT(calc.value(), Eq(2));
+
+    calc.reset();
+    pass(parser, "5", "div", "2", "--int");
+    EXPECT_THAT(calc.value(), Eq(2));
+
+    calc.reset();
+    pass(parser, "5", "div", "2");
+    EXPECT_THAT(calc.value(), Eq(2.5));
 }
 
 }  // namespace

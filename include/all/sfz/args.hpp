@@ -22,51 +22,7 @@ class Action;
 class Argument;
 struct ParserUsage;
 struct ParserHelp;
-
-class Parser {
-  public:
-    Parser(PrintItem program_name, PrintItem description);
-    Parser(const char* program_name, PrintItem description);
-
-    Argument& add_argument(PrintItem name, Action action);
-    Argument& add_argument(PrintItem short_name, PrintItem long_name, Action action);
-
-    bool parse_args(const std::vector<StringSlice>& args, PrintTarget error) const;
-    bool parse_args(int argc, const char* const* argv, PrintTarget error) const;
-
-    const String& program_name() const;
-    ParserUsage usage() const;
-    ParserHelp help() const;
-
-  private:
-    friend class Argument;
-    friend void print_to(PrintTarget out, ParserUsage usage);
-    friend void print_to(PrintTarget out, ParserHelp help);
-
-    class State;
-
-    void print_usage_to(PrintTarget out) const;
-    void print_help_to(PrintTarget out) const;
-
-    const String _program_name;
-    const String _description;
-
-    std::vector<linked_ptr<Argument> > _argument_specs;
-    std::vector<linked_ptr<Argument> > _option_specs;
-    std::map<Rune, linked_ptr<Argument> > _short_options_by_name;
-    StringMap<linked_ptr<Argument> > _long_options_by_name;
-
-    DISALLOW_COPY_AND_ASSIGN(Parser);
-};
-
-template <typename To>
-Action store(To& to);
-
-template <typename To, typename Constant>
-Action store_const(To& to, const Constant& constant);
-
-template <typename To>
-Action increment(To& to);
+Action noop();
 
 class Action {
   public:
@@ -96,6 +52,73 @@ class Action {
   private:
     linked_ptr<Impl> _impl;
 };
+
+class Parser {
+  public:
+    Parser(PrintItem program_name, PrintItem description, Action = noop());
+    Parser(const char* program_name, PrintItem description, Action = noop());
+
+    Argument& add_argument(PrintItem name, Action action);
+    Argument& add_argument(PrintItem short_name, PrintItem long_name, Action action);
+    Parser& add_subparser(PrintItem name, PrintItem description, Action action);
+
+    bool parse_args(const std::vector<StringSlice>& args, PrintTarget error) const;
+    bool parse_args(int argc, const char* const* argv, PrintTarget error) const;
+
+    const String& name() const;
+    ParserUsage usage() const;
+    ParserHelp help() const;
+
+  private:
+    friend class Argument;
+    friend void print_to(PrintTarget out, ParserUsage usage);
+    friend void print_to(PrintTarget out, ParserHelp help);
+
+    class State;
+
+    Parser(Parser* const parent, PrintItem name, PrintItem description, Action action);
+
+    const Argument& long_option(StringSlice option) const;
+    bool has_long_option(StringSlice option) const;
+    bool long_option_takes_value(StringSlice option) const;
+
+    const Argument& short_option(Rune option) const;
+    bool has_short_option(Rune option) const;
+    bool short_option_takes_value(Rune option) const;
+
+    bool has_subparsers() const;
+    bool has_subparser(StringSlice name) const;
+    const Parser& subparser(StringSlice name) const;
+
+    void print_usage_to(PrintTarget out) const;
+    void print_help_to(PrintTarget out) const;
+
+    const Parser* const _parent;
+    const String _name;
+    const String _description;
+    const Action _action;
+
+    std::vector<linked_ptr<Parser> > _subparsers;
+    StringMap<linked_ptr<Parser> > _subparsers_by_name;
+
+    std::vector<linked_ptr<Argument> > _argument_specs;
+    linked_ptr<Argument> _subparser_argument;
+
+    std::vector<linked_ptr<Argument> > _option_specs;
+    std::map<Rune, linked_ptr<Argument> > _short_options_by_name;
+    StringMap<linked_ptr<Argument> > _long_options_by_name;
+
+    DISALLOW_COPY_AND_ASSIGN(Parser);
+};
+
+template <typename To>
+Action store(To& to);
+
+template <typename To, typename Constant>
+Action store_const(To& to, const Constant& constant);
+
+template <typename To>
+Action increment(To& to);
 
 class Argument {
   public:
@@ -142,6 +165,8 @@ bool store_argument(int32_t& to, StringSlice value, PrintTarget error);
 bool store_argument(uint32_t& to, StringSlice value, PrintTarget error);
 bool store_argument(int64_t& to, StringSlice value, PrintTarget error);
 bool store_argument(uint64_t& to, StringSlice value, PrintTarget error);
+bool store_argument(float& to, StringSlice value, PrintTarget error);
+bool store_argument(double& to, StringSlice value, PrintTarget error);
 
 template <typename To>
 struct StoreAction : public Action::Impl {
@@ -210,6 +235,8 @@ template <typename To>
 Action increment(To& to) {
     return linked_ptr<Action::Impl>(new IncrementAction<To>(to));
 }
+
+inline Action noop() { return linked_ptr<Action::Impl>(); }
 
 struct ParserUsage { const Parser& parser; };
 struct ParserHelp { const Parser& parser; };
