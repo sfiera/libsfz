@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sfz/algorithm.hpp>
+#include <sfz/args.hpp>
 #include <sfz/exception.hpp>
 
 namespace sfz {
@@ -164,11 +165,12 @@ void copy(Optional<T>& to, const Optional<T>& from) {
 template <typename T>
 bool store_argument(Optional<T>& to, StringSlice from, PrintTarget error) {
     using std::swap;
-    to.set();
+    using sfz::args::store_argument;
     T value;
     if (!store_argument(value, from, error)) {
         return false;
     }
+    to.set();
     swap(*to, value);
     return true;
 }

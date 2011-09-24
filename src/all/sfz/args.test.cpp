@@ -406,7 +406,7 @@ TEST_F(ArgsTest, LongOptionsAll) {
 }
 
 struct ArgumentsOnly {
-    Optional<String> one;
+    Optional<int32_t> one;
     Optional<String> two;
     vector<int32_t> three;
 
@@ -459,7 +459,7 @@ TEST_F(ArgsTest, ArgumentsOne) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "1");
-    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.one, Eq(1));
     EXPECT_THAT(opts.two.has(), Eq(false));
     EXPECT_THAT(opts.three, ElementsAre());
 }
@@ -469,7 +469,7 @@ TEST_F(ArgsTest, ArgumentsTwo) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "1", "2");
-    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.one, Eq(1));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
     EXPECT_THAT(opts.three, ElementsAre());
 }
@@ -479,7 +479,7 @@ TEST_F(ArgsTest, ArgumentsThree) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "1", "2", "3");
-    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.one, Eq(1));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
     EXPECT_THAT(opts.three, ElementsAre(3));
 }
@@ -489,7 +489,7 @@ TEST_F(ArgsTest, ArgumentsAll) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "1", "2", "3", "4", "5");
-    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.one, Eq(1));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("2"));
     EXPECT_THAT(opts.three, ElementsAre(3, 4, 5));
 }
@@ -499,7 +499,7 @@ TEST_F(ArgsTest, ArgumentsDash) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "1", "-", "3");
-    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.one, Eq(1));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("-"));
     EXPECT_THAT(opts.three, ElementsAre(3));
 }
@@ -509,7 +509,7 @@ TEST_F(ArgsTest, ArgumentsDashDash) {
     ArgumentsOnly opts;
     opts.add_to(parser);
     pass(parser, "1", "--", "--2", "-3");
-    EXPECT_THAT(*opts.one, Eq<StringSlice>("1"));
+    EXPECT_THAT(*opts.one, Eq(1));
     EXPECT_THAT(*opts.two, Eq<StringSlice>("--2"));
     EXPECT_THAT(opts.three, ElementsAre(-3));
 }
