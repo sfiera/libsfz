@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sfz/algorithm.hpp>
+#include <sfz/args.hpp>
 #include <sfz/exception.hpp>
 
 namespace sfz {
@@ -51,7 +52,7 @@ class Optional {
 template <typename T> void copy(Optional<T>& to, const T& from);
 template <typename T> void copy(Optional<T>& to, const Optional<T>& from);
 
-template <typename T> void store_argument(Optional<T>& to, StringSlice from);
+template <typename T> bool store_argument(Optional<T>& to, StringSlice from);
 
 template <typename T>
 Optional<T>::Optional():
@@ -162,9 +163,16 @@ void copy(Optional<T>& to, const Optional<T>& from) {
 }
 
 template <typename T>
-void store_argument(Optional<T>& to, StringSlice from) {
+bool store_argument(Optional<T>& to, StringSlice from, PrintTarget error) {
+    using std::swap;
+    using sfz::args::store_argument;
+    T value;
+    if (!store_argument(value, from, error)) {
+        return false;
+    }
     to.set();
-    store_argument(*to, from);
+    swap(*to, value);
+    return true;
 }
 
 }  // namespace sfz
