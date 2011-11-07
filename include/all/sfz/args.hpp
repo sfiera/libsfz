@@ -6,6 +6,7 @@
 #ifndef SFZ_ARGS_HPP_
 #define SFZ_ARGS_HPP_
 
+#include <limits>
 #include <map>
 #include <vector>
 #include <sfz/algorithm.hpp>
