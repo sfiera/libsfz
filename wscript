@@ -19,6 +19,7 @@ def build(bld):
 
     bld.stlib(
         target="libsfz/libsfz",
+        features="universal",
         source=[
             "src/all/sfz/args.cpp",
             "src/all/sfz/bytes.cpp",
@@ -48,7 +49,6 @@ def build(bld):
         ],
         includes="./include/mac ./src/mac",
         export_includes="./include/mac",
-        arch="x86_64 i386 ppc",
     )
 
     bld.platform(
@@ -77,18 +77,13 @@ def build(bld):
     def test(name):
         bld.test(
             target="libsfz/%s-test" % name,
+            features="universal",
             source="src/all/sfz/%s.test.cpp" % name,
             cxxflags="-Wall -Werror",
             use=[
                 "libsfz/libsfz",
                 "googlemock/gmock_main",
             ],
-        )
-
-        bld.platform(
-            target="libsfz/%s-test" % name,
-            platform="darwin",
-            arch="x86_64 i386 ppc",
         )
 
     test("algorithm")
