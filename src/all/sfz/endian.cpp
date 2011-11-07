@@ -70,7 +70,9 @@ const uint8_t* NetworkBytes<T>::data() const {
 
 template <typename T>
 T NetworkBytes<T>::value() const {
-    return network_to_host(*reinterpret_cast<const T*>(_data));
+    T swapped;
+    memcpy(&swapped, _data, size());
+    return network_to_host(swapped);
 }
 
 template <typename T>

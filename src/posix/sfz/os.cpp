@@ -151,7 +151,9 @@ void rmtree(const StringSlice& path) {
 TemporaryDirectory::TemporaryDirectory(const StringSlice& prefix) {
     String str(format("/tmp/{0}XXXXXX", prefix));
     CString c_str(str);
-    mkdtemp(c_str.data());
+    if (!mkdtemp(c_str.data())) {
+        throw Exception("mkdtemp() failed");
+    }
     _path.assign(utf8::decode(c_str.data()));
 }
 

@@ -194,7 +194,7 @@ TEST_F(Sha1Test, IncrementalDigest) {
     };
 
     Sha1 sha;
-    SFZ_FOREACH(uint8_t byte, range(' ', '\x80'), {
+    SFZ_FOREACH(uint8_t byte, range<uint8_t>(' ', '\x80'), {
         write(sha, byte);
         EXPECT_THAT(sha.digest(), Eq(expected[byte - ' ']));
     });
