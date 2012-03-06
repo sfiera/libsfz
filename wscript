@@ -4,6 +4,8 @@ APPNAME = "libsfz"
 VERSION = "0.1.0"
 
 def common(ctx):
+    ctx.default_sdk = "10.4"
+    ctx.default_compiler = "gcc"
     ctx.load("compiler_cxx")
     ctx.load("core externals test", "ext/waf-sfiera")
     ctx.external("googlemock")
