@@ -37,21 +37,21 @@ class StringMap {
     bool empty() const { return _map.empty(); }
 
     void clear() { _map.clear(); }
-    void erase(iterator pos) { _map.erase(pos); }
-    void erase(iterator start, iterator end) { _map.erase(start, end); }
+    void erase(iterator pos);
+    void erase(iterator start, iterator end);
     size_type erase(const key_type& key) { return _map.erase(key); }
 
-    iterator find(const key_type& key) { return _map.find(key); }
-    const_iterator find(const key_type& key) const { return _map.find(key); }
+    iterator find(const key_type& key);
+    const_iterator find(const key_type& key) const;
 
-    iterator begin() { return _map.begin(); }
-    const_iterator begin() const { return _map.begin(); }
-    iterator end() { return _map.end(); }
-    const_iterator end() const { return _map.end(); }
-    iterator rbegin() { return _map.rbegin(); }
-    const_iterator rbegin() const { return _map.rbegin(); }
-    iterator rend() { return _map.rend(); }
-    const_iterator rend() const { return _map.rend(); }
+    iterator begin();
+    const_iterator begin() const;
+    iterator end();
+    const_iterator end() const;
+    iterator rbegin();
+    const_iterator rbegin() const;
+    iterator rend();
+    const_iterator rend() const;
 
     void swap(StringMap& from) { _map.swap(from._map); }
 
@@ -128,6 +128,17 @@ bool operator!=(const StringMap<T, Compare>& x, const StringMap<T, Compare>& y) 
 }
 
 template <typename T, typename Compare>
+class StringMap<T, Compare>::const_iterator : public iterator_base<wrapped_const_iterator> {
+  public:
+    const_iterator() { }
+
+  private:
+    friend class StringMap;
+    friend class iterator;
+    const_iterator(wrapped_const_iterator it) : iterator_base<wrapped_const_iterator>(it) { }
+};
+
+template <typename T, typename Compare>
 class StringMap<T, Compare>::iterator : public iterator_base<wrapped_iterator> {
   public:
     iterator() { }
@@ -139,15 +150,55 @@ class StringMap<T, Compare>::iterator : public iterator_base<wrapped_iterator> {
 };
 
 template <typename T, typename Compare>
-class StringMap<T, Compare>::const_iterator : public iterator_base<wrapped_const_iterator> {
-  public:
-    const_iterator() { }
+void StringMap<T, Compare>::erase(iterator pos) { _map.erase(pos); }
+template <typename T, typename Compare>
+void StringMap<T, Compare>::erase(iterator start, iterator end) {
+    _map.erase(start, end);
+}
 
-  private:
-    friend class StringMap;
-    friend class iterator;
-    const_iterator(wrapped_const_iterator it) : iterator_base<wrapped_const_iterator>(it) { }
-};
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::iterator StringMap<T, Compare>::find(
+        const key_type& key) {
+    return _map.find(key);
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::find(
+        const key_type& key) const {
+    return _map.find(key);
+}
+
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::iterator StringMap<T, Compare>::begin() {
+    return _map.begin();
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::begin() const {
+    return _map.begin();
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::iterator StringMap<T, Compare>::end() {
+    return _map.end(); 
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::end() const {
+    return _map.end();
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::iterator StringMap<T, Compare>::rbegin() {
+    return _map.rbegin();
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::rbegin() const {
+    return _map.rbegin();
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::iterator StringMap<T, Compare>::rend() {
+    return _map.rend();
+}
+template <typename T, typename Compare>
+typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::rend() const {
+    return _map.rend();
+}
 
 template <typename T, typename Compare>
 StringMap<T, Compare>::StringMap(const StringMap& other) {
@@ -177,9 +228,9 @@ std::pair<typename StringMap<T, Compare>::iterator, bool> StringMap<T, Compare>:
     if (it == _map.end()) {
         linked_ptr<WrappedValue> inserted(new WrappedValue(key, value));
         it = _map.insert(typename internal_map::value_type(inserted->key_storage, inserted)).first;
-        return make_pair(iterator(it), true);
+        return std::make_pair(iterator(it), true);
     } else {
-        return make_pair(iterator(it), false);
+        return std::make_pair(iterator(it), false);
     }
 }
 
