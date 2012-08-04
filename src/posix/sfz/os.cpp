@@ -12,6 +12,7 @@
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/posix-format.hpp>
+#include <unistd.h>
 
 namespace sfz {
 
