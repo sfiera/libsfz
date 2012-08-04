@@ -10,6 +10,7 @@
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/posix-format.hpp>
+#include <unistd.h>
 
 using sfz::Bytes;
 using sfz::Rune;
