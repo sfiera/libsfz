@@ -12,11 +12,11 @@
 
 namespace sfz {
 
-template <typename T, template <typename T> class traits> class scoped;
-template <typename T, template <typename T> class traits>
+template <typename T, template <typename> class traits> class scoped;
+template <typename T, template <typename> class traits>
 inline void swap(scoped<T, traits>& x, scoped<T, traits>& y);
-template <typename T, template <typename T> class traits> class linked;
-template <typename T, template <typename T> class traits>
+template <typename T, template <typename> class traits> class linked;
+template <typename T, template <typename> class traits>
 void swap(linked<T, traits>& x, linked<T, traits>& y);
 
 template <typename T>
@@ -46,7 +46,7 @@ struct ref_traits {
     static inline void release(pointer t) { if (t) { t->unref(); } }
 };
 
-template <typename T, template <typename T> class traits>
+template <typename T, template <typename> class traits>
 class scoped {
   public:
     typedef typename traits<T>::value_type  value_type;
@@ -131,7 +131,7 @@ class scoped_ref : public scoped<T, ref_traits> {
     reference operator*() const { return *this->get(); }
 };
 
-template <typename T, template <typename T> class traits>
+template <typename T, template <typename> class traits>
 inline void swap(scoped<T, traits>& x, scoped<T, traits>& y) {
     using std::swap;
     swap(x._ptr, y._ptr);
@@ -175,7 +175,7 @@ class linked_group {
     DISALLOW_COPY_AND_ASSIGN(linked_group);
 };
 
-template <typename T, template <typename T> class traits>
+template <typename T, template <typename> class traits>
 class linked {
   public:
     typedef typename traits<T>::value_type  value_type;
@@ -287,7 +287,7 @@ linked_ptr<T> make_linked_ptr(T* ptr) {
     return linked_ptr<T>(ptr);
 }
 
-template <typename T, template <typename T> class traits>
+template <typename T, template <typename> class traits>
 void swap(linked<T, traits>& x, linked<T, traits>& y) {
     using std::swap;
     x._group.check_unique();

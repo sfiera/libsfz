@@ -28,10 +28,6 @@ namespace {
 
 typedef Test Sha1Test;
 
-BytesSlice string_bytes(const char* string) {
-    return BytesSlice(reinterpret_cast<const uint8_t*>(string), strlen(string));
-}
-
 const Sha1::Digest kEmptyDigest = {{0xda39a3ee, 0x5e6b4b0d, 0x3255bfef, 0x95601890, 0xafd80709}};
 
 // The empty string should have the given digest.

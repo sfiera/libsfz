@@ -13,7 +13,7 @@
 namespace sfz {
 
 struct EscapedString;
-template <size_t size> class Format;
+template <size_t size> struct Format;
 struct FormattedInt;
 class Integer;
 struct QuotedString;
