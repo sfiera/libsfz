@@ -182,9 +182,9 @@ TEST_F(PrintItemTest, Uint16Item) {
 
 TEST_F(PrintItemTest, Int32Item) {
     const TestData<int32_t> data[] = {
-        { 0x80000000ul, "int32_t: -2147483648" },
-        { 0l,           "int32_t: 0" },
-        { 0x7fffffffl,  "int32_t: 2147483647" },
+        { std::numeric_limits<int32_t>::min(),  "int32_t: -2147483648" },
+        { 0l,                                   "int32_t: 0" },
+        { 0x7fffffffl,                          "int32_t: 2147483647" },
     };
     Run("int32_t: ", data);
 }
@@ -199,9 +199,9 @@ TEST_F(PrintItemTest, Uint32Item) {
 
 TEST_F(PrintItemTest, Int64Item) {
     const TestData<int64_t> data[] = {
-        { 0x8000000000000000ull, "int64_t: -9223372036854775808" },
-        { 0ll,                   "int64_t: 0" },
-        { 0x7fffffffffffffffll,  "int64_t: 9223372036854775807" },
+        { std::numeric_limits<int64_t>::min(),  "int64_t: -9223372036854775808" },
+        { 0ll,                                  "int64_t: 0" },
+        { 0x7fffffffffffffffll,                 "int64_t: 9223372036854775807" },
     };
     Run("int64_t: ", data);
 }

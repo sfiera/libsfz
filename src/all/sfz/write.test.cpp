@@ -54,9 +54,9 @@ TEST_F(WriteItemTest, WriteBool) {
     write<bool>(bytes, true);
     write<bool>(bytes, false);
     write<bool>(bytes, 23);
-    bool values[] = { true, false, 23 };
-    write(bytes, values, 3);
-    EXPECT_THAT(bytes, Eq(char_bytes("\001\000\001\001\000\001")));
+    bool values[] = { true, false };
+    write(bytes, values, 2);
+    EXPECT_THAT(bytes, Eq(char_bytes("\001\000\001\001\000")));
 }
 
 TEST_F(WriteItemTest, WriteChar) {
