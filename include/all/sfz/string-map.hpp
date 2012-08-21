@@ -177,9 +177,9 @@ std::pair<typename StringMap<T, Compare>::iterator, bool> StringMap<T, Compare>:
     if (it == _map.end()) {
         linked_ptr<WrappedValue> inserted(new WrappedValue(key, value));
         it = _map.insert(typename internal_map::value_type(inserted->key_storage, inserted)).first;
-        return make_pair(iterator(it), true);
+        return std::make_pair(iterator(it), true);
     } else {
-        return make_pair(iterator(it), false);
+        return std::make_pair(iterator(it), false);
     }
 }
 

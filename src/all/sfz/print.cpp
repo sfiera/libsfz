@@ -112,7 +112,6 @@ void PrintItem::Dispatch<double>::print_to(const void* target, PrintTarget out) 
     }
 }
 
-template <>
 void PrintItem::Dispatch<const char*>::print_to(const void* target, PrintTarget out) {
     out.push(*reinterpret_cast<const char* const*>(target));
 }
@@ -122,11 +121,18 @@ void PrintItem::Dispatch<const char[]>::print_to(const void* target, PrintTarget
     out.push(reinterpret_cast<const char*>(target));
 }
 
-template <>
 void PrintItem::Dispatch<const void*>::print_to(const void* target, PrintTarget out) {
     size_t addr = reinterpret_cast<uint64_t>(*reinterpret_cast<const void* const*>(target));
     size_t size = sizeof(const void*) * 2;
     sfz::print_to(out, hex(addr, size));
 }
+
+const PrintItem::DispatchTable PrintItem::Dispatch<const char*>::table = {
+    print_to,
+};
+
+const PrintItem::DispatchTable PrintItem::Dispatch<const void*>::table = {
+    print_to,
+};
 
 }  // namespace sfz

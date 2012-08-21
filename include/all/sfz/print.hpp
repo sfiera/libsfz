@@ -124,6 +124,21 @@ struct PrintItem::Dispatch {
     static const DispatchTable table;
 };
 
+template <>
+struct PrintItem::Dispatch<const char*> {
+    static void print_to(const void* target, PrintTarget out);
+    static const DispatchTable table;
+};
+
+template <>
+struct PrintItem::Dispatch<const void*> {
+    static void print_to(const void* target, PrintTarget out);
+    static const DispatchTable table;
+};
+
+template <typename T>
+struct PrintItem::Dispatch<T*> : public Dispatch<const void*> { };
+
 #define SFZ_PRINT_ITEM_SPECIALIZE(TYPE) \
     template <> void PrintItem::Dispatch<TYPE>::print_to(const void* target, PrintTarget out);
 SFZ_PRINT_ITEM_SPECIALIZE(void);
@@ -141,13 +156,8 @@ SFZ_PRINT_ITEM_SPECIALIZE(unsigned long);
 SFZ_PRINT_ITEM_SPECIALIZE(unsigned long long);
 SFZ_PRINT_ITEM_SPECIALIZE(float);
 SFZ_PRINT_ITEM_SPECIALIZE(double);
-SFZ_PRINT_ITEM_SPECIALIZE(const char*);
 SFZ_PRINT_ITEM_SPECIALIZE(const char[]);
-SFZ_PRINT_ITEM_SPECIALIZE(const void*);
 #undef SFZ_PRINT_ITEM_SPECIALIZE
-
-template <typename T>
-struct PrintItem::Dispatch<T*> : public Dispatch<const void*> { };
 
 template <int size>
 struct PrintItem::Dispatch<const char[size]> : public Dispatch<const char[]> { };

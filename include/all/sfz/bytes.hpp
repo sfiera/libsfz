@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <cstddef>
 #include <iterator>
 #include <sfz/memory.hpp>
 #include <sfz/write.hpp>
