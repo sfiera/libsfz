@@ -82,6 +82,7 @@ def build(bld):
             features="universal",
             source="src/all/sfz/%s.test.cpp" % name,
             cxxflags="-Wall -Werror",
+            defines="GTEST_USE_OWN_TR1_TUPLE",
             use=[
                 "libsfz/libsfz",
                 "googlemock/gmock_main",
