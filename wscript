@@ -4,8 +4,9 @@ APPNAME = "libsfz"
 VERSION = "0.1.0"
 
 def common(ctx):
-    ctx.default_sdk = "10.6"
+    ctx.default_sdk = "10.7"
     ctx.default_compiler = "clang"
+    ctx.cxx_std = "c++11"
     ctx.load("compiler_cxx")
     ctx.load("core externals test", "ext/waf-sfiera")
     ctx.external("gmock-waf")
@@ -82,7 +83,7 @@ def build(bld):
             features="universal",
             source="src/all/sfz/%s.test.cpp" % name,
             cxxflags="-Wall -Werror",
-            defines="GTEST_USE_OWN_TR1_TUPLE",
+            defines="GTEST_USE_OWN_TR1_TUPLE=1",
             use=[
                 "libsfz/libsfz",
                 "gmock/gmock-main",
