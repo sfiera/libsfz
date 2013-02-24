@@ -8,7 +8,7 @@ def common(ctx):
     ctx.default_compiler = "gcc"
     ctx.load("compiler_cxx")
     ctx.load("core externals test", "ext/waf-sfiera")
-    ctx.external("googlemock")
+    ctx.external("gmock-waf")
 
 def options(opt):
     common(opt)
@@ -85,7 +85,7 @@ def build(bld):
             defines="GTEST_USE_OWN_TR1_TUPLE",
             use=[
                 "libsfz/libsfz",
-                "googlemock/gmock_main",
+                "gmock/gmock-main",
             ],
         )
 
