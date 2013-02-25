@@ -37,15 +37,6 @@ struct array_traits {
     static inline void release(pointer t) { delete[] t; }
 };
 
-template <typename T>
-struct ref_traits {
-    typedef T   value_type;
-    typedef T*  pointer;
-    typedef T&  reference;
-    static inline void acquire(pointer t) { if (t) { t->ref(); } }
-    static inline void release(pointer t) { if (t) { t->unref(); } }
-};
-
 template <typename T, template <typename> class traits>
 class scoped {
   public:
@@ -119,18 +110,6 @@ class scoped_array : public scoped<T, array_traits> {
     DISALLOW_COPY_AND_ASSIGN(scoped_array);
 };
 
-template <typename T>
-class scoped_ref : public scoped<T, ref_traits> {
-  public:
-    typedef scoped<T, ref_traits>               super;
-    typedef typename ref_traits<T>::pointer     pointer;
-    typedef typename ref_traits<T>::reference   reference;
-
-    explicit scoped_ref(pointer ptr = NULL) : super(ptr) { }
-    pointer operator->() const { return this->get(); }
-    reference operator*() const { return *this->get(); }
-};
-
 template <typename T, template <typename> class traits>
 inline void swap(scoped<T, traits>& x, scoped<T, traits>& y) {
     using std::swap;
@@ -148,13 +127,6 @@ template <typename T>
 inline void swap(scoped_array<T>& x, scoped_array<T>& y) {
     typename scoped_array<T>::super& super_x = x;
     typename scoped_array<T>::super& super_y = y;
-    swap(super_x, super_y);
-}
-
-template <typename T>
-inline void swap(scoped_ref<T>& x, scoped_ref<T>& y) {
-    typename scoped_ref<T>::super& super_x = x;
-    typename scoped_ref<T>::super& super_y = y;
     swap(super_x, super_y);
 }
 

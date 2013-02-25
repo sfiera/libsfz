@@ -23,7 +23,6 @@
 #include <sfz/os.hpp>
 #include <sfz/print.hpp>
 #include <sfz/read.hpp>
-#include <sfz/ref-count.hpp>
 #include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>
 #include <sfz/string.hpp>

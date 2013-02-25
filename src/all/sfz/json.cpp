@@ -9,7 +9,6 @@
 #include <sfz/encoding.hpp>
 #include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
-#include <sfz/ref-count.hpp>
 #include <sfz/string.hpp>
 #include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>
@@ -43,7 +42,7 @@ void json_escape(PrintTarget out, const StringSlice& value) {
 
 }  // namespace
 
-class Json::Value : public ReferenceCounted {
+class Json::Value {
   public:
     virtual void accept(const JsonVisitor& visitor) const = 0;
 };
