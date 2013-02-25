@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <cstddef>
 #include <iterator>
-#include <sfz/memory.hpp>
+#include <memory>
 #include <sfz/print.hpp>
 
 namespace sfz {

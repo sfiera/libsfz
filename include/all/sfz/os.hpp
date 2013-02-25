@@ -8,6 +8,7 @@
 
 #include <sys/stat.h>
 #include <sfz/string.hpp>
+#include <sfz/macros.hpp>
 
 namespace sfz {
 

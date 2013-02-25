@@ -9,7 +9,6 @@
 #include <map>
 #include <memory>
 #include <vector>
-#include <sfz/memory.hpp>
 #include <sfz/string-map.hpp>
 
 namespace sfz {

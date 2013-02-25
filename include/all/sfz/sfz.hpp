@@ -18,7 +18,6 @@
 #include <sfz/io.hpp>
 #include <sfz/json.hpp>
 #include <sfz/macros.hpp>
-#include <sfz/memory.hpp>
 #include <sfz/optional.hpp>
 #include <sfz/os.hpp>
 #include <sfz/print.hpp>

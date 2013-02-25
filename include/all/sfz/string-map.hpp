@@ -10,7 +10,6 @@
 #include <utility>
 #include <stdlib.h>
 #include <sfz/foreach.hpp>
-#include <sfz/memory.hpp>
 #include <sfz/string.hpp>
 
 namespace sfz {
