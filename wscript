@@ -32,7 +32,6 @@ def build(bld):
             "src/all/sfz/exception.cpp",
             "src/all/sfz/format.cpp",
             "src/all/sfz/json.cpp",
-            "src/all/sfz/memory.cpp",
             "src/all/sfz/print.cpp",
             "src/all/sfz/read.cpp",
             "src/all/sfz/string-utils.cpp",
@@ -79,7 +78,6 @@ def build(bld):
     test("format")
     test("io")
     test("json")
-    test("memory")
     test("optional")
     test("os")
     test("print")
