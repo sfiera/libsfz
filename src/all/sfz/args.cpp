@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 #include <sfz/io.hpp>
+#include <sfz/range.hpp>
 #include <sfz/string-utils.hpp>
 
 using std::map;
@@ -367,16 +367,16 @@ bool Parser::parse_args(const vector<StringSlice>& args, PrintTarget error) cons
 bool Parser::parse_args(int argc, const char* const* argv, PrintTarget error) const {
     String storage;
     vector<size_t> cuts(argc, 0);
-    SFZ_FOREACH(size_t i, range(argc), {
+    for (size_t i: range(argc)) {
         storage.append(utf8::decode(argv[i]));
         cuts[i] = storage.size();
-    });
+    }
     size_t begin = 0;
     vector<StringSlice> args(argc, "");
-    SFZ_FOREACH(size_t i, range(argc), {
+    for (size_t i: range(argc)) {
         args[i] = storage.slice(begin, cuts[i] - begin);
         begin = cuts[i];
-    });
+    }
     return parse_args(args, error);
 }
 
@@ -401,7 +401,7 @@ void Parser::print_usage_to(PrintTarget out) const {
     print(out, _name);
 
     bool has_argless_options = false;
-    SFZ_FOREACH(const ShortArg& arg, _short_options_by_name, {
+    for (const ShortArg& arg: _short_options_by_name) {
         if (!arg.second->_action.takes_value()) {
             if (!has_argless_options) {
                 print(out, " [-");
@@ -409,39 +409,41 @@ void Parser::print_usage_to(PrintTarget out) const {
             }
             out.push(1, arg.first);
         }
-    });
+    }
     if (has_argless_options) {
         print(out, "]");
     }
 
-    SFZ_FOREACH(const ShortArg& arg, _short_options_by_name, {
+    for (const ShortArg& arg: _short_options_by_name) {
         if (arg.second->_action.takes_value()) {
             print(out, format(" [-{0} {1}]", rune(arg.first), arg.second->_metavar));
         }
-    });
+    }
 
-    SFZ_FOREACH(const LongArg& arg, _long_options_by_name, {
+    for (const LongArg& arg: _long_options_by_name) {
         if (arg.second->_action.takes_value()) {
             print(out, format(" [{0}={1}]", arg.first, arg.second->_metavar));
         } else {
             print(out, format(" [{0}]", arg.first));
         }
-    });
+    }
 
     int nesting = 0;
-    SFZ_FOREACH(const shared_ptr<Argument>& arg, _argument_specs, {
-        SFZ_FOREACH(int i, range(arg->_min_args), {
+    for (const shared_ptr<Argument>& arg: _argument_specs) {
+        for (int i: range(arg->_min_args)) {
+            static_cast<void>(i);
             print(out, format(" {0}", arg->_metavar));
-        });
+        }
         if (arg->_max_args == std::numeric_limits<int>::max()) {
             print(out, format(" [{0}...]", arg->_metavar));
         } else {
-            SFZ_FOREACH(int i, range(arg->_max_args - arg->_min_args), {
+            for (int i: range(arg->_max_args - arg->_min_args)) {
+                static_cast<void>(i);
                 ++nesting;
                 print(out, format(" [{0}", arg->_metavar));
-            });
+            }
         }
-    });
+    }
     out.push(nesting, ']');
 
     if (has_subparsers()) {
@@ -456,7 +458,7 @@ void Parser::print_help_to(PrintTarget out) const {
 
     if (!_argument_specs.empty()) {
         print(body, "\narguments:\n");
-        SFZ_FOREACH(const shared_ptr<Argument>& arg, _argument_specs, {
+        for (const shared_ptr<Argument>& arg: _argument_specs) {
             print(body, format("  {0}", arg->_metavar));
             if (!arg->_help.empty()) {
                 int padding = 20 - arg->_metavar.size();
@@ -469,12 +471,12 @@ void Parser::print_help_to(PrintTarget out) const {
                 print(body, arg->_help);
             }
             print(body, "\n");
-        });
+        }
     }
 
     if (!_option_specs.empty()) {
         print(body, "\noptions:\n");
-        SFZ_FOREACH(const shared_ptr<Argument>& arg, _option_specs, {
+        for (const shared_ptr<Argument>& arg: _option_specs) {
             int padding = 22;
             switch (arg->_type) {
               case Argument::SHORT_OPTION:
@@ -524,12 +526,12 @@ void Parser::print_help_to(PrintTarget out) const {
                 print(body, arg->_help);
             }
             print(body, "\n");
-        });
+        }
     }
 
     if (has_subparsers()) {
         print(body, "\ncommands:\n");
-        SFZ_FOREACH(const shared_ptr<Parser>& arg, _subparsers, {
+        for (const shared_ptr<Parser>& arg: _subparsers) {
             String usage(arg->usage());
             print(body, format("  {0}", usage));
             if (!arg->_description.empty()) {
@@ -543,7 +545,7 @@ void Parser::print_help_to(PrintTarget out) const {
                 print(body, arg->_description);
             }
             print(body, "\n");
-        });
+        }
     }
 }
 

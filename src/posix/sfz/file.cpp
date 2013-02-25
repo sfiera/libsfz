@@ -12,9 +12,9 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sfz/exception.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 #include <sfz/posix-format.hpp>
+#include <sfz/range.hpp>
 #include <sfz/string-utils.hpp>
 
 namespace sfz {
@@ -51,9 +51,10 @@ void ScopedFd::push(const BytesSlice& bytes) {
 }
 
 void ScopedFd::push(size_t num, uint8_t byte) {
-    SFZ_FOREACH(int i, range(num), {
+    for (int i: range(num)) {
+        static_cast<void>(i);
         push(BytesSlice(&byte, 1));
-    });
+    }
 }
 
 MappedFile::MappedFile(const StringSlice& path)

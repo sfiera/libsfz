@@ -10,7 +10,6 @@
 #include <gtest/gtest.h>
 #include <sfz/bytes.hpp>
 #include <sfz/exception.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 
 using std::numeric_limits;
@@ -83,12 +82,12 @@ class PrintItemTest : public Test {
 
     template <typename T, int size>
     void Run(const StringSlice& prefix, const T (&data)[size]) {
-        SFZ_FOREACH(const T& test, data, {
+        for (const T& test: data) {
             typename T::TestType value(test.value);
             String s(prefix);
             print(s, value);
             EXPECT_THAT(s, Eq(test.expected));
-        });
+        }
     }
 
 };

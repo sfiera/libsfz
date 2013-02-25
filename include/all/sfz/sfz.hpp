@@ -13,7 +13,6 @@
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/file.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 #include <sfz/io.hpp>
 #include <sfz/json.hpp>
@@ -21,6 +20,7 @@
 #include <sfz/optional.hpp>
 #include <sfz/os.hpp>
 #include <sfz/print.hpp>
+#include <sfz/range.hpp>
 #include <sfz/read.hpp>
 #include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>

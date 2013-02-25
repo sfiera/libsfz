@@ -9,7 +9,7 @@
 #include <map>
 #include <utility>
 #include <stdlib.h>
-#include <sfz/foreach.hpp>
+#include <sfz/macros.hpp>
 #include <sfz/string.hpp>
 
 namespace sfz {
@@ -201,9 +201,9 @@ typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::rend() con
 
 template <typename T, typename Compare>
 StringMap<T, Compare>::StringMap(const StringMap& other) {
-    SFZ_FOREACH(const value_type& item, other, {
+    for (const value_type& item: other) {
         insert(item);
-    });
+    }
 }
 
 template <typename T, typename Compare>

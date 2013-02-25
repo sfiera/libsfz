@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/string.hpp>
 
 using testing::Eq;
@@ -74,7 +73,7 @@ class StringUtilitiesTest : public Test {
   protected:
     template <typename T, int size>
     void RunInt(const TestData<T> (&inputs)[size]) {
-        SFZ_FOREACH(const TestData<T>& input, inputs, {
+        for (const TestData<T>& input: inputs) {
             T value;
             StringToIntResult result = string_to_int<T>(input.string, value);
             EXPECT_THAT(result, Eq(input.failure == NONE))
@@ -90,12 +89,12 @@ class StringUtilitiesTest : public Test {
                 EXPECT_THAT(result, PrintsTo(input.expected.message))
                         << "input: " << input.string;
             }
-        });
+        }
     }
 
     template <typename T, int size>
     void RunFloat(const TestData<T> (&inputs)[size]) {
-        SFZ_FOREACH(const TestData<T>& input, inputs, {
+        for (const TestData<T>& input: inputs) {
             T actual;
             if (input.failure == StringToIntResult::NONE) {
                 EXPECT_THAT(string_to_float(input.string, actual), Eq(true))
@@ -105,12 +104,12 @@ class StringUtilitiesTest : public Test {
                 EXPECT_THAT(string_to_float(input.string, actual), Eq(false))
                     << "input: " << input.string << "; output: " << actual;
             }
-        });
+        }
     }
 
     template <typename T, int size>
     void RunDouble(const TestData<T> (&inputs)[size]) {
-        SFZ_FOREACH(const TestData<T>& input, inputs, {
+        for (const TestData<T>& input: inputs) {
             T actual;
             if (input.failure == StringToIntResult::NONE) {
                 EXPECT_THAT(string_to_float(input.string, actual), Eq(true))
@@ -120,31 +119,31 @@ class StringUtilitiesTest : public Test {
                 EXPECT_THAT(string_to_float(input.string, actual), Eq(false))
                     << "input: " << input.string << "; output: " << actual;
             }
-        });
+        }
     }
 
     template <typename T, int size>
     void RunUpper(const TestData<T> (&inputs)[size]) {
-        SFZ_FOREACH(const TestData<T>& input, inputs, {
+        for (const TestData<T>& input: inputs) {
             String actual(utf8::decode(input.string));
             String expected(utf8::decode(input.expected.value));
             upper(actual);
             CString actual_c_str(actual);
             EXPECT_THAT(actual, Eq<StringSlice>(expected))
                 << "input: " << input.string << "; actual: " << actual_c_str.data();
-        });
+        }
     }
 
     template <typename T, int size>
     void RunLower(const TestData<T> (&inputs)[size]) {
-        SFZ_FOREACH(const TestData<T>& input, inputs, {
+        for (const TestData<T>& input: inputs) {
             String actual(utf8::decode(input.string));
             String expected(utf8::decode(input.expected.value));
             lower(actual);
             CString actual_c_str(actual);
             EXPECT_THAT(actual, Eq<StringSlice>(expected))
                 << "input: " << input.string << "; actual: " << actual_c_str.data();
-        });
+        }
     }
 };
 

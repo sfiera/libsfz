@@ -74,7 +74,6 @@ def build(bld):
     test("bytes")
     test("digest")
     test("encoding")
-    test("foreach")
     test("format")
     test("io")
     test("json")

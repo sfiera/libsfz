@@ -12,6 +12,7 @@
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/optional.hpp>
+#include <sfz/range.hpp>
 #include <sfz/string.hpp>
 
 using sfz::args::append;
@@ -341,9 +342,10 @@ struct Greeter {
     StringSlice make_greeting() {
         _result.clear();
         StringSlice suffix = _exclamation_point ? "!" : ".";
-        SFZ_FOREACH(int i, range(_times), {
+        for (int i: range(_times)) {
+            static_cast<void>(i);
             _result.append(format("{0}, {1}{2}\n", _greeting, _name, suffix));
-        });
+        }
         return _result;
     }
 
