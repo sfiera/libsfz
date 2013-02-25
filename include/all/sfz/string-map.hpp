@@ -9,8 +9,7 @@
 #include <map>
 #include <utility>
 #include <stdlib.h>
-#include <sfz/foreach.hpp>
-#include <sfz/memory.hpp>
+#include <sfz/macros.hpp>
 #include <sfz/string.hpp>
 
 namespace sfz {
@@ -57,7 +56,7 @@ class StringMap {
 
   private:
     struct WrappedValue;
-    typedef std::map<StringSlice, linked_ptr<WrappedValue>, Compare> internal_map;
+    typedef std::map<StringSlice, std::shared_ptr<WrappedValue>, Compare> internal_map;
     typedef typename internal_map::iterator wrapped_iterator;
     typedef typename internal_map::const_iterator wrapped_const_iterator;
 
@@ -202,9 +201,9 @@ typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::rend() con
 
 template <typename T, typename Compare>
 StringMap<T, Compare>::StringMap(const StringMap& other) {
-    SFZ_FOREACH(const value_type& item, other, {
+    for (const value_type& item: other) {
         insert(item);
-    });
+    }
 }
 
 template <typename T, typename Compare>
@@ -212,7 +211,7 @@ typename StringMap<T, Compare>::mapped_type& StringMap<T, Compare>::operator[](
         const key_type& key) {
     wrapped_iterator it = _map.find(key);
     if (it == _map.end()) {
-        linked_ptr<WrappedValue> inserted(new WrappedValue(key));
+        std::shared_ptr<WrappedValue> inserted(new WrappedValue(key));
         _map.insert(typename internal_map::value_type(inserted->key_storage, inserted));
         return inserted->pair.second;
     }
@@ -226,7 +225,7 @@ std::pair<typename StringMap<T, Compare>::iterator, bool> StringMap<T, Compare>:
     const mapped_type& value = pair.second;
     wrapped_iterator it = _map.find(key);
     if (it == _map.end()) {
-        linked_ptr<WrappedValue> inserted(new WrappedValue(key, value));
+        std::shared_ptr<WrappedValue> inserted(new WrappedValue(key, value));
         it = _map.insert(typename internal_map::value_type(inserted->key_storage, inserted)).first;
         return std::make_pair(iterator(it), true);
     } else {

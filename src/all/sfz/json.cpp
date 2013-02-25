@@ -7,9 +7,7 @@
 
 #include <math.h>
 #include <sfz/encoding.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
-#include <sfz/ref-count.hpp>
 #include <sfz/string.hpp>
 #include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>
@@ -29,7 +27,7 @@ const char kEscaped[' '][7] = {
 };
 
 void json_escape(PrintTarget out, const StringSlice& value) {
-    SFZ_FOREACH(Rune rune, value, {
+    for (Rune rune: value) {
         if (rune < ' ') {
             out.push(kEscaped[rune]);
         } else if (rune == '\"' || rune == '\\' || rune == '/') {
@@ -38,12 +36,12 @@ void json_escape(PrintTarget out, const StringSlice& value) {
         } else {
             out.push(1, rune);
         }
-    });
+    }
 }
 
 }  // namespace
 
-class Json::Value : public ReferenceCounted {
+class Json::Value {
   public:
     virtual void accept(const JsonVisitor& visitor) const = 0;
 };
@@ -615,7 +613,7 @@ void SerializerVisitor::visit_object(const StringMap<Json>& value) const {
     _out.push(1, '{');
     if (value.size() > 0) {
         bool first = true;
-        SFZ_FOREACH(const StringMap<Json>::value_type& item, value, {
+        for (const StringMap<Json>::value_type& item: value) {
             if (first) {
                 first = false;
             } else {
@@ -626,7 +624,7 @@ void SerializerVisitor::visit_object(const StringMap<Json>& value) const {
             _out.push(1, '"');
             _out.push(1, ':');
             item.second.accept(*this);
-        });
+        }
     }
     _out.push(1, '}');
 }
@@ -635,14 +633,14 @@ void SerializerVisitor::visit_array(const vector<Json>& value) const {
     _out.push(1, '[');
     if (value.size() > 0) {
         bool first = true;
-        SFZ_FOREACH(const Json& item, value, {
+        for (const Json& item: value) {
             if (first) {
                 first = false;
             } else {
                 _out.push(1, ',');
             }
             item.accept(*this);
-        });
+        }
     }
     _out.push(1, ']');
 }
@@ -674,7 +672,7 @@ void PrettyPrinterVisitor::visit_object(const StringMap<Json>& value) const {
     if (value.size() > 0) {
         _depth += 2;
         bool first = true;
-        SFZ_FOREACH(const StringMap<Json>::value_type& item, value, {
+        for (const StringMap<Json>::value_type& item: value) {
             if (first) {
                 first = false;
             } else {
@@ -686,7 +684,7 @@ void PrettyPrinterVisitor::visit_object(const StringMap<Json>& value) const {
             json_escape(_out, item.first);
             _out.push("\": ");
             item.second.accept(*this);
-        });
+        }
         _depth -= 2;
         _out.push(1, '\n');
         _out.push(_depth, ' ');
@@ -699,7 +697,7 @@ void PrettyPrinterVisitor::visit_array(const vector<Json>& value) const {
     if (value.size() > 0) {
         _depth += 2;
         bool first = true;
-        SFZ_FOREACH(const Json& item, value, {
+        for (const Json& item: value) {
             if (first) {
                 first = false;
             } else {
@@ -708,7 +706,7 @@ void PrettyPrinterVisitor::visit_array(const vector<Json>& value) const {
             _out.push(1, '\n');
             _out.push(_depth, ' ');
             item.accept(*this);
-        });
+        }
         _depth -= 2;
         _out.push(1, '\n');
         _out.push(_depth, ' ');

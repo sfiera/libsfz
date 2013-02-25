@@ -7,8 +7,8 @@
 #define RGOS_JSON_HPP_
 
 #include <map>
+#include <memory>
 #include <vector>
-#include <sfz/memory.hpp>
 #include <sfz/string-map.hpp>
 
 namespace sfz {
@@ -44,7 +44,7 @@ class Json {
 
     Json(Value* value);
 
-    scoped_ref<const Value> _value;
+    std::shared_ptr<const Value> _value;
 
     // ALLOW_COPY_AND_ASSIGN
 };

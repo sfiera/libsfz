@@ -41,7 +41,7 @@ class Action {
         }
     };
 
-    Action(const linked_ptr<Impl>& impl);
+    Action(const std::shared_ptr<Impl>& impl);
     Action(const Action& other);
     Action& operator=(const Action& other);
     ~Action();
@@ -51,7 +51,7 @@ class Action {
     bool process(StringSlice value, PrintTarget error) const;
 
   private:
-    linked_ptr<Impl> _impl;
+    std::shared_ptr<Impl> _impl;
 };
 
 class Parser {
@@ -99,15 +99,15 @@ class Parser {
     const String _description;
     const Action _action;
 
-    std::vector<linked_ptr<Parser> > _subparsers;
-    StringMap<linked_ptr<Parser> > _subparsers_by_name;
+    std::vector<std::shared_ptr<Parser> > _subparsers;
+    StringMap<std::shared_ptr<Parser> > _subparsers_by_name;
 
-    std::vector<linked_ptr<Argument> > _argument_specs;
-    linked_ptr<Argument> _subparser_argument;
+    std::vector<std::shared_ptr<Argument> > _argument_specs;
+    std::shared_ptr<Argument> _subparser_argument;
 
-    std::vector<linked_ptr<Argument> > _option_specs;
-    std::map<Rune, linked_ptr<Argument> > _short_options_by_name;
-    StringMap<linked_ptr<Argument> > _long_options_by_name;
+    std::vector<std::shared_ptr<Argument> > _option_specs;
+    std::map<Rune, std::shared_ptr<Argument> > _short_options_by_name;
+    StringMap<std::shared_ptr<Argument> > _long_options_by_name;
 
     DISALLOW_COPY_AND_ASSIGN(Parser);
 };
@@ -179,7 +179,7 @@ struct StoreAction : public Action::Impl {
 
 template <typename To>
 Action store(To& to) {
-    return linked_ptr<Action::Impl>(new StoreAction<To>(to));
+    return std::shared_ptr<Action::Impl>(new StoreAction<To>(to));
 }
 
 template <typename To>
@@ -194,7 +194,7 @@ struct StoreConstAction : public Action::Impl {
 
 template <typename To, typename Constant>
 Action store_const(To& to, const Constant& constant) {
-    return linked_ptr<Action::Impl>(new StoreConstAction<To>(to, constant));
+    return std::shared_ptr<Action::Impl>(new StoreConstAction<To>(to, constant));
 }
 
 template <typename ToElement>
@@ -214,7 +214,7 @@ struct AppendAction : public Action::Impl {
 
 template <typename ToElement>
 Action append(std::vector<ToElement>& to) {
-    return linked_ptr<Action::Impl>(new AppendAction<ToElement>(to));
+    return std::shared_ptr<Action::Impl>(new AppendAction<ToElement>(to));
 }
 
 template <typename To>
@@ -234,13 +234,13 @@ struct IncrementAction : public Action::Impl {
 
 template <typename To>
 Action increment(To& to) {
-    return linked_ptr<Action::Impl>(new IncrementAction<To>(to));
+    return std::shared_ptr<Action::Impl>(new IncrementAction<To>(to));
 }
 
 Action help(const Parser& parser, int exit_code);
 Action version(StringSlice string);
 
-inline Action noop() { return linked_ptr<Action::Impl>(); }
+inline Action noop() { return std::shared_ptr<Action::Impl>(); }
 
 struct ParserUsage { const Parser& parser; };
 struct ParserHelp { const Parser& parser; };

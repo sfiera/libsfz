@@ -94,12 +94,17 @@ TEST_F(BytesTest, HelloWorldConst) {
     EXPECT_THROW(bytes.slice(14, 0), Exception);
 }
 
-// Test all five non-default overloads of Bytes's constructor.
+// Test all six non-default overloads of Bytes's constructor.
 TEST_F(BytesTest, AllNonEmptyConstructors) {
     const char* expected = "Hello, world!";
     {
         const Bytes s(expected);
         const Bytes bytes(s);
+        EXPECT_THAT(bytes, Eq(expected));
+    }
+    {
+        const Bytes s(expected);
+        const Bytes bytes(std::move(s));
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
@@ -122,13 +127,19 @@ TEST_F(BytesTest, AllNonEmptyConstructors) {
     }
 }
 
-// Test all five overloads of Bytes::assign().
+// Test all six overloads of Bytes::assign().
 TEST_F(BytesTest, AllAssignOverloads) {
     const char* expected = "Hello, world!";
     {
         Bytes s(expected);
         Bytes bytes("Hello, ");
         bytes.assign(s);
+        EXPECT_THAT(bytes, Eq(expected));
+    }
+    {
+        Bytes s(expected);
+        Bytes bytes("Hello, ");
+        bytes.assign(std::move(s));
         EXPECT_THAT(bytes, Eq(expected));
     }
     {

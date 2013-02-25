@@ -6,27 +6,6 @@
 #ifndef SFZ_FOREACH_HPP_
 #define SFZ_FOREACH_HPP_
 
-#include <sfz/macros.hpp>
-
-#   if (_MSC_VER >= 1600) && (_MSC_VER < 1700)
-#       define SFZ_DECLTYPE(x) decltype(x)
-#   elif __GNUC__ == 4
-#       define SFZ_DECLTYPE(x) __typeof__(x)
-#   else
-#       define SFZ_DECLTYPE(x) int
-#       error "Don't know how to get decltype-like functionality"
-#   endif
-
-#define SFZ_FOREACH(DECLARATION, CONTAINER, BLOCK) \
-    do { \
-        const SFZ_DECLTYPE((CONTAINER))& __container = (CONTAINER); \
-        for (SFZ_DECLTYPE(::sfz::begin(__container)) __begin = ::sfz::begin(__container), \
-                __end = ::sfz::end(__container); __begin != __end; ++__begin) { \
-            DECLARATION __attribute__((unused)) = *__begin; \
-            { BLOCK } \
-        } \
-    } while (false)
-
 namespace sfz {
 
 template <typename T> class Range;
@@ -38,26 +17,6 @@ template <typename T>
 Range<T> range(T end);
 
 // Implementation details follow.
-
-template <typename T>
-typename T::const_iterator begin(const T& container) {
-    return container.begin();
-}
-
-template <typename T, int size>
-const T* begin(const T (&array)[size]) {
-    return array;
-}
-
-template <typename T>
-typename T::const_iterator end(const T& container) {
-    return container.end();
-}
-
-template <typename T, int size>
-const T* end(const T (&array)[size]) {
-    return array + size;
-}
 
 template <typename T>
 class RangeIterator {

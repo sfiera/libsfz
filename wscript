@@ -32,7 +32,6 @@ def build(bld):
             "src/all/sfz/exception.cpp",
             "src/all/sfz/format.cpp",
             "src/all/sfz/json.cpp",
-            "src/all/sfz/memory.cpp",
             "src/all/sfz/print.cpp",
             "src/all/sfz/read.cpp",
             "src/all/sfz/string-utils.cpp",
@@ -42,26 +41,6 @@ def build(bld):
         cxxflags="-Wall -Werror",
         includes="./include/all ./src/all",
         export_includes="./include/all",
-    )
-
-    bld.platform(
-        target="libsfz/libsfz",
-        platform="darwin",
-        source=[
-            "src/mac/sfz/ref-count.cpp",
-        ],
-        includes="./include/mac ./src/mac",
-        export_includes="./include/mac",
-    )
-
-    bld.platform(
-        target="libsfz/libsfz",
-        platform="linux",
-        source=[
-            "src/linux/sfz/ref-count.cpp",
-        ],
-        includes="./include/linux ./src/linux",
-        export_includes="./include/linux",
     )
 
     bld.platform(
@@ -95,11 +74,9 @@ def build(bld):
     test("bytes")
     test("digest")
     test("encoding")
-    test("foreach")
     test("format")
     test("io")
     test("json")
-    test("memory")
     test("optional")
     test("os")
     test("print")

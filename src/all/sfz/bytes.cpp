@@ -8,14 +8,15 @@
 #include <string.h>
 #include <algorithm>
 #include <sfz/exception.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/macros.hpp>
+#include <sfz/range.hpp>
 
 namespace sfz {
 
 using std::max;
 using std::min;
 using std::swap;
+using std::unique_ptr;
 
 namespace {
 
@@ -60,6 +61,10 @@ Bytes::Bytes(size_t num, uint8_t byte)
 }
 
 Bytes::~Bytes() { }
+
+void Bytes::assign(Bytes&& bytes) {
+    *this = std::move(bytes);
+}
 
 uint8_t* Bytes::data() {
     return _data.get();
@@ -167,7 +172,7 @@ void Bytes::reserve(size_t capacity) {
         while (new_capacity < capacity) {
             new_capacity *= 2;
         }
-        scoped_array<uint8_t> new_data(new uint8_t[new_capacity]);
+        unique_ptr<uint8_t[]> new_data(new uint8_t[new_capacity]);
         memcpy(new_data.get(), _data.get(), _size);
         swap(_data, new_data);
         _capacity = new_capacity;
@@ -216,11 +221,11 @@ uint8_t BytesSlice::at(size_t loc) const {
 }
 
 size_t BytesSlice::find(uint8_t byte) const {
-    SFZ_FOREACH(size_type i, range(_size), {
+    for (size_type i: range(_size)) {
         if (at(i) == byte) {
             return i;
         }
-    });
+    }
     return BytesSlice::npos;
 }
 
@@ -228,20 +233,20 @@ size_t BytesSlice::find(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
         return BytesSlice::npos;
     }
-    SFZ_FOREACH(size_type i, range(_size - bytes.size() + 1), {
+    for (size_type i: range(_size - bytes.size() + 1)) {
         if (slice(i, bytes.size()) == bytes) {
             return i;
         }
-    });
+    }
     return BytesSlice::npos;
 }
 
 size_t BytesSlice::rfind(uint8_t byte) const {
-    SFZ_FOREACH(size_type i, range(_size), {
+    for (size_type i: range(_size)) {
         if (at(_size - i - 1) == byte) {
             return _size - i - 1;
         }
-    });
+    }
     return BytesSlice::npos;
 }
 
@@ -249,11 +254,11 @@ size_t BytesSlice::rfind(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
         return BytesSlice::npos;
     }
-    SFZ_FOREACH(size_type i, range(_size - bytes.size() + 1), {
+    for (size_type i: range(_size - bytes.size() + 1)) {
         if (slice(_size - bytes.size() - i, bytes.size()) == bytes) {
             return _size - bytes.size() - i;
         }
-    });
+    }
     return BytesSlice::npos;
 }
 

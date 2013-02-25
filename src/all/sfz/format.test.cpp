@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <sfz/bytes.hpp>
 #include <sfz/exception.hpp>
-#include <sfz/foreach.hpp>
 
 using testing::Eq;
 using testing::Ne;
@@ -27,11 +26,11 @@ class FormatterTest : public Test {
   protected:
     template <int size>
     void Run(const StringSlice& prefix, const TestData (&data)[size]) {
-        SFZ_FOREACH(const TestData& test, data, {
+        for (const TestData& test: data) {
             String s(prefix);
             test.value.print_to(s);
             EXPECT_THAT(s, Eq(test.expected));
-        });
+        }
     }
 };
 

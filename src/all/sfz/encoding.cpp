@@ -7,7 +7,7 @@
 
 #include <algorithm>
 #include <sfz/bytes.hpp>
-#include <sfz/foreach.hpp>
+#include <sfz/range.hpp>
 #include <sfz/string.hpp>
 
 namespace sfz {
@@ -39,23 +39,23 @@ bool is_valid_code_point(Rune rune) {
 namespace ascii {
 
 void Ascii::encode_to(WriteTarget out, const StringSlice& string) {
-    SFZ_FOREACH(Rune r, string, {
+    for (Rune r: string) {
         if (r > 0x7f) {
             out.push(1, kAsciiUnknownCodePoint);
         } else {
             out.push(1, r);
         }
-    });
+    }
 }
 
 void Ascii::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    SFZ_FOREACH(uint8_t byte, bytes, {
+    for (uint8_t byte: bytes) {
         if (byte & 0x80) {
             out.push(1, kUnknownCodePoint);
         } else {
             out.push(1, byte);
         }
-    });
+    }
 }
 
 }  // namespace ascii
@@ -63,19 +63,19 @@ void Ascii::decode_to(PrintTarget out, const BytesSlice& bytes) {
 namespace latin1 {
 
 void Latin1::encode_to(WriteTarget out, const StringSlice& string) {
-    SFZ_FOREACH(Rune r, string, {
+    for (Rune r: string) {
         if (r > 0xff) {
             out.push(1, kAsciiUnknownCodePoint);
         } else {
             out.push(1, r);
         }
-    });
+    }
 }
 
 void Latin1::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    SFZ_FOREACH(uint8_t byte, bytes, {
+    for (uint8_t byte: bytes) {
         out.push(1, byte);
-    });
+    }
 }
 
 }  // namespace latin1
@@ -119,7 +119,7 @@ const Rune kUtf8Max[4] = { 0x80, 0x800, 0x10000 };
 }  // namespace
 
 void Utf8::encode_to(WriteTarget out, const StringSlice& string) {
-    SFZ_FOREACH(Rune rune, string, {
+    for (Rune rune: string) {
         if (rune < kUtf8Max[0]) {
             out.push(1, rune);
         } else if (rune < kUtf8Max[1]) {
@@ -135,7 +135,7 @@ void Utf8::encode_to(WriteTarget out, const StringSlice& string) {
             out.push(1, left(1, 0xff) | right(6, rune >> 6));
             out.push(1, left(1, 0xff) | right(6, rune >> 0));
         }
-    });
+    }
 }
 
 void Utf8::decode_to(PrintTarget out, const BytesSlice& bytes) {
@@ -143,7 +143,7 @@ void Utf8::decode_to(PrintTarget out, const BytesSlice& bytes) {
     int multibytes_seen = 0;
     Rune rune = 0;
 
-    SFZ_FOREACH(uint8_t byte, bytes, {
+    for (uint8_t byte: bytes) {
         if (multibytes_expected > 0) {
             if (is_continuation_byte(byte)) {
                 rune = (rune << 6) | right(6, byte);
@@ -178,7 +178,7 @@ void Utf8::decode_to(PrintTarget out, const BytesSlice& bytes) {
         out.push(1, kUnknownCodePoint);
 next_byte:
         continue;
-    });
+    }
 
     if (multibytes_expected) {
         out.push(multibytes_seen, kUnknownCodePoint);
@@ -325,31 +325,31 @@ uint16_t kMacRomanSupplement[0x80] = {
 }  // namespace
 
 void MacRoman::encode_to(WriteTarget out, const StringSlice& string) {
-    SFZ_FOREACH(Rune r, string, {
+    for (Rune r: string) {
         if (r <= 0x7f) {
             out.push(1, r);
         } else {
-            SFZ_FOREACH(int i, range(0x80), {
+            for (int i: range(0x80)) {
                 if (r == kMacRomanSupplement[i]) {
                     out.push(1, 0x80 + i);
                     goto next_rune;
                 }
-            });
+            }
             out.push(1, kAsciiUnknownCodePoint);
         }
 next_rune:
         continue;
-    });
+    }
 }
 
 void MacRoman::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    SFZ_FOREACH(uint8_t byte, bytes, {
+    for (uint8_t byte: bytes) {
         if (byte < 0x80) {
             out.push(1, byte);
         } else {
             out.push(1, kMacRomanSupplement[byte - 0x80]);
         }
-    });
+    }
 }
 
 }  // namespace macroman

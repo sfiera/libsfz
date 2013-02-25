@@ -7,9 +7,8 @@
 #define SFZ_EXCEPTION_HPP_
 
 #include <exception>
-#include <sfz/memory.hpp>
+#include <memory>
 #include <sfz/print.hpp>
-#include <sfz/ref-count.hpp>
 #include <sfz/string.hpp>
 #include <sfz/string-utils.hpp>
 
@@ -23,13 +22,13 @@ class Exception : public std::exception {
     virtual const char* what() const throw();
 
   private:
-    struct Impl : public ReferenceCounted {
+    struct Impl {
         Impl(const PrintItem& msg);
         String message;
         CString what;
     };
 
-    scoped_ref<const Impl> _impl;
+    std::shared_ptr<const Impl> _impl;
 };
 
 }  // namespace sfz

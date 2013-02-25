@@ -8,7 +8,6 @@
 #include <limits>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
-#include <sfz/foreach.hpp>
 #include <sfz/format.hpp>
 #include <sfz/string.hpp>
 
@@ -72,6 +71,12 @@ void print_to(PrintTarget out, const StringToIntResult& result) {
     }
 }
 
+template <typename T> bool signed_and_less(T x, T y) { return x < y; }
+template <> bool signed_and_less<uint8_t>(uint8_t, uint8_t) { return false; }
+template <> bool signed_and_less<uint16_t>(uint16_t, uint16_t) { return false; }
+template <> bool signed_and_less<uint32_t>(uint32_t, uint32_t) { return false; }
+template <> bool signed_and_less<uint64_t>(uint64_t, uint64_t) { return false; }
+
 template <typename T>
 StringToIntResult string_to_int(StringSlice s, T& out, int base) {
     StringToIntResult result = {StringToIntResult::NONE, integer_name<T>(), base};
@@ -93,7 +98,7 @@ StringToIntResult string_to_int(StringSlice s, T& out, int base) {
     // applies.
     bool overflow = false;
 
-    SFZ_FOREACH(Rune r, s, {
+    for (Rune r: s) {
         int digit;
         if (!get_digit_value(r, base, &digit)) {
             result.failure = StringToIntResult::INVALID_LITERAL;
@@ -114,7 +119,7 @@ StringToIntResult string_to_int(StringSlice s, T& out, int base) {
             }
             value += digit;
         } else {
-            if (value < (numeric_limits<T>::min() / 10)) {
+            if (signed_and_less<T>(value, numeric_limits<T>::min() / 10)) {
                 overflow = true;
                 continue;
             }
@@ -125,7 +130,7 @@ StringToIntResult string_to_int(StringSlice s, T& out, int base) {
             }
             value -= digit;
         }
-    });
+    }
 
     if (overflow) {
         result.failure = StringToIntResult::INTEGER_OVERFLOW;

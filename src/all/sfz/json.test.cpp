@@ -35,10 +35,10 @@ class MockJsonVisitor : public JsonVisitor {
     MOCK_CONST_METHOD0(exit_object, void());
     void visit_object(const StringMap<Json>& value) const {
         enter_object();
-        SFZ_FOREACH(const StringMap<Json>::value_type& item, value, {
+        for (const StringMap<Json>::value_type& item: value) {
             object_key(item.first);
             item.second.accept(*this);
-        });
+        }
         exit_object();
     }
 
@@ -46,9 +46,9 @@ class MockJsonVisitor : public JsonVisitor {
     MOCK_CONST_METHOD0(exit_array, void());
     void visit_array(const vector<Json>& value) const {
         enter_array();
-        SFZ_FOREACH(const Json& item, value, {
+        for (const Json& item: value) {
             item.accept(*this);
-        });
+        }
         exit_array();
     }
 
@@ -210,26 +210,26 @@ TEST_F(JsonTest, ComplexObjectTest) {
 
         EXPECT_CALL(visitor, object_key(Eq<StringSlice>("tracks")));
         EXPECT_CALL(visitor, enter_array());
-        SFZ_FOREACH(const Album::Track& track, kAlbum.tracks, {
+        for (const Album::Track& track: kAlbum.tracks) {
             EXPECT_CALL(visitor, enter_object());
             EXPECT_CALL(visitor, object_key(Eq<StringSlice>("length")));
             EXPECT_CALL(visitor, visit_number(track.length));
             EXPECT_CALL(visitor, object_key(Eq<StringSlice>("title")));
             EXPECT_CALL(visitor, visit_string(track.title));
             EXPECT_CALL(visitor, exit_object());
-        });
+        }
         EXPECT_CALL(visitor, exit_array());
 
         EXPECT_CALL(visitor, exit_object());
     }
 
     vector<Json> tracks;
-    SFZ_FOREACH(const Album::Track& track, kAlbum.tracks, {
+    for (const Album::Track& track: kAlbum.tracks) {
         StringMap<Json> object;
         object.insert(make_pair("title", Json::string(track.title)));
         object.insert(make_pair("length", Json::number(track.length)));
         tracks.push_back(Json::object(object));
-    });
+    }
 
     StringMap<Json> album;
     album.insert(make_pair("album", Json::string(kAlbum.album)));
@@ -364,12 +364,12 @@ TEST_F(SerializeTest, ComplexObjectTest) {
     };
 
     vector<Json> tracks;
-    SFZ_FOREACH(const Album::Track& track, kAlbum.tracks, {
+    for (const Album::Track& track: kAlbum.tracks) {
         StringMap<Json> object;
         object.insert(make_pair("title", Json::string(track.title)));
         object.insert(make_pair("length", Json::number(track.length)));
         tracks.push_back(Json::object(object));
-    });
+    }
 
     StringMap<Json> album;
     album.insert(make_pair("album", Json::string(kAlbum.album)));
