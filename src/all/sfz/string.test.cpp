@@ -94,12 +94,17 @@ TEST_F(StringTest, HelloWorldConst) {
     EXPECT_THROW(string.slice(14, 0), Exception);
 }
 
-// Test all five non-default overloads of String's constructor.
+// Test all six non-default overloads of String's constructor.
 TEST_F(StringTest, AllNonEmptyConstructors) {
     const char* expected = "Hello, world!";
     {
         const String s(expected);
         const String string(s);
+        EXPECT_THAT(string, Eq(expected));
+    }
+    {
+        const String s(expected);
+        const String string(std::move(s));
         EXPECT_THAT(string, Eq(expected));
     }
     {
@@ -122,13 +127,19 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
     }
 }
 
-// Test all five overloads of String::assign().
+// Test all six overloads of String::assign().
 TEST_F(StringTest, AllAssignOverloads) {
     const char* expected = "Hello, world!";
     {
         String s(expected);
         String string("Hello, ");
         string.assign(s);
+        EXPECT_THAT(string, Eq(expected));
+    }
+    {
+        String s(expected);
+        String string("Hello, ");
+        string.assign(std::move(s));
         EXPECT_THAT(string, Eq(expected));
     }
     {

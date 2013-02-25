@@ -16,6 +16,7 @@ namespace sfz {
 using std::max;
 using std::min;
 using std::swap;
+using std::unique_ptr;
 
 namespace {
 
@@ -60,6 +61,10 @@ Bytes::Bytes(size_t num, uint8_t byte)
 }
 
 Bytes::~Bytes() { }
+
+void Bytes::assign(Bytes&& bytes) {
+    *this = std::move(bytes);
+}
 
 uint8_t* Bytes::data() {
     return _data.get();
@@ -167,7 +172,7 @@ void Bytes::reserve(size_t capacity) {
         while (new_capacity < capacity) {
             new_capacity *= 2;
         }
-        scoped_array<uint8_t> new_data(new uint8_t[new_capacity]);
+        unique_ptr<uint8_t[]> new_data(new uint8_t[new_capacity]);
         memcpy(new_data.get(), _data.get(), _size);
         swap(_data, new_data);
         _capacity = new_capacity;

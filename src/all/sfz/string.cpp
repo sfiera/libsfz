@@ -18,6 +18,7 @@ namespace sfz {
 using std::max;
 using std::min;
 using std::swap;
+using std::unique_ptr;
 
 namespace {
 
@@ -37,6 +38,10 @@ String::String() {
 String::String(const String& string) {
     initialize(string._capacity);
     append(PrintItem(string));
+}
+
+void String::assign(String&& string) {
+    *this = std::move(string);
 }
 
 String::String(const PrintItem& item) {
@@ -96,7 +101,7 @@ void String::reserve(size_t capacity) {
         while (new_capacity < capacity) {
             new_capacity *= 2;
         }
-        scoped_array<Rune> new_data(new Rune[new_capacity]);
+        unique_ptr<Rune[]> new_data(new Rune[new_capacity]);
         memcpy(new_data.get(), _data.get(), _size * sizeof(Rune));
         swap(_data, new_data);
         _capacity = new_capacity;

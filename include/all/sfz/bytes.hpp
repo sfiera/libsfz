@@ -43,6 +43,10 @@ class Bytes {
     Bytes(size_t num, uint8_t byte);
     ~Bytes();
 
+    Bytes(Bytes&& bytes) = default;
+    Bytes& operator=(Bytes&& bytes) = default;
+    void assign(Bytes&& item);
+
     uint8_t* data();
     const uint8_t* data() const;
     size_t size() const;
@@ -92,7 +96,7 @@ class Bytes {
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
   private:
-    scoped_array<uint8_t> _data;
+    std::unique_ptr<uint8_t[]> _data;
     size_t _size;
     size_t _capacity;
 

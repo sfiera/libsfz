@@ -55,6 +55,10 @@ class String {
     // @param [in] string   The string to copy.
     explicit String(const String& string);
 
+    String(String&& string) = default;
+    String& operator=(String&& string) = default;
+    void assign(String&& string);
+
     // Copies the content of a printable object.
     //
     // The content of `object` either is used to initialize the String, is appended to the String,
@@ -134,7 +138,7 @@ class String {
 
     void initialize(size_t capacity);
 
-    scoped_array<Rune> _data;
+    std::unique_ptr<Rune[]> _data;
     size_t _size;
     size_t _capacity;
 
