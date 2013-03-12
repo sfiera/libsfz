@@ -108,22 +108,22 @@ StringToIntResult string_to_int(StringSlice s, T& out, int base) {
         if (overflow) {
             continue;
         } else if (positive) {
-            if (value > (numeric_limits<T>::max() / 10)) {
+            if (value > (numeric_limits<T>::max() / base)) {
                 overflow = true;
                 continue;
             }
-            value *= 10;
+            value *= base;
             if ((numeric_limits<T>::max() - value) < static_cast<T>(digit)) {
                 overflow = true;
                 continue;
             }
             value += digit;
         } else {
-            if (signed_and_less<T>(value, numeric_limits<T>::min() / 10)) {
+            if (signed_and_less<T>(value, numeric_limits<T>::min() / base)) {
                 overflow = true;
                 continue;
             }
-            value *= 10;
+            value *= base;
             if ((numeric_limits<T>::min() - value) > static_cast<T>(-digit)) {
                 overflow = true;
                 continue;
