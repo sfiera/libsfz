@@ -31,6 +31,23 @@ class Json {
 
     void accept(const JsonVisitor& visitor) const;
 
+    bool is_object() const;
+    bool is_array() const;
+    bool is_string() const;
+    bool is_number() const;
+    bool is_boolean() const;
+    bool is_null() const;
+
+    bool has(StringSlice key) const;
+    Json get(StringSlice key) const;
+
+    Json at(size_t index) const;
+    size_t size() const;
+
+    const StringSlice string() const;
+    const double number() const;
+    const bool boolean() const;
+
   private:
     friend bool operator==(const Json& x, const Json& y);
 

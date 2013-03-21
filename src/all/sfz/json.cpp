@@ -44,6 +44,23 @@ void json_escape(PrintTarget out, const StringSlice& value) {
 class Json::Value {
   public:
     virtual void accept(const JsonVisitor& visitor) const = 0;
+
+    virtual bool is_object() const { return false; }
+    virtual bool is_array() const { return false; }
+    virtual bool is_string() const { return false; }
+    virtual bool is_number() const { return false; }
+    virtual bool is_boolean() const { return false; }
+    virtual bool is_null() const { return false; }
+
+    virtual bool has(StringSlice key) const { return false; }
+    virtual Json get(StringSlice key) const { return Json(); }
+
+    virtual Json at(size_t index) const { return Json(); }
+    virtual size_t size() const { return 0; }
+
+    virtual const StringSlice string() const { return StringSlice(); }
+    virtual const double number() const { return 0.0; }
+    virtual const bool boolean() const { return false; }
 };
 
 class Json::Object : public Json::Value {
@@ -51,8 +68,16 @@ class Json::Object : public Json::Value {
     Object(const StringMap<Json>& value)
         : _value(value) { }
 
-    virtual void accept(const JsonVisitor& visitor) const {
-        visitor.visit_object(_value);
+    virtual void accept(const JsonVisitor& visitor) const { visitor.visit_object(_value); }
+    virtual bool is_object() const { return true; }
+    virtual bool has(StringSlice key) const { return _value.find(key) != _value.end(); }
+    virtual Json get(StringSlice key) const {
+        auto it = _value.find(key);
+        if (it == _value.end()) {
+            return Json();
+        } else {
+            return it->second;
+        }
     }
 
   private:
@@ -66,8 +91,15 @@ class Json::Array : public Json::Value {
     Array(const vector<Json>& value)
         : _value(value) { }
 
-    virtual void accept(const JsonVisitor& visitor) const {
-        visitor.visit_array(_value);
+    virtual void accept(const JsonVisitor& visitor) const { visitor.visit_array(_value); }
+    virtual bool is_array() const { return true; }
+    virtual size_t size() const { return _value.size(); }
+    virtual Json at(size_t index) const {
+        if (index < size()) {
+            return _value.at(index);
+        } else {
+            return Json();
+        }
     }
 
   private:
@@ -81,9 +113,9 @@ class Json::String : public Json::Value {
     explicit String(const sfz::PrintItem& s)
         : _value(s) { }
 
-    virtual void accept(const JsonVisitor& visitor) const {
-        visitor.visit_string(_value);
-    }
+    virtual void accept(const JsonVisitor& visitor) const { visitor.visit_string(_value); }
+    virtual bool is_string() const { return true; }
+    virtual const StringSlice string() const { return _value; }
 
   private:
     const sfz::String _value;
@@ -96,9 +128,10 @@ class Json::Number : public Json::Value {
     explicit Number(double value)
         : _value(value) { }
 
-    virtual void accept(const JsonVisitor& visitor) const {
-        visitor.visit_number(_value);
-    }
+    virtual void accept(const JsonVisitor& visitor) const { visitor.visit_number(_value); }
+
+    virtual bool is_number() const { return true; }
+    virtual const double number() const { return _value; }
 
   private:
     const double _value;
@@ -111,9 +144,9 @@ class Json::Boolean : public Json::Value {
     explicit Boolean(bool value)
         : _value(value) { }
 
-    virtual void accept(const JsonVisitor& visitor) const {
-        visitor.visit_bool(_value);
-    }
+    virtual void accept(const JsonVisitor& visitor) const { visitor.visit_bool(_value); }
+    virtual bool is_boolean() const { return true; }
+    virtual const bool boolean() const { return _value; }
 
   private:
     const bool _value;
@@ -128,9 +161,8 @@ class Json::Null : public Json::Value {
         return *null;
     }
 
-    virtual void accept(const JsonVisitor& visitor) const {
-        visitor.visit_null();
-    }
+    virtual void accept(const JsonVisitor& visitor) const { visitor.visit_null(); }
+    virtual bool is_null() const { return true; }
 
   private:
     Null() { }
@@ -174,6 +206,22 @@ Json::~Json() { }
 void Json::accept(const JsonVisitor& visitor) const {
     _value->accept(visitor);
 }
+
+bool Json::is_object() const { return _value->is_object(); }
+bool Json::is_array() const { return _value->is_array(); }
+bool Json::is_string() const { return _value->is_string(); }
+bool Json::is_number() const { return _value->is_number(); }
+bool Json::is_boolean() const { return _value->is_boolean(); }
+bool Json::is_null() const { return _value->is_null(); }
+
+bool Json::has(StringSlice key) const { return _value->has(key); }
+Json Json::get(StringSlice key) const { return _value->get(key); }
+Json Json::at(size_t index) const { return _value->at(index); }
+size_t Json::size() const { return _value->size(); }
+
+const StringSlice Json::string() const { return _value->string(); }
+const double Json::number() const { return _value->number(); }
+const bool Json::boolean() const { return _value->boolean(); }
 
 namespace {
 

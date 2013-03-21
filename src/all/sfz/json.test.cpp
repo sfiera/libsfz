@@ -61,43 +61,149 @@ class MockJsonVisitor : public JsonVisitor {
 typedef ::testing::Test JsonTest;
 
 TEST_F(JsonTest, NullTest) {
+    Json json;
+
+    EXPECT_THAT(json.is_object(), false);
+    EXPECT_THAT(json.is_array(), false);
+    EXPECT_THAT(json.is_string(), false);
+    EXPECT_THAT(json.is_number(), false);
+    EXPECT_THAT(json.is_boolean(), false);
+    EXPECT_THAT(json.is_null(), true);
+
+    EXPECT_THAT(json.has("one"), false);
+    EXPECT_THAT(json.get("one"), Json());
+    EXPECT_THAT(json.size(), 0);
+    EXPECT_THAT(json.at(0), Json());
+    EXPECT_THAT(json.string(), Eq(""));
+    EXPECT_THAT(json.number(), 0.0);
+    EXPECT_THAT(json.boolean(), false);
+
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_null());
-    Json().accept(visitor);
+    json.accept(visitor);
 }
 
 TEST_F(JsonTest, StringTest) {
+    Json json = Json::string("Hello, world!");
+
+    EXPECT_THAT(json.is_object(), false);
+    EXPECT_THAT(json.is_array(), false);
+    EXPECT_THAT(json.is_string(), true);
+    EXPECT_THAT(json.is_number(), false);
+    EXPECT_THAT(json.is_boolean(), false);
+    EXPECT_THAT(json.is_null(), false);
+
+    EXPECT_THAT(json.has("one"), false);
+    EXPECT_THAT(json.get("one"), Json());
+    EXPECT_THAT(json.size(), 0);
+    EXPECT_THAT(json.at(0), Json());
+    EXPECT_THAT(json.string(), Eq("Hello, world!"));
+    EXPECT_THAT(json.number(), 0.0);
+    EXPECT_THAT(json.boolean(), false);
+
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_string(Eq<StringSlice>("Hello, world!")));
-    Json::string("Hello, world!").accept(visitor);
+    json.accept(visitor);
 }
 
 TEST_F(JsonTest, NumberTest) {
+    Json json = Json::number(1.0);
+
+    EXPECT_THAT(json.is_object(), false);
+    EXPECT_THAT(json.is_array(), false);
+    EXPECT_THAT(json.is_string(), false);
+    EXPECT_THAT(json.is_number(), true);
+    EXPECT_THAT(json.is_boolean(), false);
+    EXPECT_THAT(json.is_null(), false);
+
+    EXPECT_THAT(json.has("one"), false);
+    EXPECT_THAT(json.get("one"), Json());
+    EXPECT_THAT(json.size(), 0);
+    EXPECT_THAT(json.at(0), Json());
+    EXPECT_THAT(json.string(), Eq(""));
+    EXPECT_THAT(json.number(), 1.0);
+    EXPECT_THAT(json.boolean(), false);
+
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_number(1.0));
-    Json::number(1.0).accept(visitor);
+    json.accept(visitor);
 }
 
 TEST_F(JsonTest, BoolTest) {
+    Json json = Json::boolean(true);
+
+    EXPECT_THAT(json.is_object(), false);
+    EXPECT_THAT(json.is_array(), false);
+    EXPECT_THAT(json.is_string(), false);
+    EXPECT_THAT(json.is_number(), false);
+    EXPECT_THAT(json.is_boolean(), true);
+    EXPECT_THAT(json.is_null(), false);
+
+    EXPECT_THAT(json.has("one"), false);
+    EXPECT_THAT(json.get("one"), Json());
+    EXPECT_THAT(json.size(), 0);
+    EXPECT_THAT(json.at(0), Json());
+    EXPECT_THAT(json.string(), Eq(""));
+    EXPECT_THAT(json.number(), 0.0);
+    EXPECT_THAT(json.boolean(), true);
+
     StrictMock<MockJsonVisitor> visitor;
     EXPECT_CALL(visitor, visit_bool(true));
-    Json::boolean(true).accept(visitor);
+    json.accept(visitor);
 }
 
 // []
 TEST_F(JsonTest, EmptyArrayTest) {
+    vector<Json> a;
+    Json json = Json::array(a);
+
+    EXPECT_THAT(json.is_object(), false);
+    EXPECT_THAT(json.is_array(), true);
+    EXPECT_THAT(json.is_string(), false);
+    EXPECT_THAT(json.is_number(), false);
+    EXPECT_THAT(json.is_boolean(), false);
+    EXPECT_THAT(json.is_null(), false);
+
+    EXPECT_THAT(json.has("one"), false);
+    EXPECT_THAT(json.get("one"), Json());
+    EXPECT_THAT(json.size(), 0);
+    EXPECT_THAT(json.at(0), Json());
+    EXPECT_THAT(json.string(), Eq(""));
+    EXPECT_THAT(json.number(), 0.0);
+    EXPECT_THAT(json.boolean(), false);
+
     StrictMock<MockJsonVisitor> visitor;
     {
         InSequence s;
         EXPECT_CALL(visitor, enter_array());
         EXPECT_CALL(visitor, exit_array());
     }
-    vector<Json> a;
-    Json::array(a).accept(visitor);
+    json.accept(visitor);
 }
 
 // [1.0, 2.0, 3.0]
 TEST_F(JsonTest, NonEmptyArrayTest) {
+    vector<Json> a;
+    a.push_back(Json::number(1.0));
+    a.push_back(Json::number(2.0));
+    a.push_back(Json::number(3.0));
+    Json json = Json::array(a);
+
+    EXPECT_THAT(json.is_object(), false);
+    EXPECT_THAT(json.is_array(), true);
+    EXPECT_THAT(json.is_string(), false);
+    EXPECT_THAT(json.is_number(), false);
+    EXPECT_THAT(json.is_boolean(), false);
+    EXPECT_THAT(json.is_null(), false);
+
+    EXPECT_THAT(json.has("one"), false);
+    EXPECT_THAT(json.get("one"), Json());
+    EXPECT_THAT(json.size(), 3);
+    EXPECT_THAT(json.at(0), Json::number(1.0));
+    EXPECT_THAT(json.string(), Eq(""));
+    EXPECT_THAT(json.number(), 0.0);
+    EXPECT_THAT(json.boolean(), false);
+
     StrictMock<MockJsonVisitor> visitor;
     {
         InSequence s;
@@ -107,23 +213,36 @@ TEST_F(JsonTest, NonEmptyArrayTest) {
         EXPECT_CALL(visitor, visit_number(3.0));
         EXPECT_CALL(visitor, exit_array());
     }
-    vector<Json> a;
-    a.push_back(Json::number(1.0));
-    a.push_back(Json::number(2.0));
-    a.push_back(Json::number(3.0));
-    Json::array(a).accept(visitor);
+    json.accept(visitor);
 }
 
 // {}
 TEST_F(JsonTest, EmptyObjectTest) {
+    StringMap<Json> o;
+    Json json = Json::object(o);
+
+    EXPECT_THAT(json.is_object(), true);
+    EXPECT_THAT(json.is_array(), false);
+    EXPECT_THAT(json.is_string(), false);
+    EXPECT_THAT(json.is_number(), false);
+    EXPECT_THAT(json.is_boolean(), false);
+    EXPECT_THAT(json.is_null(), false);
+
+    EXPECT_THAT(json.has("one"), false);
+    EXPECT_THAT(json.get("one"), Json());
+    EXPECT_THAT(json.size(), 0);
+    EXPECT_THAT(json.at(0), Json());
+    EXPECT_THAT(json.string(), Eq(""));
+    EXPECT_THAT(json.number(), 0.0);
+    EXPECT_THAT(json.boolean(), false);
+
     StrictMock<MockJsonVisitor> visitor;
     {
         InSequence s;
         EXPECT_CALL(visitor, enter_object());
         EXPECT_CALL(visitor, exit_object());
     }
-    StringMap<Json> o;
-    Json::object(o).accept(visitor);
+    json.accept(visitor);
 }
 
 // {
@@ -132,6 +251,27 @@ TEST_F(JsonTest, EmptyObjectTest) {
 //   "three", 3.0
 // }
 TEST_F(JsonTest, NonEmptyObjectTest) {
+    StringMap<Json> o;
+    o.insert(make_pair("one", Json::number(1.0)));
+    o.insert(make_pair("two", Json::number(2.0)));
+    o.insert(make_pair("three", Json::number(3.0)));
+    Json json = Json::object(o);
+
+    EXPECT_THAT(json.is_object(), true);
+    EXPECT_THAT(json.is_array(), false);
+    EXPECT_THAT(json.is_string(), false);
+    EXPECT_THAT(json.is_number(), false);
+    EXPECT_THAT(json.is_boolean(), false);
+    EXPECT_THAT(json.is_null(), false);
+
+    EXPECT_THAT(json.has("one"), true);
+    EXPECT_THAT(json.get("one"), Json::number(1.0));
+    EXPECT_THAT(json.size(), 0);
+    EXPECT_THAT(json.at(0), Json());
+    EXPECT_THAT(json.string(), Eq(""));
+    EXPECT_THAT(json.number(), 0.0);
+    EXPECT_THAT(json.boolean(), false);
+
     StrictMock<MockJsonVisitor> visitor;
     {
         InSequence s;
@@ -144,11 +284,7 @@ TEST_F(JsonTest, NonEmptyObjectTest) {
         EXPECT_CALL(visitor, visit_number(2.0));
         EXPECT_CALL(visitor, exit_object());
     }
-    StringMap<Json> o;
-    o.insert(make_pair("one", Json::number(1.0)));
-    o.insert(make_pair("two", Json::number(2.0)));
-    o.insert(make_pair("three", Json::number(3.0)));
-    Json::object(o).accept(visitor);
+    json.accept(visitor);
 }
 
 // {
