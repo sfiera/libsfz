@@ -121,6 +121,21 @@ class Json::Boolean : public Json::Value {
     DISALLOW_COPY_AND_ASSIGN(Boolean);
 };
 
+class Json::Null : public Json::Value {
+  public:
+    static const std::shared_ptr<Null>& shared_null() {
+        std::shared_ptr<Null>* null = new std::shared_ptr<Null>(new Null);
+        return *null;
+    }
+
+    virtual void accept(const JsonVisitor& visitor) const {
+        visitor.visit_null();
+    }
+
+  private:
+    Null() { }
+};
+
 Json Json::object(const StringMap<Json>& value) {
     return Json(new Object(value));
 }
@@ -141,7 +156,7 @@ Json Json::boolean(bool value) {
     return Json(new Boolean(value));
 }
 
-Json::Json() { }
+Json::Json(): _value(Null::shared_null()) { }
 
 Json::Json(Json::Value* value)
     : _value(value) { }
@@ -157,11 +172,7 @@ Json& Json::operator=(const Json& other) {
 Json::~Json() { }
 
 void Json::accept(const JsonVisitor& visitor) const {
-    if (_value.get()) {
-        _value->accept(visitor);
-    } else {
-        visitor.visit_null();
-    }
+    _value->accept(visitor);
 }
 
 namespace {
