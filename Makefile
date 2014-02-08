@@ -1,18 +1,32 @@
-WAF=python ext/waf-sfiera/waf
+NINJA=ninja -C out/cur
 
 all:
-	@$(WAF) build
+	@$(NINJA)
 
-test:
-	@$(WAF) test
+test: all
+	out/cur/algorithm-test
+	out/cur/args-test
+	out/cur/bytes-test
+	out/cur/digest-test
+	out/cur/encoding-test
+	out/cur/format-test
+	out/cur/io-test
+	out/cur/json-test
+	out/cur/optional-test
+	out/cur/os-test
+	out/cur/print-test
+	out/cur/read-test
+	out/cur/string-test
+	out/cur/string-utils-test
+	out/cur/write-test
 
 clean:
-	@$(WAF) clean
+	@$(NINJA) -t clean
 
 dist:
-	@$(WAF) dist
+	scripts/dist.py
 
 distclean:
-	@$(WAF) distclean
+	rm -Rf out/
 
-.PHONY: clean dist distclean all test
+.PHONY: all clean dist distclean run sign test
