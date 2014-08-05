@@ -465,7 +465,8 @@ TEST_F(SerializeTest, NonEmptyArrayTest) {
     a.push_back(Json::number(1.0));
     a.push_back(Json::number(2.0));
     a.push_back(Json::number(3.0));
-    RoundTripBetween(Json::array(a), format("[{0},{1},{2}]", 1.0, 2.0, 3.0));
+    RoundTripBetween(Json::array(a), "[1,2,3]");
+    RoundTripBetween(Json::array(a), format("[{0},{1},{2}]", 1.25, 2.5, 3.75));
 }
 
 TEST_F(SerializeTest, EmptyObjectTest) {

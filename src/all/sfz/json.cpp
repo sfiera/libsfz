@@ -711,7 +711,12 @@ void SerializerVisitor::visit_string(const StringSlice& value) const {
 }
 
 void SerializerVisitor::visit_number(double value) const {
-    PrintItem(value).print_to(_out);
+    int64_t int_value = value;
+    if (value == int_value) {
+        PrintItem(int_value).print_to(_out);
+    } else {
+        PrintItem(value).print_to(_out);
+    }
 }
 
 void SerializerVisitor::visit_bool(bool value) const {
