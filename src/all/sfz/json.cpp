@@ -43,6 +43,7 @@ void json_escape(PrintTarget out, const StringSlice& value) {
 
 class Json::Value {
   public:
+    virtual ~Value() {}
     virtual void accept(const JsonVisitor& visitor) const = 0;
 
     virtual bool is_object() const { return false; }
