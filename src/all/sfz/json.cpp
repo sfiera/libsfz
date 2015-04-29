@@ -157,8 +157,8 @@ class Json::Boolean : public Json::Value {
 class Json::Null : public Json::Value {
   public:
     static const std::shared_ptr<Null>& shared_null() {
-        std::shared_ptr<Null>* null = new std::shared_ptr<Null>(new Null);
-        return *null;
+        static std::shared_ptr<Null> null(new Null);
+        return null;
     }
 
     virtual void accept(const JsonVisitor& visitor) const { visitor.visit_null(); }
