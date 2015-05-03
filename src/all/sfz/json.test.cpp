@@ -445,9 +445,10 @@ TEST_F(SerializeTest, StringTest) {
 }
 
 TEST_F(SerializeTest, NumberTest) {
-    RoundTripBetween(Json::number(1.0), 1.0);
-    RoundTripBetween(Json::number(2.0), 2.0);
-    RoundTripBetween(Json::number(3.0), 3.0);
+    RoundTripBetween(Json::number(1.0), 1);
+    RoundTripBetween(Json::number(2.0), 2);
+    RoundTripBetween(Json::number(3.0), 3);
+    RoundTripBetween(Json::number(4.5), 4.5);
 }
 
 TEST_F(SerializeTest, BoolTest) {
@@ -466,6 +467,9 @@ TEST_F(SerializeTest, NonEmptyArrayTest) {
     a.push_back(Json::number(2.0));
     a.push_back(Json::number(3.0));
     RoundTripBetween(Json::array(a), "[1,2,3]");
+    a[0] = Json::number(1.25);
+    a[1] = Json::number(2.5);
+    a[2] = Json::number(3.75);
     RoundTripBetween(Json::array(a), format("[{0},{1},{2}]", 1.25, 2.5, 3.75));
 }
 
@@ -479,13 +483,11 @@ TEST_F(SerializeTest, NonEmptyObjectTest) {
     o.insert(make_pair("one", Json::number(1.0)));
     o.insert(make_pair("two", Json::number(2.0)));
     o.insert(make_pair("three", Json::number(3.0)));
-    RoundTripBetween(Json::object(o), format(
-                "{{"
-                    "\"one\":{0},"
-                    "\"three\":{1},"
-                    "\"two\":{2}"
-                "}}",
-                1.0, 3.0, 2.0));
+    RoundTripBetween(Json::object(o), "{"
+                "\"one\":1,"
+                "\"three\":3,"
+                "\"two\":2"
+            "}");
 }
 
 TEST_F(SerializeTest, ComplexObjectTest) {
@@ -514,27 +516,25 @@ TEST_F(SerializeTest, ComplexObjectTest) {
     album.insert(make_pair("compilation", Json::boolean(kAlbum.compilation)));
     album.insert(make_pair("tracks", Json::array(tracks)));
 
-    RoundTripBetween(Json::object(album), format(
-                "{{"
-                    "\"album\":\"Hey Everyone\","
-                    "\"artist\":\"Dananananaykroyd\","
-                    "\"compilation\":false,"
-                    "\"tracks\":["
-                        "{{"
-                            "\"length\":{0},"
-                            "\"title\":\"Hey Everyone\""
-                        "}},"
-                        "{{"
-                            "\"length\":{1},"
-                            "\"title\":\"Watch This!\""
-                        "}},"
-                        "{{"
-                            "\"length\":{2},"
-                            "\"title\":\"The Greater Than Symbol & The Hash\""
-                        "}}"
-                    "]"
-                "}}",
-                151.0, 213.0, 281.0));
+    RoundTripBetween(Json::object(album), "{"
+                "\"album\":\"Hey Everyone\","
+                "\"artist\":\"Dananananaykroyd\","
+                "\"compilation\":false,"
+                "\"tracks\":["
+                    "{"
+                        "\"length\":151,"
+                        "\"title\":\"Hey Everyone\""
+                    "},"
+                    "{"
+                        "\"length\":213,"
+                        "\"title\":\"Watch This!\""
+                    "},"
+                    "{"
+                        "\"length\":281,"
+                        "\"title\":\"The Greater Than Symbol & The Hash\""
+                    "}"
+                "]"
+            "}");
 
     ASSERT_THAT(Json::object(album), PrettyPrintsTo(
                 "{\n"
@@ -543,15 +543,15 @@ TEST_F(SerializeTest, ComplexObjectTest) {
                 "  \"compilation\": false,\n"
                 "  \"tracks\": [\n"
                 "    {\n"
-                "      \"length\": 151.000000,\n"
+                "      \"length\": 151,\n"
                 "      \"title\": \"Hey Everyone\"\n"
                 "    },\n"
                 "    {\n"
-                "      \"length\": 213.000000,\n"
+                "      \"length\": 213,\n"
                 "      \"title\": \"Watch This!\"\n"
                 "    },\n"
                 "    {\n"
-                "      \"length\": 281.000000,\n"
+                "      \"length\": 281,\n"
                 "      \"title\": \"The Greater Than Symbol & The Hash\"\n"
                 "    }\n"
                 "  ]\n"
