@@ -5,6 +5,7 @@
 
 #include <sfz/string-utils.hpp>
 
+#include <wctype.h>
 #include <limits>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
