@@ -23,7 +23,9 @@ ScopedFd::ScopedFd(int fd)
         : _fd(fd) { }
 
 ScopedFd::~ScopedFd() {
-    close(_fd);
+    if (_fd >= 0) {
+        close(_fd);
+    }
 }
 
 int ScopedFd::get() {
