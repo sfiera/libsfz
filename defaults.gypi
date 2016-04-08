@@ -4,19 +4,31 @@
   ]
 , "target_defaults":
   { "variables":
-    { "MACOSX_VERSION": "10.9"
+    { "MACOSX_VERSION": "10.11"
+    , "MACOSX_TARGET": "10.7"
     }
   , "default_configuration": "opt"
   , "configurations":
     { "dbg":
       { "cflags": ["-g"]
       , "cxxflags": ["-g"]
+      , "xcode_settings":
+        { "GCC_OPTIMIZATION_LEVEL": "0"
+        , "OTHER_CFLAGS": ["-g"]
+        }
       }
-    , "dev": { }
+    , "dev":
+      { "cflags": ["-O0"]
+      , "xcode_settings":
+        { "GCC_OPTIMIZATION_LEVEL": "0"
+        }
+      }
     , "opt":
       { "cflags": ["-Os"]
-      , "cxxflags": ["-Os"]
       , "defines": ["NDEBUG"]
+      , "xcode_settings":
+        { "GCC_OPTIMIZATION_LEVEL": "s"
+        }
       }
     }
   , "cxxflags":
@@ -30,6 +42,7 @@
     , "CLANG_CXX_LANGUAGE_STANDARD": "c++11"
     , "CLANG_CXX_LIBRARY": "libc++"
     , "SDKROOT": "macosx<(MACOSX_VERSION)"
+    , "MACOSX_DEPLOYMENT_TARGET": "<(MACOSX_TARGET)"
     }
   }
 }
