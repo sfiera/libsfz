@@ -1,0 +1,190 @@
+config("libsfz_private") {
+  include_dirs = [
+    "include/all",
+    "src/all",
+    "include/posix",
+    "src/posix",
+  ]
+}
+
+config("libsfz_public") {
+  include_dirs = [
+    "include/all",
+    "include/posix",
+  ]
+}
+
+static_library("libsfz") {
+  sources = [
+    "src/all/sfz/args.cpp",
+    "src/all/sfz/bytes.cpp",
+    "src/all/sfz/digest.cpp",
+    "src/all/sfz/encoding.cpp",
+    "src/all/sfz/endian.cpp",
+    "src/all/sfz/exception.cpp",
+    "src/all/sfz/format.cpp",
+    "src/all/sfz/json.cpp",
+    "src/all/sfz/print.cpp",
+    "src/all/sfz/read.cpp",
+    "src/all/sfz/string-utils.cpp",
+    "src/all/sfz/string.cpp",
+    "src/all/sfz/write.cpp",
+    "src/posix/sfz/file.cpp",
+    "src/posix/sfz/io.cpp",
+    "src/posix/sfz/os.cpp",
+    "src/posix/sfz/posix-format.cpp",
+    "src/posix/sfz/posix-format.hpp",
+  ]
+  configs += [ ":libsfz_private" ]
+  public_configs = [ ":libsfz_public" ]
+}
+
+executable("algorithm-test") {
+  sources = [
+    "src/all/sfz/algorithm.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("args-test") {
+  sources = [
+    "src/all/sfz/algorithm.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("bytes-test") {
+  sources = [
+    "src/all/sfz/bytes.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("digest-test") {
+  sources = [
+    "src/all/sfz/digest.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("encoding-test") {
+  sources = [
+    "src/all/sfz/encoding.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("format-test") {
+  sources = [
+    "src/all/sfz/format.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("io-test") {
+  sources = [
+    "src/all/sfz/io.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("json-test") {
+  sources = [
+    "src/all/sfz/json.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("optional-test") {
+  sources = [
+    "src/all/sfz/optional.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("os-test") {
+  sources = [
+    "src/all/sfz/os.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("print-test") {
+  sources = [
+    "src/all/sfz/print.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("read-test") {
+  sources = [
+    "src/all/sfz/read.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("string-utils-test") {
+  sources = [
+    "src/all/sfz/string-utils.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("string-test") {
+  sources = [
+    "src/all/sfz/string.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
+
+executable("write-test") {
+  sources = [
+    "src/all/sfz/write.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+}
