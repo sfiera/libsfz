@@ -23,10 +23,8 @@ test: all
 clean:
 	@$(NINJA) -t clean
 
-dist:
-	scripts/dist.py
-
 distclean:
 	rm -Rf out/
+	rm -f build/lib/scripts/gn
 
-.PHONY: all clean dist distclean run sign test
+.PHONY: all test clean dist distclean
