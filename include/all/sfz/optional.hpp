@@ -25,11 +25,8 @@ class Optional {
     bool has() const { return _has; }
     void clear();
 
-    void set();
-    template <typename A0>
-    void set(const A0& a0);
-    template <typename A0, typename A1>
-    void set(const A0& a0, const A1& a1);
+    template <typename... Args>
+    void set(Args&&... args);
 
     T* get() { return null_or(data()); }
     T* operator->() { return exception_or(data()); }
@@ -40,27 +37,30 @@ class Optional {
     const T& operator*() const { return *exception_or(data()); }
 
   private:
-    T* data();
+    T*       data();
     const T* data() const;
-    template <typename U> U null_or(U u) const;
-    template <typename U> U exception_or(U u) const;
+    template <typename U>
+    U null_or(U u) const;
+    template <typename U>
+    U exception_or(U u) const;
 
-    bool _has;
+    bool    _has;
     uint8_t _data[sizeof(T)];
 };
 
-template <typename T> void copy(Optional<T>& to, const T& from);
-template <typename T> void copy(Optional<T>& to, const Optional<T>& from);
-
-template <typename T> bool store_argument(Optional<T>& to, StringSlice from);
+template <typename T>
+void copy(Optional<T>& to, const T& from);
+template <typename T>
+void copy(Optional<T>& to, const Optional<T>& from);
 
 template <typename T>
-Optional<T>::Optional():
-        _has(false) { }
+bool store_argument(Optional<T>& to, StringSlice from);
 
 template <typename T>
-Optional<T>::Optional(const Optional& other):
-        _has(false) {
+Optional<T>::Optional() : _has(false) {}
+
+template <typename T>
+Optional<T>::Optional(const Optional& other) : _has(false) {
     if (other.has()) {
         set(*other);
     }
@@ -94,25 +94,10 @@ void Optional<T>::clear() {
 }
 
 template <typename T>
-void Optional<T>::set() {
+template <typename... Args>
+void Optional<T>::set(Args&&... args) {
     clear();
-    new (data()) T();
-    _has = true;
-}
-
-template <typename T>
-template <typename A0>
-void Optional<T>::set(const A0& a0) {
-    clear();
-    new (data()) T(a0);
-    _has = true;
-}
-
-template <typename T>
-template <typename A0, typename A1>
-void Optional<T>::set(const A0& a0, const A1& a1) {
-    clear();
-    new (data()) T(a0, a1);
+    new (data()) T(std::forward<Args&&>(args)...);
     _has = true;
 }
 
