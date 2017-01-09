@@ -8,9 +8,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/posix-format.hpp>
@@ -19,8 +19,7 @@
 
 namespace sfz {
 
-ScopedFd::ScopedFd(int fd)
-        : _fd(fd) { }
+ScopedFd::ScopedFd(int fd) : _fd(fd) {}
 
 ScopedFd::~ScopedFd() {
     if (_fd >= 0) {
@@ -28,13 +27,11 @@ ScopedFd::~ScopedFd() {
     }
 }
 
-int ScopedFd::get() {
-    return _fd;
-}
+int ScopedFd::get() { return _fd; }
 
 int ScopedFd::release() {
     int fd = _fd;
-    _fd = -1;
+    _fd    = -1;
     return fd;
 }
 
@@ -53,16 +50,13 @@ void ScopedFd::push(const BytesSlice& bytes) {
 }
 
 void ScopedFd::push(size_t num, uint8_t byte) {
-    for (int i: range(num)) {
+    for (int i : range(num)) {
         static_cast<void>(i);
         push(BytesSlice(&byte, 1));
     }
 }
 
-MappedFile::MappedFile(const StringSlice& path)
-        : _path(path),
-          _size(0),
-          _data(NULL) {
+MappedFile::MappedFile(const StringSlice& path) : _path(path), _size(0), _data(NULL) {
     CString c_path(path);
     _fd = open(c_path.data(), O_RDONLY, 0600);
     if (_fd < 0) {
@@ -92,12 +86,8 @@ MappedFile::~MappedFile() {
     close(_fd);
 }
 
-StringSlice MappedFile::path() const {
-    return _path;
-}
+StringSlice MappedFile::path() const { return _path; }
 
-BytesSlice MappedFile::data() const {
-    return BytesSlice(_data, _size);
-}
+BytesSlice MappedFile::data() const { return BytesSlice(_data, _size); }
 
 }  // namespace sfz

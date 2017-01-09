@@ -109,7 +109,7 @@ TEST_F(BytesTest, AllNonEmptyConstructors) {
     }
     {
         const BytesSlice s(expected);
-        const Bytes bytes(s);
+        const Bytes      bytes(s);
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
@@ -144,7 +144,7 @@ TEST_F(BytesTest, AllAssignOverloads) {
     }
     {
         BytesSlice s(expected);
-        Bytes bytes("Hello, ");
+        Bytes      bytes("Hello, ");
         bytes.assign(s);
         EXPECT_THAT(bytes, Eq(expected));
     }
@@ -155,7 +155,7 @@ TEST_F(BytesTest, AllAssignOverloads) {
     }
     {
         StringSlice string(expected);
-        Bytes bytes("Hello, ");
+        Bytes       bytes("Hello, ");
         bytes.assign(ascii::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
     }
@@ -169,7 +169,7 @@ TEST_F(BytesTest, AllAssignOverloads) {
 // Test all five overloads of Bytes::append().
 TEST_F(BytesTest, AllAppendOverloads) {
     const char* expected = "Hello, world!";
-    const char* append = "world!";
+    const char* append   = "world!";
     {
         Bytes s(append);
         Bytes bytes("Hello, ");
@@ -178,7 +178,7 @@ TEST_F(BytesTest, AllAppendOverloads) {
     }
     {
         BytesSlice s(append);
-        Bytes bytes("Hello, ");
+        Bytes      bytes("Hello, ");
         bytes.append(s);
         EXPECT_THAT(bytes, Eq(expected));
     }
@@ -189,7 +189,7 @@ TEST_F(BytesTest, AllAppendOverloads) {
     }
     {
         StringSlice string("world!");
-        Bytes bytes("Hello, ");
+        Bytes       bytes("Hello, ");
         bytes.append(ascii::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
     }
@@ -248,7 +248,7 @@ void TestComparison() {
     const Bytes world_bytes("World");
     const Bytes backspace_bytes("\377");
 
-    Left world_left(world_bytes);
+    Left  world_left(world_bytes);
     Right hello(hello_bytes);
     Right world_right(world_bytes);
     Right backspace(backspace_bytes);
@@ -267,8 +267,8 @@ void TestComparison() {
 }
 
 TEST_F(BytesTest, Comparison) {
-    TestComparison<Bytes,      Bytes>();
-    TestComparison<Bytes,      BytesSlice>();
+    TestComparison<Bytes, Bytes>();
+    TestComparison<Bytes, BytesSlice>();
     TestComparison<BytesSlice, BytesSlice>();
 }
 

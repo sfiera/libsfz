@@ -21,9 +21,9 @@ struct StringToIntResult {
         INVALID_LITERAL,
         INTEGER_OVERFLOW,
     };
-    Failure failure;
+    Failure     failure;
     const char* integer_name;
-    int base;
+    int         base;
 
     operator bool() const { return failure == NONE; }
 };
@@ -44,9 +44,9 @@ class CString {
   public:
     CString(const StringSlice& string);
 
-    char* data();
+    char*       data();
     const char* data() const;
-    size_t size() const;
+    size_t      size() const;
 
   private:
     Bytes _bytes;

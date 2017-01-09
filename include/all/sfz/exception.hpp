@@ -9,8 +9,8 @@
 #include <exception>
 #include <memory>
 #include <sfz/print.hpp>
-#include <sfz/string.hpp>
 #include <sfz/string-utils.hpp>
+#include <sfz/string.hpp>
 
 namespace sfz {
 
@@ -19,12 +19,12 @@ class Exception : public std::exception {
     Exception(const PrintItem& message);
     virtual ~Exception() throw();
     virtual const String& message() const throw();
-    virtual const char* what() const throw();
+    virtual const char*   what() const throw();
 
   private:
     struct Impl {
         Impl(const PrintItem& msg);
-        String message;
+        String  message;
         CString what;
     };
 
@@ -33,4 +33,4 @@ class Exception : public std::exception {
 
 }  // namespace sfz
 
-#endif // SFZ_EXCEPTION_HPP_
+#endif  // SFZ_EXCEPTION_HPP_

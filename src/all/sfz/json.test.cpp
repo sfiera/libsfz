@@ -5,8 +5,8 @@
 
 #include <sfz/json.hpp>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <sfz/format.hpp>
 #include <sfz/string-utils.hpp>
 
@@ -21,7 +21,7 @@ using testing::StrictMock;
 namespace sfz {
 
 std::ostream& operator<<(std::ostream& ostr, const Json& json) {
-    String str(json);
+    String  str(json);
     CString c_str(str);
     return ostr << c_str.data();
 }
@@ -35,7 +35,7 @@ class MockJsonVisitor : public JsonVisitor {
     MOCK_CONST_METHOD0(exit_object, void());
     void visit_object(const StringMap<Json>& value) const {
         enter_object();
-        for (const StringMap<Json>::value_type& item: value) {
+        for (const StringMap<Json>::value_type& item : value) {
             object_key(item.first);
             item.second.accept(*this);
         }
@@ -46,7 +46,7 @@ class MockJsonVisitor : public JsonVisitor {
     MOCK_CONST_METHOD0(exit_array, void());
     void visit_array(const vector<Json>& value) const {
         enter_array();
-        for (const Json& item: value) {
+        for (const Json& item : value) {
             item.accept(*this);
         }
         exit_array();
@@ -155,7 +155,7 @@ TEST_F(JsonTest, BoolTest) {
 // []
 TEST_F(JsonTest, EmptyArrayTest) {
     vector<Json> a;
-    Json json = Json::array(a);
+    Json         json = Json::array(a);
 
     EXPECT_THAT(json.is_object(), false);
     EXPECT_THAT(json.is_array(), true);
@@ -219,7 +219,7 @@ TEST_F(JsonTest, NonEmptyArrayTest) {
 // {}
 TEST_F(JsonTest, EmptyObjectTest) {
     StringMap<Json> o;
-    Json json = Json::object(o);
+    Json            json = Json::object(o);
 
     EXPECT_THAT(json.is_object(), true);
     EXPECT_THAT(json.is_array(), false);
@@ -309,25 +309,25 @@ TEST_F(JsonTest, NonEmptyObjectTest) {
 struct Album {
     struct Track {
         const StringSlice title;
-        double length;
+        double            length;
     };
 
     const StringSlice album;
     const StringSlice artist;
-    bool compilation;
-    Track tracks[3];
+    bool              compilation;
+    Track             tracks[3];
 };
 
 TEST_F(JsonTest, ComplexObjectTest) {
     const Album kAlbum = {
-        "Hey Everyone",
-        "Dananananaykroyd",
-        false,
-        {
-            { "Hey Everyone", 151 },
-            { "Watch This!", 213 },
-            { "The Greater Than Symbol & The Hash", 281 },
-        },
+            "Hey Everyone",
+            "Dananananaykroyd",
+            false,
+            {
+                    {"Hey Everyone", 151},
+                    {"Watch This!", 213},
+                    {"The Greater Than Symbol & The Hash", 281},
+            },
     };
 
     StrictMock<MockJsonVisitor> visitor;
@@ -346,7 +346,7 @@ TEST_F(JsonTest, ComplexObjectTest) {
 
         EXPECT_CALL(visitor, object_key(Eq<StringSlice>("tracks")));
         EXPECT_CALL(visitor, enter_array());
-        for (const Album::Track& track: kAlbum.tracks) {
+        for (const Album::Track& track : kAlbum.tracks) {
             EXPECT_CALL(visitor, enter_object());
             EXPECT_CALL(visitor, object_key(Eq<StringSlice>("length")));
             EXPECT_CALL(visitor, visit_number(track.length));
@@ -360,7 +360,7 @@ TEST_F(JsonTest, ComplexObjectTest) {
     }
 
     vector<Json> tracks;
-    for (const Album::Track& track: kAlbum.tracks) {
+    for (const Album::Track& track : kAlbum.tracks) {
         StringMap<Json> object;
         object.insert(make_pair("title", Json::string(track.title)));
         object.insert(make_pair("length", Json::number(track.length)));
@@ -380,19 +380,19 @@ typedef ::testing::Test SerializeTest;
 
 MATCHER_P(SerializesTo, expected, "") {
     sfz::String actual(arg);
-    CString actual_c_str(actual);
-    CString expected_c_str(expected);
-    *result_listener
-        << "actual " << actual_c_str.data() << " vs. expected " << expected_c_str.data();
+    CString     actual_c_str(actual);
+    CString     expected_c_str(expected);
+    *result_listener << "actual " << actual_c_str.data() << " vs. expected "
+                     << expected_c_str.data();
     return actual == expected;
 }
 
 MATCHER_P(PrettyPrintsTo, expected, "") {
     sfz::String actual(pretty_print(arg));
-    CString actual_c_str(actual);
-    CString expected_c_str(expected);
-    *result_listener
-        << "actual " << actual_c_str.data() << " vs. expected " << expected_c_str.data();
+    CString     actual_c_str(actual);
+    CString     expected_c_str(expected);
+    *result_listener << "actual " << actual_c_str.data() << " vs. expected "
+                     << expected_c_str.data();
     return actual == expected;
 }
 
@@ -424,9 +424,7 @@ void RoundTripBetween(const Json& json, PrintItem text) {
     EXPECT_THAT(string, ParsesTo(json));
 }
 
-TEST_F(SerializeTest, NullTest) {
-    RoundTripBetween(Json(), "null");
-}
+TEST_F(SerializeTest, NullTest) { RoundTripBetween(Json(), "null"); }
 
 TEST_F(SerializeTest, StringTest) {
     RoundTripBetween(Json::string(""), "\"\"");
@@ -483,27 +481,29 @@ TEST_F(SerializeTest, NonEmptyObjectTest) {
     o.insert(make_pair("one", Json::number(1.0)));
     o.insert(make_pair("two", Json::number(2.0)));
     o.insert(make_pair("three", Json::number(3.0)));
-    RoundTripBetween(Json::object(o), "{"
-                "\"one\":1,"
-                "\"three\":3,"
-                "\"two\":2"
+    RoundTripBetween(
+            Json::object(o),
+            "{"
+            "\"one\":1,"
+            "\"three\":3,"
+            "\"two\":2"
             "}");
 }
 
 TEST_F(SerializeTest, ComplexObjectTest) {
     const Album kAlbum = {
-        "Hey Everyone",
-        "Dananananaykroyd",
-        false,
-        {
-            { "Hey Everyone", 151 },
-            { "Watch This!", 213 },
-            { "The Greater Than Symbol & The Hash", 281 },
-        },
+            "Hey Everyone",
+            "Dananananaykroyd",
+            false,
+            {
+                    {"Hey Everyone", 151},
+                    {"Watch This!", 213},
+                    {"The Greater Than Symbol & The Hash", 281},
+            },
     };
 
     vector<Json> tracks;
-    for (const Album::Track& track: kAlbum.tracks) {
+    for (const Album::Track& track : kAlbum.tracks) {
         StringMap<Json> object;
         object.insert(make_pair("title", Json::string(track.title)));
         object.insert(make_pair("length", Json::number(track.length)));
@@ -516,60 +516,63 @@ TEST_F(SerializeTest, ComplexObjectTest) {
     album.insert(make_pair("compilation", Json::boolean(kAlbum.compilation)));
     album.insert(make_pair("tracks", Json::array(tracks)));
 
-    RoundTripBetween(Json::object(album), "{"
-                "\"album\":\"Hey Everyone\","
-                "\"artist\":\"Dananananaykroyd\","
-                "\"compilation\":false,"
-                "\"tracks\":["
-                    "{"
-                        "\"length\":151,"
-                        "\"title\":\"Hey Everyone\""
-                    "},"
-                    "{"
-                        "\"length\":213,"
-                        "\"title\":\"Watch This!\""
-                    "},"
-                    "{"
-                        "\"length\":281,"
-                        "\"title\":\"The Greater Than Symbol & The Hash\""
-                    "}"
-                "]"
+    RoundTripBetween(
+            Json::object(album),
+            "{"
+            "\"album\":\"Hey Everyone\","
+            "\"artist\":\"Dananananaykroyd\","
+            "\"compilation\":false,"
+            "\"tracks\":["
+            "{"
+            "\"length\":151,"
+            "\"title\":\"Hey Everyone\""
+            "},"
+            "{"
+            "\"length\":213,"
+            "\"title\":\"Watch This!\""
+            "},"
+            "{"
+            "\"length\":281,"
+            "\"title\":\"The Greater Than Symbol & The Hash\""
+            "}"
+            "]"
             "}");
 
-    ASSERT_THAT(Json::object(album), PrettyPrintsTo(
-                "{\n"
-                "  \"album\": \"Hey Everyone\",\n"
-                "  \"artist\": \"Dananananaykroyd\",\n"
-                "  \"compilation\": false,\n"
-                "  \"tracks\": [\n"
-                "    {\n"
-                "      \"length\": 151,\n"
-                "      \"title\": \"Hey Everyone\"\n"
-                "    },\n"
-                "    {\n"
-                "      \"length\": 213,\n"
-                "      \"title\": \"Watch This!\"\n"
-                "    },\n"
-                "    {\n"
-                "      \"length\": 281,\n"
-                "      \"title\": \"The Greater Than Symbol & The Hash\"\n"
-                "    }\n"
-                "  ]\n"
-                "}"));
+    ASSERT_THAT(
+            Json::object(album),
+            PrettyPrintsTo("{\n"
+                           "  \"album\": \"Hey Everyone\",\n"
+                           "  \"artist\": \"Dananananaykroyd\",\n"
+                           "  \"compilation\": false,\n"
+                           "  \"tracks\": [\n"
+                           "    {\n"
+                           "      \"length\": 151,\n"
+                           "      \"title\": \"Hey Everyone\"\n"
+                           "    },\n"
+                           "    {\n"
+                           "      \"length\": 213,\n"
+                           "      \"title\": \"Watch This!\"\n"
+                           "    },\n"
+                           "    {\n"
+                           "      \"length\": 281,\n"
+                           "      \"title\": \"The Greater Than Symbol & The Hash\"\n"
+                           "    }\n"
+                           "  ]\n"
+                           "}"));
 }
 
 TEST_F(SerializeTest, ParseWhitespace) {
     StringSlice text =
-        "  {  \n"
-        "    \"\"  :  {  }  ,  "
-        "    \" \"  :  {  \"\": \"\"  }  ,  "
-        "    \"  \"  :  [  ]  ,  "
-        "    \"   \"  :  [  \"\"  ]  ,  "
-        "    \"    \"  :  \" \"  ,  "
-        "    \"     \"  :  0  ,  "
-        "    \"      \"  :  true  ,  "
-        "    \"       \"  :  null  "
-        "  }  ";
+            "  {  \n"
+            "    \"\"  :  {  }  ,  "
+            "    \" \"  :  {  \"\": \"\"  }  ,  "
+            "    \"  \"  :  [  ]  ,  "
+            "    \"   \"  :  [  \"\"  ]  ,  "
+            "    \"    \"  :  \" \"  ,  "
+            "    \"     \"  :  0  ,  "
+            "    \"      \"  :  true  ,  "
+            "    \"       \"  :  null  "
+            "  }  ";
     StringMap<Json> object;
 
     StringMap<Json> inner_object;

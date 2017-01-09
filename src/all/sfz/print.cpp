@@ -11,8 +11,7 @@
 namespace sfz {
 
 template <>
-void PrintItem::Dispatch<void>::print_to(const void* target, PrintTarget out) {
-}
+void PrintItem::Dispatch<void>::print_to(const void* target, PrintTarget out) {}
 
 template <>
 void PrintItem::Dispatch<bool>::print_to(const void* target, PrintTarget out) {
@@ -103,7 +102,7 @@ void PrintItem::Dispatch<float>::print_to(const void* target, PrintTarget out) {
 template <>
 void PrintItem::Dispatch<double>::print_to(const void* target, PrintTarget out) {
     double value = *reinterpret_cast<const double*>(target);
-    char* string;
+    char*  string;
     if (asprintf(&string, "%lf", value) < 0) {
         fprintf(stderr, "asprintf failed");
     } else {
@@ -128,11 +127,11 @@ void PrintItem::Dispatch<const void*>::print_to(const void* target, PrintTarget 
 }
 
 const PrintItem::DispatchTable PrintItem::Dispatch<const char*>::table = {
-    print_to,
+        print_to,
 };
 
 const PrintItem::DispatchTable PrintItem::Dispatch<const void*>::table = {
-    print_to,
+        print_to,
 };
 
 }  // namespace sfz

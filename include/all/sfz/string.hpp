@@ -27,19 +27,19 @@ class StringSlice;
 class String {
   public:
     // STL container types and constants.
-    typedef Rune                                    value_type;
-    typedef Rune*                                   pointer;
-    typedef const Rune*                             const_pointer;
-    typedef Rune&                                   reference;
-    typedef const Rune&                             const_reference;
+    typedef Rune        value_type;
+    typedef Rune*       pointer;
+    typedef const Rune* const_pointer;
+    typedef Rune&       reference;
+    typedef const Rune& const_reference;
 
-    typedef size_t                                  size_type;
-    typedef ptrdiff_t                               difference_type;
+    typedef size_t    size_type;
+    typedef ptrdiff_t difference_type;
 
-    typedef pointer                                 iterator;
-    typedef const_pointer                           const_iterator;
-    typedef std::reverse_iterator<iterator>         reverse_iterator;
-    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+    typedef pointer                               iterator;
+    typedef const_pointer                         const_iterator;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     static const size_type npos = -1;
 
@@ -108,7 +108,7 @@ class String {
     void replace(size_t index, size_t num, const StringSlice& string);
 
     size_t size() const;
-    bool empty() const;
+    bool   empty() const;
     Rune at(size_t loc) const;
     size_t find(Rune rune, size_t index = 0) const;
     size_t find(const StringSlice& string, size_t index = 0) const;
@@ -120,12 +120,12 @@ class String {
     StringSlice slice(size_t loc, size_t size) const;
 
     // @returns             STL-like iterators over the StringSlice.
-    iterator begin() { return _data.get(); }
-    iterator end() { return _data.get() + _size; }
-    const_iterator begin() const { return _data.get(); }
-    const_iterator end() const { return _data.get() + _size; }
-    reverse_iterator rbegin() { return reverse_iterator(end()); }
-    reverse_iterator rend() { return reverse_iterator(begin()); }
+    iterator               begin() { return _data.get(); }
+    iterator               end() { return _data.get() + _size; }
+    const_iterator         begin() const { return _data.get(); }
+    const_iterator         end() const { return _data.get() + _size; }
+    reverse_iterator       rbegin() { return reverse_iterator(end()); }
+    reverse_iterator       rend() { return reverse_iterator(begin()); }
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
@@ -134,13 +134,13 @@ class String {
   private:
     friend class StringSlice;
     friend bool operator==(const String& x, const String& y);
-    friend bool operator< (const String& x, const String& y);
+    friend bool operator<(const String& x, const String& y);
 
     void initialize(size_t capacity);
 
     std::unique_ptr<Rune[]> _data;
-    size_t _size;
-    size_t _capacity;
+    size_t                  _size;
+    size_t                  _capacity;
 
     // Disallow assignment.
     String& operator=(const String&);
@@ -156,19 +156,19 @@ class String {
 class StringSlice {
   public:
     // STL container types and constants.
-    typedef Rune                                    value_type;
-    typedef Rune*                                   pointer;
-    typedef const Rune*                             const_pointer;
-    typedef Rune&                                   reference;
-    typedef const Rune&                             const_reference;
+    typedef Rune        value_type;
+    typedef Rune*       pointer;
+    typedef const Rune* const_pointer;
+    typedef Rune&       reference;
+    typedef const Rune& const_reference;
 
-    typedef size_t                                  size_type;
-    typedef ptrdiff_t                               difference_type;
+    typedef size_t    size_type;
+    typedef ptrdiff_t difference_type;
 
     class iterator;
-    typedef iterator                                const_iterator;
-    typedef std::reverse_iterator<iterator>         reverse_iterator;
-    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+    typedef iterator                              const_iterator;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     static const size_type npos = -1;
 
@@ -218,8 +218,8 @@ class StringSlice {
     StringSlice slice(size_t loc, size_t size) const;
 
     // @returns             STL-like iterators over the StringSlice.
-    const_iterator begin() const;
-    const_iterator end() const;
+    const_iterator         begin() const;
+    const_iterator         end() const;
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
@@ -227,11 +227,11 @@ class StringSlice {
     class iterator {
       public:
         typedef std::random_access_iterator_tag iterator_category;
-        typedef StringSlice container_type;
-        typedef Rune value_type;
-        typedef const Rune* pointer;
-        typedef const Rune& reference;
-        typedef ptrdiff_t difference_type;
+        typedef StringSlice                     container_type;
+        typedef Rune                            value_type;
+        typedef const Rune*                     pointer;
+        typedef const Rune&                     reference;
+        typedef ptrdiff_t                       difference_type;
 
         iterator();
 
@@ -258,7 +258,7 @@ class StringSlice {
         iterator(const uint8_t* it, int encoding);
 
         const uint8_t* _it;
-        int _encoding;
+        int            _encoding;
 
         // ALLOW_COPY_AND_ASSIGN
     };
@@ -271,8 +271,8 @@ class StringSlice {
     StringSlice(const uint8_t* data, size_t size, int encoding);
 
     const uint8_t* _data;
-    int _encoding;
-    size_t _size;
+    int            _encoding;
+    size_t         _size;
 
     // ALLOW_COPY_AND_ASSIGN
 };
@@ -285,34 +285,43 @@ void swap(StringSlice& x, StringSlice& y);
 
 inline void copy(String& to, const String& from) { to.assign(from); }
 
-inline bool store_argument(String& to, StringSlice from, PrintTarget error) { to.assign(from); return true; }
+inline bool store_argument(String& to, StringSlice from, PrintTarget error) {
+    to.assign(from);
+    return true;
+}
 
 bool operator==(const String& x, const String& y);
 inline bool operator!=(const String& x, const String& y) { return !(x == y); }
-bool operator< (const String& x, const String& y);
+bool operator<(const String& x, const String& y);
 inline bool operator<=(const String& x, const String& y) { return !(y < x); }
-inline bool operator> (const String& x, const String& y) { return y < x; }
+inline bool operator>(const String& x, const String& y) { return y < x; }
 inline bool operator>=(const String& x, const String& y) { return !(x < y); }
 
 bool operator==(const StringSlice& x, const StringSlice& y);
 inline bool operator!=(const StringSlice& x, const StringSlice& y) { return !(x == y); }
-bool operator< (const StringSlice& x, const StringSlice& y);
+bool operator<(const StringSlice& x, const StringSlice& y);
 inline bool operator<=(const StringSlice& x, const StringSlice& y) { return !(y < x); }
-inline bool operator> (const StringSlice& x, const StringSlice& y) { return y < x; }
+inline bool operator>(const StringSlice& x, const StringSlice& y) { return y < x; }
 inline bool operator>=(const StringSlice& x, const StringSlice& y) { return !(x < y); }
 
 inline bool operator==(const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    return x._it == y._it; }
+    return x._it == y._it;
+}
 inline bool operator!=(const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    return !(x == y); }
-inline bool operator< (const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    return x._it < y._it; }
+    return !(x == y);
+}
+inline bool operator<(const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return x._it < y._it;
+}
 inline bool operator<=(const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    return !(y < x); }
-inline bool operator> (const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    return y < x; }
+    return !(y < x);
+}
+inline bool operator>(const StringSlice::iterator& x, const StringSlice::iterator& y) {
+    return y < x;
+}
 inline bool operator>=(const StringSlice::iterator& x, const StringSlice::iterator& y) {
-    return !(x < y); }
+    return !(x < y);
+}
 
 }  // namespace sfz
 

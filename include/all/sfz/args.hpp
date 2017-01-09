@@ -8,13 +8,13 @@
 
 #include <limits>
 #include <map>
-#include <vector>
 #include <sfz/algorithm.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/print.hpp>
-#include <sfz/string.hpp>
 #include <sfz/string-map.hpp>
+#include <sfz/string.hpp>
+#include <vector>
 
 namespace sfz {
 namespace args {
@@ -29,7 +29,7 @@ class Action {
   public:
     class Impl {
       public:
-        virtual ~Impl() { }
+        virtual ~Impl() {}
         virtual bool takes_value() const = 0;
         virtual bool process(PrintTarget error) const {
             print(error, "not implemented");
@@ -67,8 +67,8 @@ class Parser {
     bool parse_args(int argc, const char* const* argv, PrintTarget error) const;
 
     const String& name() const;
-    ParserUsage usage() const;
-    ParserHelp help() const;
+    ParserUsage   usage() const;
+    ParserHelp    help() const;
 
   private:
     friend class Argument;
@@ -95,19 +95,19 @@ class Parser {
     void print_help_to(PrintTarget out) const;
 
     const Parser* const _parent;
-    const String _name;
-    const String _description;
-    const Action _action;
+    const String        _name;
+    const String        _description;
+    const Action        _action;
 
-    std::vector<std::shared_ptr<Parser> > _subparsers;
-    StringMap<std::shared_ptr<Parser> > _subparsers_by_name;
+    std::vector<std::shared_ptr<Parser>> _subparsers;
+    StringMap<std::shared_ptr<Parser>>   _subparsers_by_name;
 
-    std::vector<std::shared_ptr<Argument> > _argument_specs;
-    std::shared_ptr<Argument> _subparser_argument;
+    std::vector<std::shared_ptr<Argument>> _argument_specs;
+    std::shared_ptr<Argument>              _subparser_argument;
 
-    std::vector<std::shared_ptr<Argument> > _option_specs;
-    std::map<Rune, std::shared_ptr<Argument> > _short_options_by_name;
-    StringMap<std::shared_ptr<Argument> > _long_options_by_name;
+    std::vector<std::shared_ptr<Argument>> _option_specs;
+    std::map<Rune, std::shared_ptr<Argument>> _short_options_by_name;
+    StringMap<std::shared_ptr<Argument>> _long_options_by_name;
 
     DISALLOW_COPY_AND_ASSIGN(Parser);
 };
@@ -141,17 +141,18 @@ class Argument {
         BOTH_OPTION,
     };
 
-    Argument(Type type, const StringSlice& short_option_name,
-            const StringSlice& long_option_name, Action action);
+    Argument(
+            Type type, const StringSlice& short_option_name, const StringSlice& long_option_name,
+            Action action);
 
-    const Type _type;
+    const Type   _type;
     const String _short_option_name;
     const String _long_option_name;
     const Action _action;
-    String _metavar;
-    String _help;
-    int _min_args;
-    int _max_args;
+    String       _metavar;
+    String       _help;
+    int          _min_args;
+    int          _max_args;
 
     DISALLOW_COPY_AND_ASSIGN(Argument);
 };
@@ -171,9 +172,11 @@ bool store_argument(double& to, StringSlice value, PrintTarget error);
 
 template <typename To>
 struct StoreAction : public Action::Impl {
-    StoreAction(To& to): to(to) { }
-    virtual bool takes_value() const { return true; }
-    virtual bool process(StringSlice value, PrintTarget error) const { return store_argument(to, value, error); }
+    StoreAction(To& to) : to(to) {}
+    virtual bool    takes_value() const { return true; }
+    virtual bool process(StringSlice value, PrintTarget error) const {
+        return store_argument(to, value, error);
+    }
     To& to;
 };
 
@@ -185,11 +188,14 @@ Action store(To& to) {
 template <typename To>
 struct StoreConstAction : public Action::Impl {
     template <typename Constant>
-    StoreConstAction(To& to, Constant constant): to(to), constant(constant) { }
+    StoreConstAction(To& to, Constant constant) : to(to), constant(constant) {}
     virtual bool takes_value() const { return false; }
-    virtual bool process(PrintTarget error) const { copy(to, constant); return true; }
+    virtual bool process(PrintTarget error) const {
+        copy(to, constant);
+        return true;
+    }
     To& to;
-    To constant;
+    To  constant;
 };
 
 template <typename To, typename Constant>
@@ -199,8 +205,8 @@ Action store_const(To& to, const Constant& constant) {
 
 template <typename ToElement>
 struct AppendAction : public Action::Impl {
-    AppendAction(std::vector<ToElement>& to): to(to) { }
-    virtual bool takes_value() const { return true; }
+    AppendAction(std::vector<ToElement>& to) : to(to) {}
+    virtual bool                         takes_value() const { return true; }
     virtual bool process(StringSlice value, PrintTarget error) const {
         ToElement next;
         if (!store_argument(next, value, error)) {
@@ -219,8 +225,8 @@ Action append(std::vector<ToElement>& to) {
 
 template <typename To>
 struct IncrementAction : public Action::Impl {
-    IncrementAction(To& arg): arg(arg) { }
-    virtual bool takes_value() const { return false; }
+    IncrementAction(To& arg) : arg(arg) {}
+    virtual bool        takes_value() const { return false; }
     virtual bool process(PrintTarget error) const {
         if (arg == std::numeric_limits<To>::max()) {
             print(error, "integer overflow");
@@ -242,8 +248,12 @@ Action version(StringSlice string);
 
 inline Action noop() { return std::shared_ptr<Action::Impl>(); }
 
-struct ParserUsage { const Parser& parser; };
-struct ParserHelp { const Parser& parser; };
+struct ParserUsage {
+    const Parser& parser;
+};
+struct ParserHelp {
+    const Parser& parser;
+};
 void print_to(PrintTarget out, ParserUsage usage);
 void print_to(PrintTarget out, ParserHelp help);
 

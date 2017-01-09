@@ -23,16 +23,18 @@ void write(WriteTarget out, const T* items, size_t count);
 class WriteTarget {
   public:
     WriteTarget(const WriteTarget& target);
-    template <typename T> WriteTarget(T& target);
+    template <typename T>
+    WriteTarget(T& target);
 
     inline void push(const BytesSlice& bytes);
     inline void push(size_t num, uint8_t byte);
 
   private:
     struct DispatchTable;
-    template <typename T> struct Dispatch;
+    template <typename T>
+    struct Dispatch;
 
-    void* _target;
+    void*                _target;
     const DispatchTable* _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
@@ -40,17 +42,20 @@ class WriteTarget {
 
 class WriteItem {
   public:
-    template <typename T> WriteItem(const T& t);
-    template <typename T> WriteItem(const T* t, size_t size);
+    template <typename T>
+    WriteItem(const T& t);
+    template <typename T>
+    WriteItem(const T* t, size_t size);
 
     inline void write_to(WriteTarget out) const;
 
   private:
     struct DispatchTable;
-    template <typename T> struct Dispatch;
+    template <typename T>
+    struct Dispatch;
 
-    const void* _target;
-    const size_t _size;
+    const void*          _target;
+    const size_t         _size;
     const DispatchTable* _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
@@ -84,18 +89,14 @@ struct WriteTarget::Dispatch {
 
 template <typename T>
 const WriteTarget::DispatchTable WriteTarget::Dispatch<T>::table = {
-    push_bytes,
-    push_repeated_bytes,
+        push_bytes, push_repeated_bytes,
 };
 
 inline WriteTarget::WriteTarget(const WriteTarget& other)
-    : _target(other._target),
-      _dispatch_table(other._dispatch_table) { }
+        : _target(other._target), _dispatch_table(other._dispatch_table) {}
 
 template <typename T>
-WriteTarget::WriteTarget(T& t)
-    : _target(&t),
-      _dispatch_table(&Dispatch<T>::table) { }
+WriteTarget::WriteTarget(T& t) : _target(&t), _dispatch_table(&Dispatch<T>::table) {}
 
 inline void WriteTarget::push(const BytesSlice& bytes) {
     _dispatch_table->push_bytes(_target, bytes);
@@ -135,8 +136,8 @@ struct WriteItem::Dispatch {
 };
 
 #define SFZ_WRITE_ITEM_SPECIALIZE(TYPE) \
-    template <> void WriteItem::Dispatch<TYPE>::write_to( \
-            const void* target, WriteTarget out, size_t count);
+    template <>                         \
+    void WriteItem::Dispatch<TYPE>::write_to(const void* target, WriteTarget out, size_t count);
 SFZ_WRITE_ITEM_SPECIALIZE(bool);
 SFZ_WRITE_ITEM_SPECIALIZE(char);
 SFZ_WRITE_ITEM_SPECIALIZE(int8_t);
@@ -151,20 +152,15 @@ SFZ_WRITE_ITEM_SPECIALIZE(uint64_t);
 
 template <typename T>
 const WriteItem::DispatchTable WriteItem::Dispatch<T>::table = {
-    write_to,
+        write_to,
 };
 
 template <typename T>
-WriteItem::WriteItem(const T& t)
-    : _target(&t),
-      _size(1),
-      _dispatch_table(&Dispatch<T>::table) { }
+WriteItem::WriteItem(const T& t) : _target(&t), _size(1), _dispatch_table(&Dispatch<T>::table) {}
 
 template <typename T>
 WriteItem::WriteItem(const T* t, size_t size)
-    : _target(t),
-      _size(size),
-      _dispatch_table(&Dispatch<T>::table) { }
+        : _target(t), _size(size), _dispatch_table(&Dispatch<T>::table) {}
 
 inline void WriteItem::write_to(WriteTarget out) const {
     _dispatch_table->write_to(_target, out, _size);

@@ -8,24 +8,24 @@
 #include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/range.hpp>
-#include <sfz/string.hpp>
 #include <sfz/string-utils.hpp>
+#include <sfz/string.hpp>
 
 namespace sfz {
 
 namespace {
 
 void span_complement(
-        const StringSlice& input, const StringSlice& chars,
-        StringSlice* span, StringSlice* remainder) {
-    for (int i: range(input.size())) {
+        const StringSlice& input, const StringSlice& chars, StringSlice* span,
+        StringSlice* remainder) {
+    for (int i : range(input.size())) {
         if (chars.find(input.at(i)) != String::npos) {
-            *span = input.slice(0, i);
+            *span      = input.slice(0, i);
             *remainder = input.slice(i);
             return;
         }
     }
-    *span = input;
+    *span      = input;
     *remainder = StringSlice();
 }
 
@@ -33,7 +33,7 @@ void span_complement(
 
 void print_format_to(
         PrintTarget out, const char* format_string, const PrintItem* const* items, size_t size) {
-    static const StringSlice kBraces = "{}";
+    static const StringSlice kBraces     = "{}";
     static const StringSlice kCloseBrace = "}";
 
     StringSlice f = format_string;
@@ -43,7 +43,7 @@ void print_format_to(
         StringSlice remainder;
         span_complement(f, kBraces, &span, &remainder);
         if (remainder.size() == 1) {
-            span = f;
+            span      = f;
             remainder = StringSlice();
         }
         out.push(span);
@@ -77,52 +77,37 @@ void print_format_to(
 }
 
 Integer::Integer(signed char value)
-    : _negative(value < 0),
-      _abs(_negative ? -static_cast<int64_t>(value) : value) { }
+        : _negative(value < 0), _abs(_negative ? -static_cast<int64_t>(value) : value) {}
 
 Integer::Integer(signed short value)
-    : _negative(value < 0),
-      _abs(_negative ? -static_cast<int64_t>(value) : value) { }
+        : _negative(value < 0), _abs(_negative ? -static_cast<int64_t>(value) : value) {}
 
 Integer::Integer(signed int value)
-    : _negative(value < 0),
-      _abs(_negative ? -static_cast<int64_t>(value) : value) { }
+        : _negative(value < 0), _abs(_negative ? -static_cast<int64_t>(value) : value) {}
 
 Integer::Integer(signed long value)
-    : _negative(value < 0),
-      _abs(_negative ? -static_cast<int64_t>(value) : value) { }
+        : _negative(value < 0), _abs(_negative ? -static_cast<int64_t>(value) : value) {}
 
 Integer::Integer(signed long long value)
-    : _negative(value < 0),
-      _abs(_negative ? -static_cast<int64_t>(value) : value) { }
+        : _negative(value < 0), _abs(_negative ? -static_cast<int64_t>(value) : value) {}
 
-Integer::Integer(unsigned char value)
-    : _negative(false),
-      _abs(value) { }
+Integer::Integer(unsigned char value) : _negative(false), _abs(value) {}
 
-Integer::Integer(unsigned short value)
-    : _negative(false),
-      _abs(value) { }
+Integer::Integer(unsigned short value) : _negative(false), _abs(value) {}
 
-Integer::Integer(unsigned int value)
-    : _negative(false),
-      _abs(value) { }
+Integer::Integer(unsigned int value) : _negative(false), _abs(value) {}
 
-Integer::Integer(unsigned long value)
-    : _negative(false),
-      _abs(value) { }
+Integer::Integer(unsigned long value) : _negative(false), _abs(value) {}
 
-Integer::Integer(unsigned long long value)
-    : _negative(false),
-      _abs(value) { }
+Integer::Integer(unsigned long long value) : _negative(false), _abs(value) {}
 
 void print_to(PrintTarget out, const FormattedInt& value) {
     static const char kDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    uint8_t buffer[64];
-    size_t size = 0;
+    uint8_t  buffer[64];
+    size_t   size = 0;
     uint8_t* data = buffer + 64;
-    uint64_t v = value.value.abs();
+    uint64_t v    = value.value.abs();
 
     while (v > 0) {
         --data;
@@ -149,16 +134,16 @@ namespace {
 // equivalents of '\a', '\b', and '\v' rather than the symbolic names.  These characters are rare
 // enough that it is considered more informative to provide the numeric name.
 const char kEscaped[' '][5] = {
-    "\\000", "\\001", "\\002", "\\003", "\\004", "\\005", "\\006", "\\007",
-    "\\010", "\\t",   "\\n",   "\\013", "\\014", "\\r",   "\\016", "\\017",
-    "\\020", "\\021", "\\022", "\\023", "\\024", "\\025", "\\026", "\\027",
-    "\\030", "\\031", "\\032", "\\033", "\\034", "\\035", "\\036", "\\037",
+        "\\000", "\\001", "\\002", "\\003", "\\004", "\\005", "\\006", "\\007",
+        "\\010", "\\t",   "\\n",   "\\013", "\\014", "\\r",   "\\016", "\\017",
+        "\\020", "\\021", "\\022", "\\023", "\\024", "\\025", "\\026", "\\027",
+        "\\030", "\\031", "\\032", "\\033", "\\034", "\\035", "\\036", "\\037",
 };
 
 }  // namespace
 
 void print_to(PrintTarget out, const EscapedString& value) {
-    for (Rune rune: value.string) {
+    for (Rune rune : value.string) {
         if (rune < ' ') {
             out.push(kEscaped[rune]);
         } else if (rune == '\'' || rune == '\"' || rune == '\\') {
@@ -172,7 +157,7 @@ void print_to(PrintTarget out, const EscapedString& value) {
 
 void print_to(PrintTarget out, const QuotedString& value) {
     out.push(1, '"');
-    EscapedString item = { value.string };
+    EscapedString item = {value.string};
     print_to(out, item);
     out.push(1, '"');
 }

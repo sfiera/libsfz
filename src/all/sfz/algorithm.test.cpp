@@ -19,35 +19,35 @@ typedef testing::Test AlgorithmTest;
 
 TEST_F(AlgorithmTest, Int) {
     const int from = 1;
-    int to = 0;
+    int       to   = 0;
     copy(to, from);
     ASSERT_THAT(to, Eq(from));
 }
 
 TEST_F(AlgorithmTest, BytesSlice) {
     const BytesSlice from("from");
-    BytesSlice to("to");
+    BytesSlice       to("to");
     copy(to, from);
     ASSERT_THAT(to, Eq(from));
 }
 
 TEST_F(AlgorithmTest, Bytes) {
     const Bytes from("from");
-    Bytes to("to");
+    Bytes       to("to");
     copy(to, from);
     ASSERT_THAT(to, Eq<BytesSlice>(from));
 }
 
 TEST_F(AlgorithmTest, StringSlice) {
     const StringSlice from("from");
-    StringSlice to("to");
+    StringSlice       to("to");
     copy(to, from);
     ASSERT_THAT(to, Eq(from));
 }
 
 TEST_F(AlgorithmTest, String) {
     const String from("from");
-    String to("to");
+    String       to("to");
     copy(to, from);
     ASSERT_THAT(to, Eq<StringSlice>(from));
 }

@@ -46,7 +46,7 @@ inline uint64_t host_to_network(const uint64_t& t) { return swap_u64(t); }
 }  // namespace
 
 template <typename T>
-NetworkBytes<T>::NetworkBytes() { }
+NetworkBytes<T>::NetworkBytes() {}
 
 template <typename T>
 NetworkBytes<T>::NetworkBytes(T t) {

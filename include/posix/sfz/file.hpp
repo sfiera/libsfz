@@ -67,4 +67,4 @@ class MappedFile {
 
 }  // namespace sfz
 
-#endif // SFZ_FILE_HPP_
+#endif  // SFZ_FILE_HPP_

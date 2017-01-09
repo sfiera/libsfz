@@ -109,7 +109,7 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
     }
     {
         const StringSlice s(expected);
-        const String string(s);
+        const String      string(s);
         EXPECT_THAT(string, Eq(expected));
     }
     {
@@ -117,7 +117,7 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
         EXPECT_THAT(string, Eq(expected));
     }
     {
-        BytesSlice bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
+        BytesSlice   bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
         const String string(ascii::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
     }
@@ -144,7 +144,7 @@ TEST_F(StringTest, AllAssignOverloads) {
     }
     {
         StringSlice s(expected);
-        String string("Hello, ");
+        String      string("Hello, ");
         string.assign(s);
         EXPECT_THAT(string, Eq(expected));
     }
@@ -155,7 +155,7 @@ TEST_F(StringTest, AllAssignOverloads) {
     }
     {
         BytesSlice bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
-        String string("Hello, ");
+        String     string("Hello, ");
         string.assign(ascii::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
     }
@@ -169,7 +169,7 @@ TEST_F(StringTest, AllAssignOverloads) {
 // Test all five overloads of String::append().
 TEST_F(StringTest, AllAppendOverloads) {
     const char* expected = "Hello, world!";
-    const char* append = "world!";
+    const char* append   = "world!";
     {
         String s(append);
         String string("Hello, ");
@@ -178,7 +178,7 @@ TEST_F(StringTest, AllAppendOverloads) {
     }
     {
         StringSlice s(append);
-        String string("Hello, ");
+        String      string("Hello, ");
         string.append(s);
         EXPECT_THAT(string, Eq(expected));
     }
@@ -189,7 +189,7 @@ TEST_F(StringTest, AllAppendOverloads) {
     }
     {
         BytesSlice bytes(reinterpret_cast<const uint8_t*>("world!"), 6);
-        String string("Hello, ");
+        String     string("Hello, ");
         string.append(ascii::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
     }
@@ -244,7 +244,7 @@ TEST_F(StringTest, Replace) {
 
 TEST_F(StringTest, ReplaceGreek) {
     const String kalimera_kosme_bang(utf8::decode("Καλημέρα, κόσμε!"));
-    String string(kalimera_kosme_bang);
+    String       string(kalimera_kosme_bang);
 
     const String antio(utf8::decode("Αντίο"));
     const String antio_kosme_bang(utf8::decode("Αντίο, κόσμε!"));
@@ -267,7 +267,7 @@ TEST_F(StringTest, ReplaceGreek) {
 
 TEST_F(StringTest, ReplaceJapanese) {
     const String konnitiha_sekai_bang(utf8::decode("こんにちは世界！"));
-    String string(konnitiha_sekai_bang);
+    String       string(konnitiha_sekai_bang);
 
     const String sayonara(utf8::decode("さよなら"));
     const String sayonara_sekai_bang(utf8::decode("さよなら世界！"));
@@ -294,7 +294,7 @@ void TestComparison() {
     const String world_string("World");
     const String kalimera_string(utf8::decode("Καλημέρα"));
 
-    Left world_left(world_string);
+    Left  world_left(world_string);
     Right hello(hello_string);
     Right world_right(world_string);
     Right kalimera(kalimera_string);
@@ -313,8 +313,8 @@ void TestComparison() {
 }
 
 TEST_F(StringTest, Comparison) {
-    TestComparison<String,      String>();
-    TestComparison<String,      StringSlice>();
+    TestComparison<String, String>();
+    TestComparison<String, StringSlice>();
     TestComparison<StringSlice, StringSlice>();
 }
 

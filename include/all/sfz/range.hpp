@@ -8,7 +8,8 @@
 
 namespace sfz {
 
-template <typename T> class Range;
+template <typename T>
+class Range;
 
 template <typename T>
 Range<T> range(T begin, T end);
@@ -21,20 +22,26 @@ Range<T> range(T end);
 template <typename T>
 class RangeIterator {
   public:
-    typedef T value_type;
+    typedef T                 value_type;
     typedef const value_type* pointer;
     typedef const value_type* const_pointer;
     typedef const value_type& reference;
     typedef const value_type& const_reference;
 
-    RangeIterator(value_type value): _value(value) { }
+    RangeIterator(value_type value) : _value(value) {}
 
     value_type operator*() const { return _value; }
     pointer operator->() const { return &_value; }
 
-    RangeIterator& operator++() { ++_value; return *this; }
+    RangeIterator& operator++() {
+        ++_value;
+        return *this;
+    }
     RangeIterator operator++(int) { return _value++; }
-    RangeIterator& operator--() { --_value; return *this; }
+    RangeIterator& operator--() {
+        --_value;
+        return *this;
+    }
     RangeIterator operator--(int) { return _value--; }
 
   private:
@@ -51,7 +58,7 @@ class Range {
     typedef RangeIterator<T> iterator;
     typedef RangeIterator<T> const_iterator;
 
-    Range(value_type first, value_type last): _first(first), _last(last) {}
+    Range(value_type first, value_type last) : _first(first), _last(last) {}
 
     const_iterator begin() const { return _first; }
     const_iterator end() const { return _last; }
@@ -63,12 +70,30 @@ class Range {
     // ALLOW_COPY_AND_ASSIGN
 };
 
-template <typename T> bool operator==(RangeIterator<T> x, RangeIterator<T> y) { return *x == *y; }
-template <typename T> bool operator!=(RangeIterator<T> x, RangeIterator<T> y) { return *x != *y; }
-template <typename T> bool operator< (RangeIterator<T> x, RangeIterator<T> y) { return *x <  *y; }
-template <typename T> bool operator<=(RangeIterator<T> x, RangeIterator<T> y) { return *x <= *y; }
-template <typename T> bool operator> (RangeIterator<T> x, RangeIterator<T> y) { return *x >  *y; }
-template <typename T> bool operator>=(RangeIterator<T> x, RangeIterator<T> y) { return *x >= *y; }
+template <typename T>
+bool operator==(RangeIterator<T> x, RangeIterator<T> y) {
+    return *x == *y;
+}
+template <typename T>
+bool operator!=(RangeIterator<T> x, RangeIterator<T> y) {
+    return *x != *y;
+}
+template <typename T>
+bool operator<(RangeIterator<T> x, RangeIterator<T> y) {
+    return *x < *y;
+}
+template <typename T>
+bool operator<=(RangeIterator<T> x, RangeIterator<T> y) {
+    return *x <= *y;
+}
+template <typename T>
+bool operator>(RangeIterator<T> x, RangeIterator<T> y) {
+    return *x > *y;
+}
+template <typename T>
+bool operator>=(RangeIterator<T> x, RangeIterator<T> y) {
+    return *x >= *y;
+}
 
 template <typename T>
 Range<T> range(T begin, T end) {

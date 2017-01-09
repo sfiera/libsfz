@@ -70,7 +70,7 @@ class Sha1 {
     // Used to accumulate data before a call to process_message_block().  The next byte of data
     // will be added at _message_block_index, and when _message_block_index is 64, at the end of
     // _message_block, process_message_block() is called to process the data and reset it to 0.
-    int _message_block_index;
+    int     _message_block_index;
     uint8_t _message_block[64];
 
     // Disallow assignment.  Copying is allowed but explicit.

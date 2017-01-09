@@ -21,40 +21,40 @@ typedef Test OsTest;
 
 // Test path::basename() with many different inputs.
 TEST_F(OsTest, Basename) {
-    EXPECT_THAT(path::basename("/"),                Eq("/"));
-    EXPECT_THAT(path::basename("/aesc"),            Eq("aesc"));
-    EXPECT_THAT(path::basename("/aesc/"),           Eq("aesc"));
-    EXPECT_THAT(path::basename("/aesc/wynn"),       Eq("wynn"));
-    EXPECT_THAT(path::basename("/aesc/wynn/"),      Eq("wynn"));
-    EXPECT_THAT(path::basename("/aesc/wynn/."),     Eq("."));
-    EXPECT_THAT(path::basename("/aesc/wynn/.."),    Eq(".."));
+    EXPECT_THAT(path::basename("/"), Eq("/"));
+    EXPECT_THAT(path::basename("/aesc"), Eq("aesc"));
+    EXPECT_THAT(path::basename("/aesc/"), Eq("aesc"));
+    EXPECT_THAT(path::basename("/aesc/wynn"), Eq("wynn"));
+    EXPECT_THAT(path::basename("/aesc/wynn/"), Eq("wynn"));
+    EXPECT_THAT(path::basename("/aesc/wynn/."), Eq("."));
+    EXPECT_THAT(path::basename("/aesc/wynn/.."), Eq(".."));
 
-    EXPECT_THAT(path::basename(""),                 Eq(""));
-    EXPECT_THAT(path::basename("aesc"),             Eq("aesc"));
-    EXPECT_THAT(path::basename("aesc/"),            Eq("aesc"));
-    EXPECT_THAT(path::basename("aesc/wynn"),        Eq("wynn"));
-    EXPECT_THAT(path::basename("aesc/wynn/"),       Eq("wynn"));
-    EXPECT_THAT(path::basename("aesc/wynn/."),      Eq("."));
-    EXPECT_THAT(path::basename("aesc/wynn/.."),     Eq(".."));
+    EXPECT_THAT(path::basename(""), Eq(""));
+    EXPECT_THAT(path::basename("aesc"), Eq("aesc"));
+    EXPECT_THAT(path::basename("aesc/"), Eq("aesc"));
+    EXPECT_THAT(path::basename("aesc/wynn"), Eq("wynn"));
+    EXPECT_THAT(path::basename("aesc/wynn/"), Eq("wynn"));
+    EXPECT_THAT(path::basename("aesc/wynn/."), Eq("."));
+    EXPECT_THAT(path::basename("aesc/wynn/.."), Eq(".."));
 }
 
 // Test path::basename() with many different inputs.
 TEST_F(OsTest, Dirname) {
-    EXPECT_THAT(path::dirname("/"),                Eq("/"));
-    EXPECT_THAT(path::dirname("/aesc"),            Eq("/"));
-    EXPECT_THAT(path::dirname("/aesc/"),           Eq("/"));
-    EXPECT_THAT(path::dirname("/aesc/wynn"),       Eq("/aesc"));
-    EXPECT_THAT(path::dirname("/aesc/wynn/"),      Eq("/aesc"));
-    EXPECT_THAT(path::dirname("/aesc/wynn/."),     Eq("/aesc/wynn"));
-    EXPECT_THAT(path::dirname("/aesc/wynn/.."),    Eq("/aesc/wynn"));
+    EXPECT_THAT(path::dirname("/"), Eq("/"));
+    EXPECT_THAT(path::dirname("/aesc"), Eq("/"));
+    EXPECT_THAT(path::dirname("/aesc/"), Eq("/"));
+    EXPECT_THAT(path::dirname("/aesc/wynn"), Eq("/aesc"));
+    EXPECT_THAT(path::dirname("/aesc/wynn/"), Eq("/aesc"));
+    EXPECT_THAT(path::dirname("/aesc/wynn/."), Eq("/aesc/wynn"));
+    EXPECT_THAT(path::dirname("/aesc/wynn/.."), Eq("/aesc/wynn"));
 
-    EXPECT_THAT(path::dirname(""),                 Eq("."));
-    EXPECT_THAT(path::dirname("aesc"),             Eq("."));
-    EXPECT_THAT(path::dirname("aesc/"),            Eq("."));
-    EXPECT_THAT(path::dirname("aesc/wynn"),        Eq("aesc"));
-    EXPECT_THAT(path::dirname("aesc/wynn/"),       Eq("aesc"));
-    EXPECT_THAT(path::dirname("aesc/wynn/."),      Eq("aesc/wynn"));
-    EXPECT_THAT(path::dirname("aesc/wynn/.."),     Eq("aesc/wynn"));
+    EXPECT_THAT(path::dirname(""), Eq("."));
+    EXPECT_THAT(path::dirname("aesc"), Eq("."));
+    EXPECT_THAT(path::dirname("aesc/"), Eq("."));
+    EXPECT_THAT(path::dirname("aesc/wynn"), Eq("aesc"));
+    EXPECT_THAT(path::dirname("aesc/wynn/"), Eq("aesc"));
+    EXPECT_THAT(path::dirname("aesc/wynn/."), Eq("aesc/wynn"));
+    EXPECT_THAT(path::dirname("aesc/wynn/.."), Eq("aesc/wynn"));
 }
 
 class MockTreeWalker : public TreeWalker {
@@ -126,7 +126,7 @@ TEST_F(OsTest, Hierarchy) {
 
     {
         MockTreeWalker walker;
-        InSequence s;
+        InSequence     s;
         EXPECT_CALL(walker, pre_directory(StringSlice("roman"), IsDirStat()));
         EXPECT_CALL(walker, file(StringSlice("roman/README"), IsFileStat()));
         EXPECT_CALL(walker, pre_directory(StringSlice("roman/lower"), IsDirStat()));
@@ -142,7 +142,7 @@ TEST_F(OsTest, Hierarchy) {
 
     {
         MockTreeWalker walker;
-        InSequence s;
+        InSequence     s;
         EXPECT_CALL(walker, pre_directory(StringSlice("cyrillic"), IsDirStat()));
         EXPECT_CALL(walker, file(StringSlice("cyrillic/README"), IsFileStat()));
         EXPECT_CALL(walker, pre_directory(StringSlice("cyrillic/lower"), IsDirStat()));
@@ -157,7 +157,7 @@ TEST_F(OsTest, Hierarchy) {
 
     {
         MockTreeWalker walker;
-        InSequence s;
+        InSequence     s;
         EXPECT_CALL(walker, pre_directory(StringSlice("cyrillic"), IsDirStat()));
         EXPECT_CALL(walker, file(StringSlice("cyrillic/README"), IsFileStat()));
         EXPECT_CALL(walker, pre_directory(StringSlice("cyrillic/lower"), IsDirStat()));
@@ -178,7 +178,7 @@ TEST_F(OsTest, Hierarchy) {
 
     {
         MockTreeWalker walker;
-        InSequence s;
+        InSequence     s;
         EXPECT_CALL(walker, pre_directory(StringSlice("."), IsDirStat()));
         EXPECT_CALL(walker, pre_directory(StringSlice("./cyrillic"), IsDirStat()));
         EXPECT_CALL(walker, pre_directory(StringSlice("./cyrillic/upper"), IsDirStat()));
@@ -209,7 +209,7 @@ TEST_F(OsTest, WalkOther) {
     mkfifo("./aesc/thorn", 0600);
 
     MockTreeWalker walker;
-    InSequence s;
+    InSequence     s;
     EXPECT_CALL(walker, pre_directory(StringSlice("."), IsDirStat()));
     EXPECT_CALL(walker, pre_directory(StringSlice("./aesc"), IsDirStat()));
     EXPECT_CALL(walker, other(StringSlice("./aesc/thorn"), IsFifoStat()));

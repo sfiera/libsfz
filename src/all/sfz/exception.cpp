@@ -9,18 +9,13 @@
 
 namespace sfz {
 
-Exception::Impl::Impl(const PrintItem& msg)
-    : message(msg),
-      what(message) { }
+Exception::Impl::Impl(const PrintItem& msg) : message(msg), what(message) {}
 
-Exception::Exception(const PrintItem& message)
-    : _impl(new Impl(message)) { }
+Exception::Exception(const PrintItem& message) : _impl(new Impl(message)) {}
 
-Exception::~Exception() throw() { }
+Exception::~Exception() throw() {}
 
-const String& Exception::message() const throw() {
-    return _impl->message;
-}
+const String& Exception::message() const throw() { return _impl->message; }
 
 const char* Exception::what() const throw() {
     return reinterpret_cast<const char*>(_impl->what.data());

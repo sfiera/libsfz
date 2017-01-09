@@ -7,8 +7,8 @@
 #define SFZ_OS_HPP_
 
 #include <sys/stat.h>
-#include <sfz/string.hpp>
 #include <sfz/macros.hpp>
+#include <sfz/string.hpp>
 
 namespace sfz {
 
@@ -59,13 +59,13 @@ class TreeWalker {
   public:
     virtual ~TreeWalker();
 
-    virtual void pre_directory(const StringSlice& name, const Stat& st) const = 0;
+    virtual void pre_directory(const StringSlice& name, const Stat& st) const   = 0;
     virtual void cycle_directory(const StringSlice& name, const Stat& st) const = 0;
-    virtual void post_directory(const StringSlice& name, const Stat& st) const = 0;
+    virtual void post_directory(const StringSlice& name, const Stat& st) const  = 0;
 
     virtual void file(const StringSlice& name, const Stat& st) const = 0;
 
-    virtual void symlink(const StringSlice& name, const Stat& st) const = 0;
+    virtual void symlink(const StringSlice& name, const Stat& st) const        = 0;
     virtual void broken_symlink(const StringSlice& name, const Stat& st) const = 0;
 
     virtual void other(const StringSlice& name, const Stat& st) const = 0;

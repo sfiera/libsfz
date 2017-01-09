@@ -20,19 +20,19 @@ class BytesSlice;
 class Bytes {
   public:
     // STL container types and constants.
-    typedef uint8_t                                 value_type;
-    typedef uint8_t*                                pointer;
-    typedef const uint8_t*                          const_pointer;
-    typedef uint8_t&                                reference;
-    typedef const uint8_t&                          const_reference;
+    typedef uint8_t        value_type;
+    typedef uint8_t*       pointer;
+    typedef const uint8_t* const_pointer;
+    typedef uint8_t&       reference;
+    typedef const uint8_t& const_reference;
 
-    typedef size_t                                  size_type;
-    typedef ptrdiff_t                               difference_type;
+    typedef size_t    size_type;
+    typedef ptrdiff_t difference_type;
 
-    typedef pointer                                 iterator;
-    typedef const_pointer                           const_iterator;
-    typedef std::reverse_iterator<iterator>         reverse_iterator;
-    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+    typedef pointer                               iterator;
+    typedef const_pointer                         const_iterator;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     static const size_type npos = -1;
 
@@ -47,9 +47,9 @@ class Bytes {
     Bytes& operator=(Bytes&& bytes) = default;
     void assign(Bytes&& item);
 
-    uint8_t* data();
+    uint8_t*       data();
     const uint8_t* data() const;
-    size_t size() const;
+    size_t         size() const;
 
     void push(const BytesSlice& bytes);
     void push(size_t num, uint8_t byte);
@@ -86,19 +86,19 @@ class Bytes {
     friend void swap(Bytes& a, Bytes& b);
 
     // Iterator support.
-    iterator begin() { return iterator(_data.get()); }
-    iterator end() { return iterator(_data.get() + _size); }
-    const_iterator begin() const { return const_iterator(_data.get()); }
-    const_iterator end() const { return const_iterator(_data.get() + _size); }
-    reverse_iterator rbegin() { return reverse_iterator(end()); }
-    reverse_iterator rend() { return reverse_iterator(begin()); }
+    iterator               begin() { return iterator(_data.get()); }
+    iterator               end() { return iterator(_data.get() + _size); }
+    const_iterator         begin() const { return const_iterator(_data.get()); }
+    const_iterator         end() const { return const_iterator(_data.get() + _size); }
+    reverse_iterator       rbegin() { return reverse_iterator(end()); }
+    reverse_iterator       rend() { return reverse_iterator(begin()); }
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
   private:
     std::unique_ptr<uint8_t[]> _data;
-    size_t _size;
-    size_t _capacity;
+    size_t                     _size;
+    size_t                     _capacity;
 
     // Disallow assignment.
     Bytes& operator=(const Bytes&);
@@ -107,18 +107,18 @@ class Bytes {
 class BytesSlice {
   public:
     // STL container types and constants.
-    typedef uint8_t                                 value_type;
-    typedef uint8_t*                                pointer;
-    typedef const uint8_t*                          const_pointer;
-    typedef uint8_t&                                reference;
-    typedef const uint8_t&                          const_reference;
-    typedef size_t                                  size_type;
-    typedef ptrdiff_t                               difference_type;
+    typedef uint8_t        value_type;
+    typedef uint8_t*       pointer;
+    typedef const uint8_t* const_pointer;
+    typedef uint8_t&       reference;
+    typedef const uint8_t& const_reference;
+    typedef size_t         size_type;
+    typedef ptrdiff_t      difference_type;
 
-    typedef const_pointer                           iterator;
-    typedef const_pointer                           const_iterator;
-    typedef std::reverse_iterator<iterator>         reverse_iterator;
-    typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
+    typedef const_pointer                         iterator;
+    typedef const_pointer                         const_iterator;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     static const size_type npos = -1;
 
@@ -129,7 +129,7 @@ class BytesSlice {
     BytesSlice(const uint8_t* data, size_t size);
 
     const uint8_t* data() const;
-    size_t size() const;
+    size_t         size() const;
 
     uint8_t at(size_t loc) const;
 
@@ -147,8 +147,8 @@ class BytesSlice {
     void shift(size_t size);
     void shift(uint8_t* data, size_t size);
 
-    const_iterator begin() const { return const_iterator(_data); }
-    const_iterator end() const { return const_iterator(_data + _size); }
+    const_iterator         begin() const { return const_iterator(_data); }
+    const_iterator         end() const { return const_iterator(_data + _size); }
     const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
     const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
@@ -156,7 +156,7 @@ class BytesSlice {
 
   private:
     const uint8_t* _data;
-    size_t _size;
+    size_t         _size;
 
     // ALLOW_COPY_AND_ASSIGN
 };
@@ -171,16 +171,16 @@ inline void copy(Bytes& to, const Bytes& from) { to.assign(from); }
 
 bool operator==(const BytesSlice& x, const BytesSlice& y);
 inline bool operator!=(const BytesSlice& x, const BytesSlice& y) { return !(x == y); }
-bool operator< (const BytesSlice& x, const BytesSlice& y);
+bool operator<(const BytesSlice& x, const BytesSlice& y);
 inline bool operator<=(const BytesSlice& x, const BytesSlice& y) { return !(y < x); }
-inline bool operator> (const BytesSlice& x, const BytesSlice& y) { return y < x; }
+inline bool operator>(const BytesSlice& x, const BytesSlice& y) { return y < x; }
 inline bool operator>=(const BytesSlice& x, const BytesSlice& y) { return !(x < y); }
 
 inline bool operator==(const Bytes& x, const Bytes& y) { return x.slice() == y.slice(); }
 inline bool operator!=(const Bytes& x, const Bytes& y) { return x.slice() != y.slice(); }
-inline bool operator< (const Bytes& x, const Bytes& y) { return x.slice() < y.slice(); }
+inline bool operator<(const Bytes& x, const Bytes& y) { return x.slice() < y.slice(); }
 inline bool operator<=(const Bytes& x, const Bytes& y) { return x.slice() <= y.slice(); }
-inline bool operator> (const Bytes& x, const Bytes& y) { return x.slice() > y.slice(); }
+inline bool operator>(const Bytes& x, const Bytes& y) { return x.slice() > y.slice(); }
 inline bool operator>=(const Bytes& x, const Bytes& y) { return x.slice() >= y.slice(); }
 
 }  // namespace sfz
