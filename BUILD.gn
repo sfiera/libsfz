@@ -45,7 +45,7 @@ executable("algorithm-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -55,7 +55,7 @@ executable("args-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -65,7 +65,7 @@ executable("bytes-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -75,7 +75,7 @@ executable("digest-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -85,7 +85,7 @@ executable("encoding-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -95,7 +95,7 @@ executable("format-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -105,7 +105,7 @@ executable("io-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -115,7 +115,7 @@ executable("json-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -125,7 +125,7 @@ executable("optional-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -135,7 +135,7 @@ executable("os-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -145,7 +145,7 @@ executable("print-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -155,7 +155,7 @@ executable("read-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -165,7 +165,7 @@ executable("string-utils-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -175,7 +175,7 @@ executable("string-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
 
@@ -185,6 +185,6 @@ executable("write-test") {
   ]
   deps = [
     ":libsfz",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
 }
