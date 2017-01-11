@@ -274,10 +274,10 @@ TEST_F(Sha1Test, TreeDigest) {
     TemporaryDirectory dir("sha1-test");
 
     for (const TreeData& tree_data : kTreeData) {
-        pn::string      path = pn::format("{0}/{1}", CString(dir.path()).data(), tree_data.path);
+        pn::string      path = pn::format("{0}/{1}", dir.path(), tree_data.path);
         pn::string_view data = tree_data.data;
 
-        makedirs(path::dirname(String(utf8::decode(path.c_str()))), 0700);
+        makedirs(path::dirname(path), 0700);
         {
             pn::file file = pn::open(path, "w");
             ASSERT_THAT(file.c_obj(), NotNull());
@@ -286,7 +286,7 @@ TEST_F(Sha1Test, TreeDigest) {
 
         EXPECT_THAT(file_digest(String(utf8::decode(path.c_str()))), Eq(tree_data.digest));
     }
-    EXPECT_THAT(tree_digest(dir.path()), Eq(kTreeDigest));
+    EXPECT_THAT(tree_digest(String(utf8::decode(dir.path().copy().c_str()))), Eq(kTreeDigest));
 }
 
 }  // namespace

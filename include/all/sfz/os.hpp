@@ -7,8 +7,8 @@
 #define SFZ_OS_HPP_
 
 #include <sys/stat.h>
+#include <pn/string>
 #include <sfz/macros.hpp>
-#include <sfz/string.hpp>
 
 namespace sfz {
 
@@ -16,59 +16,57 @@ typedef struct stat Stat;
 
 namespace path {
 
-bool exists(const StringSlice& path);
-bool isdir(const StringSlice& path);
-bool isfile(const StringSlice& path);
-bool islink(const StringSlice& path);
+bool exists(pn::string_view path);
+bool isdir(pn::string_view path);
+bool isfile(pn::string_view path);
+bool islink(pn::string_view path);
 
-StringSlice basename(const StringSlice& path);
-StringSlice dirname(const StringSlice& path);
+pn::string_view basename(pn::string_view path);
+pn::string_view dirname(pn::string_view path);
 
 }  // namespace path
 
-void chdir(const StringSlice& path);
-void symlink(const StringSlice& content, const StringSlice& container);
+void chdir(pn::string_view path);
+void symlink(pn::string_view content, pn::string_view container);
 
-int open(const StringSlice& path, int oflag, mode_t mode);
+void mkdir(pn::string_view path, mode_t mode);
+void mkfifo(pn::string_view path, mode_t mode);
+void makedirs(pn::string_view path, mode_t mode);
 
-void mkdir(const StringSlice& path, mode_t mode);
-void mkfifo(const StringSlice& path, mode_t mode);
-void makedirs(const StringSlice& path, mode_t mode);
-
-void unlink(const StringSlice& path);
-void rmdir(const StringSlice& path);
-void rmtree(const StringSlice& path);
+void unlink(pn::string_view path);
+void rmdir(pn::string_view path);
+void rmtree(pn::string_view path);
 
 class TemporaryDirectory {
   public:
-    TemporaryDirectory(const StringSlice& prefix);
+    TemporaryDirectory(pn::string_view prefix);
     ~TemporaryDirectory();
 
-    const String& path() const;
+    const pn::string& path() const;
 
   private:
-    String _path;
+    pn::string _path;
     DISALLOW_COPY_AND_ASSIGN(TemporaryDirectory);
 };
 
 class TreeWalker;
 enum WalkType { WALK_LOGICAL, WALK_PHYSICAL };
-void walk(const StringSlice& root, WalkType type, const TreeWalker& visitor);
+void walk(pn::string_view root, WalkType type, const TreeWalker& visitor);
 
 class TreeWalker {
   public:
     virtual ~TreeWalker();
 
-    virtual void pre_directory(const StringSlice& name, const Stat& st) const   = 0;
-    virtual void cycle_directory(const StringSlice& name, const Stat& st) const = 0;
-    virtual void post_directory(const StringSlice& name, const Stat& st) const  = 0;
+    virtual void pre_directory(pn::string_view name, const Stat& st) const   = 0;
+    virtual void cycle_directory(pn::string_view name, const Stat& st) const = 0;
+    virtual void post_directory(pn::string_view name, const Stat& st) const  = 0;
 
-    virtual void file(const StringSlice& name, const Stat& st) const = 0;
+    virtual void file(pn::string_view name, const Stat& st) const = 0;
 
-    virtual void symlink(const StringSlice& name, const Stat& st) const        = 0;
-    virtual void broken_symlink(const StringSlice& name, const Stat& st) const = 0;
+    virtual void symlink(pn::string_view name, const Stat& st) const        = 0;
+    virtual void broken_symlink(pn::string_view name, const Stat& st) const = 0;
 
-    virtual void other(const StringSlice& name, const Stat& st) const = 0;
+    virtual void other(pn::string_view name, const Stat& st) const = 0;
 };
 
 }  // namespace sfz

@@ -40,7 +40,7 @@ void Sha1::push(const BytesSlice& input) {
         return;
     }
     if (((numeric_limits<uint64_t>::max() - _size) / 8) < input.size()) {
-        throw Exception("message is too long");
+        throw std::runtime_error("message is too long");
     }
     BytesSlice remainder = input;
     while (_message_block_index + remainder.size() >= 64) {
@@ -153,49 +153,50 @@ Sha1::Digest file_digest(const StringSlice& path) {
 }
 
 Sha1::Digest tree_digest(const StringSlice& path) {
-    if (!path::isdir(path)) {
+    if (!path::isdir(CString(path).data())) {
         return file_digest(path);
     }
     struct DigestWalker : TreeWalker {
         // For files, hash the size and bytes of their UTF-8-encoded path, followed by the size and
         // bytes of the file content.  We don't worry about the mode or owner of the file, just as
         // we wouldn't if taking the digest of a file.
-        void file(const StringSlice& path, const Stat&) const {
-            Bytes path_bytes(utf8::encode(path.slice(prefix_size)));
+        void file(pn::string_view path, const Stat&) const {
+            BytesSlice path_bytes{reinterpret_cast<const uint8_t*>(path.data() + prefix_size),
+                                  static_cast<size_t>(path.size() - prefix_size)};
             write<uint64_t>(sha, path_bytes.size());
             sha.push(path_bytes);
 
-            mapped_file file(CString(path).data());
+            mapped_file file(path);
             write<uint64_t>(sha, file.data().size());
             sha.push(BytesSlice{file.data().data(), static_cast<size_t>(file.data().size())});
         }
 
         // Ignore empty directories.  Directories which are not empty will be included in the
         // resulting digest by virtue of the inclusion of their files.
-        void pre_directory(const StringSlice& path, const Stat&) const {}
-        void post_directory(const StringSlice& path, const Stat&) const {}
+        void pre_directory(pn::string_view path, const Stat&) const {}
+        void post_directory(pn::string_view path, const Stat&) const {}
 
         // Throw exceptions on anything that might break our logical view of a tree as a
         // hierarchical listing of of regular files.
-        void cycle_directory(const StringSlice& path, const Stat&) const {
-            throw Exception(format("Found directory cycle: {0}.", path));
+        void cycle_directory(pn::string_view path, const Stat&) const {
+            throw std::runtime_error(pn::format("Found directory cycle: {0}.", path).c_str());
         }
-        void other(const StringSlice& path, const Stat&) const {
-            throw Exception(format("Found non-regular file: {0}", path));
+        void other(pn::string_view path, const Stat&) const {
+            throw std::runtime_error(pn::format("Found non-regular file: {0}", path).c_str());
         }
 
         // Ignore broken symlinks; they effectively don't exist.
-        void broken_symlink(const StringSlice& path, const Stat&) const {}
+        void broken_symlink(pn::string_view path, const Stat&) const {}
 
         // Can't happen during WALK_LOGICAL.
-        void symlink(const StringSlice& path, const Stat&) const {}
+        void symlink(pn::string_view path, const Stat&) const {}
 
         Sha1&     sha;
         const int prefix_size;
         DigestWalker(Sha1& sha, int prefix_size) : sha(sha), prefix_size(prefix_size) {}
     };
     Sha1 sha;
-    walk(path, WALK_LOGICAL, DigestWalker(sha, path.size() + 1));
+    walk(CString(path).data(), WALK_LOGICAL, DigestWalker(sha, path.size() + 1));
     return sha.digest();
 }
 
