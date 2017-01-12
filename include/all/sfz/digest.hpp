@@ -8,9 +8,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <sfz/print.hpp>
-#include <sfz/read.hpp>
-#include <sfz/write.hpp>
+#include <pn/data>
+#include <pn/file>
+#include <pn/string>
 
 namespace sfz {
 
@@ -20,20 +20,28 @@ class BytesSlice;
 // Computes the SHA-1 digest of some sequence of bytes.
 //
 // Based on the code provided by RFC 3174.
-class Sha1 {
+class sha1 {
   public:
-    struct Digest {
-        uint32_t digest[5];
+    struct digest {
+        constexpr digest() : d{} {}
+        constexpr digest(uint32_t d0, uint32_t d1, uint32_t d2, uint32_t d3, uint32_t d4)
+                : d{d0, d1, d2, d3, d4} {}
+        digest(pn::data_view data);
+
+        pn::data   data() const;
+        pn::string hex() const;
+
+        uint32_t d[5];
     };
 
     // Creates an instance in initial state.  Calling get_digest() on a default-initialized object
     // will result in the digest of 0 bytes of data.
-    Sha1();
+    sha1();
 
     // Copies state derived from previous calls to `other.update()`.  This can be used to
     // efficiently compute the hash of several pieces of data which share a large, common prefix.
     // @param [in] other    The instance to copy from.
-    explicit Sha1(const Sha1& other);
+    explicit sha1(const sha1& other);
 
     // Resets the object to its initial state, as if update() had never been called.
     void reset();
@@ -41,13 +49,21 @@ class Sha1 {
     // Adds data in `input` to the current content.  It is more efficient, though semantically
     // identical, to add data in larger chunks.
     // @param [in] input    The data to add to the digest.
-    void push(const BytesSlice& input);
-    void push(size_t num, uint8_t byte);
+    void write(pn::data_view input);
+    template <typename... arguments>
+    void write(const arguments&... args) {
+        pn::data d;
+        {
+            pn::file f = d.open("w");
+            f.write(args...);
+        }
+        write(pn::data_view{d});
+    }
 
     // Returns a digest computed from the current content.  This method does non-trivial work, so
     // if the digest is to be used multiple times, it should be called once, and the retrieved
     // digest reused.
-    Digest digest() const;
+    digest compute() const;
 
   private:
     // Finishes computation of the digest of the current contents.  After this method is called, it
@@ -62,7 +78,7 @@ class Sha1 {
     void process_message_block();
 
     // The current value of the digest being computed.
-    Digest _intermediate;
+    struct digest _intermediate;
 
     // The size of the current content.
     uint64_t _size;
@@ -74,20 +90,17 @@ class Sha1 {
     uint8_t _message_block[64];
 
     // Disallow assignment.  Copying is allowed but explicit.
-    Sha1& operator=(const Sha1&);
+    sha1& operator=(const sha1&);
 };
 
-bool operator==(const Sha1::Digest& lhs, const Sha1::Digest& rhs);
-bool operator!=(const Sha1::Digest& lhs, const Sha1::Digest& rhs);
-void read_from(ReadSource in, Sha1::Digest& digest);
-void write_to(WriteTarget out, const Sha1::Digest& digest);
-void print_to(PrintTarget out, const Sha1::Digest& digest);
+bool operator==(const sha1::digest& lhs, const sha1::digest& rhs);
+bool operator!=(const sha1::digest& lhs, const sha1::digest& rhs);
 
 // Hashes a regular file.
-Sha1::Digest file_digest(const StringSlice& path);
+sha1::digest file_digest(pn::string_view path);
 
 // Hashes a tree containing regular files (or symlinks).
-Sha1::Digest tree_digest(const StringSlice& path);
+sha1::digest tree_digest(pn::string_view path);
 
 }  // namespace sfz
 
