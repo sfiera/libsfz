@@ -5,12 +5,12 @@
 
 #include <sfz/io.hpp>
 
+#include <unistd.h>
 #include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/posix-format.hpp>
-#include <unistd.h>
 
 using sfz::Bytes;
 using sfz::Rune;
@@ -29,7 +29,7 @@ Io fds[] = {{0}, {1}, {2}};
 }  // namespace
 
 void Io::push(const StringSlice& string) {
-    Bytes bytes(utf8::encode(string));
+    Bytes      bytes(utf8::encode(string));
     BytesSlice remainder(bytes);
     while (!remainder.empty()) {
         ssize_t result = ::write(fd, remainder.data(), remainder.size());
@@ -46,7 +46,7 @@ void Io::push(size_t num, Rune rune) {
     push(StringSlice(string));
 }
 
-Io& in = fds[0];
+Io& in  = fds[0];
 Io& out = fds[1];
 Io& err = fds[2];
 

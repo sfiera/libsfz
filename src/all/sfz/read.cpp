@@ -19,7 +19,7 @@ inline void read_bytes_from(void* target, ReadSource in, size_t count) {
 
 template <typename T>
 inline void read_integers_from(void* target, ReadSource in, size_t count) {
-    for (int i: range(count)) {
+    for (int i : range(count)) {
         NetworkBytes<T> bytes;
         in.shift(bytes.data(), bytes.size());
         reinterpret_cast<T*>(target)[i] = bytes.value();
@@ -30,7 +30,7 @@ inline void read_integers_from(void* target, ReadSource in, size_t count) {
 
 template <>
 void ReadItem::Dispatch<bool>::read_from(void* target, ReadSource in, size_t count) {
-    for (int i: range(count)) {
+    for (int i : range(count)) {
         uint8_t byte;
         in.shift(&byte, 1);
         reinterpret_cast<bool*>(target)[i] = (byte != 0);

@@ -23,16 +23,18 @@ void print(PrintTarget out, const T& item);
 class PrintTarget {
   public:
     PrintTarget(const PrintTarget& t);
-    template <typename T> PrintTarget(T& t);
+    template <typename T>
+    PrintTarget(T& t);
 
     inline void push(const StringSlice& string);
     inline void push(size_t num, Rune rune);
 
   private:
     struct DispatchTable;
-    template <typename T> struct Dispatch;
+    template <typename T>
+    struct Dispatch;
 
-    void* const _target;
+    void* const                _target;
     const DispatchTable* const _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
@@ -41,15 +43,17 @@ class PrintTarget {
 class PrintItem {
   public:
     PrintItem();
-    template <typename T> PrintItem(const T& object);
+    template <typename T>
+    PrintItem(const T& object);
 
     void print_to(PrintTarget out) const;
 
   private:
     struct DispatchTable;
-    template <typename T> struct Dispatch;
+    template <typename T>
+    struct Dispatch;
 
-    const void* const _target;
+    const void* const          _target;
     const DispatchTable* const _dispatch_table;
 
     // ALLOW_COPY_AND_ASSIGN
@@ -78,18 +82,14 @@ struct PrintTarget::Dispatch {
 
 template <typename T>
 const PrintTarget::DispatchTable PrintTarget::Dispatch<T>::table = {
-    push_string,
-    push_repeated_runes,
+        push_string, push_repeated_runes,
 };
 
 inline PrintTarget::PrintTarget(const PrintTarget& other)
-    : _target(other._target),
-      _dispatch_table(other._dispatch_table) { }
+        : _target(other._target), _dispatch_table(other._dispatch_table) {}
 
 template <typename T>
-PrintTarget::PrintTarget(T& t)
-    : _target(&t),
-      _dispatch_table(&Dispatch<T>::table) { }
+PrintTarget::PrintTarget(T& t) : _target(&t), _dispatch_table(&Dispatch<T>::table) {}
 
 inline void PrintTarget::push(const StringSlice& string) {
     _dispatch_table->push_string(_target, string);
@@ -137,10 +137,11 @@ struct PrintItem::Dispatch<const void*> {
 };
 
 template <typename T>
-struct PrintItem::Dispatch<T*> : public Dispatch<const void*> { };
+struct PrintItem::Dispatch<T*> : public Dispatch<const void*> {};
 
 #define SFZ_PRINT_ITEM_SPECIALIZE(TYPE) \
-    template <> void PrintItem::Dispatch<TYPE>::print_to(const void* target, PrintTarget out);
+    template <>                         \
+    void PrintItem::Dispatch<TYPE>::print_to(const void* target, PrintTarget out);
 SFZ_PRINT_ITEM_SPECIALIZE(void);
 SFZ_PRINT_ITEM_SPECIALIZE(bool);
 SFZ_PRINT_ITEM_SPECIALIZE(char);
@@ -160,25 +161,19 @@ SFZ_PRINT_ITEM_SPECIALIZE(const char[]);
 #undef SFZ_PRINT_ITEM_SPECIALIZE
 
 template <int size>
-struct PrintItem::Dispatch<const char[size]> : public Dispatch<const char[]> { };
+struct PrintItem::Dispatch<const char[size]> : public Dispatch<const char[]> {};
 
 template <typename T>
 const PrintItem::DispatchTable PrintItem::Dispatch<T>::table = {
-    print_to,
+        print_to,
 };
 
-inline PrintItem::PrintItem()
-    : _target(NULL),
-      _dispatch_table(&Dispatch<void>::table) { }
+inline PrintItem::PrintItem() : _target(NULL), _dispatch_table(&Dispatch<void>::table) {}
 
 template <typename T>
-PrintItem::PrintItem(const T& t)
-    : _target(&t),
-      _dispatch_table(&Dispatch<T>::table) { }
+PrintItem::PrintItem(const T& t) : _target(&t), _dispatch_table(&Dispatch<T>::table) {}
 
-inline void PrintItem::print_to(PrintTarget out) const {
-    _dispatch_table->print_to(_target, out);
-}
+inline void PrintItem::print_to(PrintTarget out) const { _dispatch_table->print_to(_target, out); }
 
 }  // namespace sfz
 

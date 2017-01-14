@@ -25,8 +25,8 @@ namespace {
 
 struct Indented {
     PrintTarget out;
-    int32_t indent;
-    bool line_started;
+    int32_t     indent;
+    bool        line_started;
 
     void push(StringSlice string) {
         StringSlice line;
@@ -54,18 +54,17 @@ struct Indented {
     }
 };
 
-struct PrintableRune { Rune r; };
+struct PrintableRune {
+    Rune r;
+};
 PrintableRune rune(Rune r) {
     PrintableRune rune = {r};
     return rune;
 }
-void print_to(PrintTarget out, PrintableRune rune) {
-    out.push(1, rune.r);
-}
+void print_to(PrintTarget out, PrintableRune rune) { out.push(1, rune.r); }
 
 bool starts_with(StringSlice string, StringSlice prefix) {
-    return (string.size() >= prefix.size())
-        && (string.slice(0, prefix.size()) == prefix);
+    return (string.size() >= prefix.size()) && (string.slice(0, prefix.size()) == prefix);
 }
 
 bool is_valid_short_option(StringSlice s) {
@@ -73,30 +72,29 @@ bool is_valid_short_option(StringSlice s) {
 }
 
 bool is_valid_long_option(StringSlice s) {
-    return (s.size() > 2) && (s.at(0) == '-') && (s.at(1) == '-')
-        && (s.find('=') == StringSlice::npos);
+    return (s.size() > 2) && (s.at(0) == '-') && (s.at(1) == '-') &&
+           (s.find('=') == StringSlice::npos);
 }
 
 }  // namespace
 
 class Parser::State {
   public:
-    State(const Parser& spec, PrintTarget error):
-            _spec(spec),
-            _error(error),
-            _expecting_value(false),
-            _arguments_saturated(false),
-            _argument(_spec._argument_specs.begin()) { }
+    State(const Parser& spec, PrintTarget error)
+            : _spec(spec),
+              _error(error),
+              _expecting_value(false),
+              _arguments_saturated(false),
+              _argument(_spec._argument_specs.begin()) {}
 
     bool parse_args(
             // TODO(sfiera): use an array slice.
-            vector<StringSlice>::const_iterator begin,
-            vector<StringSlice>::const_iterator end) {
+            vector<StringSlice>::const_iterator begin, vector<StringSlice>::const_iterator end) {
         if (!_spec._action.process(_error)) {
             return false;
         }
         bool saw_dash_dash = false;
-        for ( ; begin != end; ++begin) {
+        for (; begin != end; ++begin) {
             const StringSlice token = *begin;
             if (_arguments_saturated) {
                 print(_error, format(" {0}", quote(token)));
@@ -141,9 +139,7 @@ class Parser::State {
         return true;
     }
 
-    bool args_remaining() {
-        return _argument != _spec._argument_specs.end();
-    }
+    bool args_remaining() { return _argument != _spec._argument_specs.end(); }
 
     bool parse_long_option(StringSlice token) {
         StringSlice option;
@@ -188,7 +184,7 @@ class Parser::State {
     }
 
     bool parse_short_option(StringSlice token) {
-        Rune option = token.at(0);
+        Rune        option    = token.at(0);
         StringSlice remainder = token.slice(1);
         if (!_spec.has_short_option(option)) {
             print(_error, format("illegal option: -{0}", token.slice(0, 1)));
@@ -236,8 +232,8 @@ class Parser::State {
             return true;
         }
         if (!(*_argument)->_action.process(value, _action_error)) {
-            print(_error, format("argument {0}: {1}: {2}",
-                        (*_argument)->_metavar, _action_error, quote(value)));
+            print(_error, format("argument {0}: {1}: {2}", (*_argument)->_metavar, _action_error,
+                                 quote(value)));
             return false;
         }
         int& nargs = _nargs[_argument->get()];
@@ -249,8 +245,7 @@ class Parser::State {
     }
 
     bool process_subparser(
-            StringSlice token,
-            vector<StringSlice>::const_iterator begin,
+            StringSlice token, vector<StringSlice>::const_iterator begin,
             vector<StringSlice>::const_iterator end) {
         if (_spec.has_subparser(token)) {
             State substate(_spec.subparser(token), _error);
@@ -263,36 +258,30 @@ class Parser::State {
 
   private:
     const Parser& _spec;
-    PrintTarget _error;
-    String _action_error;
+    PrintTarget   _error;
+    String        _action_error;
 
     Rune _option_expected;
     bool _expecting_value;
     bool _arguments_saturated;
 
-    vector<shared_ptr<Argument> >::const_iterator _argument;
+    vector<shared_ptr<Argument>>::const_iterator _argument;
     map<Argument*, int> _nargs;
 
     DISALLOW_COPY_AND_ASSIGN(State);
 };
 
-Parser::Parser(PrintItem program_name, PrintItem description, Action action):
-        _parent(NULL),
-        _name(program_name),
-        _description(description),
-        _action(action) { }
+Parser::Parser(PrintItem program_name, PrintItem description, Action action)
+        : _parent(NULL), _name(program_name), _description(description), _action(action) {}
 
-Parser::Parser(const char* program_name, PrintItem description, Action action):
-        _parent(NULL),
-        _name(utf8::decode(program_name)),
-        _description(description),
-        _action(action) { }
+Parser::Parser(const char* program_name, PrintItem description, Action action)
+        : _parent(NULL),
+          _name(utf8::decode(program_name)),
+          _description(description),
+          _action(action) {}
 
-Parser::Parser(Parser* const parent, PrintItem name, PrintItem description, Action action):
-        _parent(parent),
-        _name(name),
-        _description(description),
-        _action(action) { }
+Parser::Parser(Parser* const parent, PrintItem name, PrintItem description, Action action)
+        : _parent(parent), _name(name), _description(description), _action(action) {}
 
 Argument& Parser::add_argument(PrintItem name, Action action) {
     String printed_name(name);
@@ -320,8 +309,7 @@ Argument& Parser::add_argument(PrintItem name, Action action) {
             throw Exception("invalid argument name");
         }
     } else {
-        shared_ptr<Argument> arg(
-                new Argument(Argument::ARGUMENT, "", "", action));
+        shared_ptr<Argument> arg(new Argument(Argument::ARGUMENT, "", "", action));
         _argument_specs.push_back(arg);
         arg->_metavar.assign(printed_name);
         return *arg;
@@ -340,7 +328,7 @@ Argument& Parser::add_argument(PrintItem short_name, PrintItem long_name, Action
             new Argument(Argument::BOTH_OPTION, printed_short_name, printed_long_name, action));
     _option_specs.push_back(arg);
     _short_options_by_name[printed_short_name.at(1)] = arg;
-    _long_options_by_name[printed_long_name] = arg;
+    _long_options_by_name[printed_long_name]         = arg;
     arg->_metavar.assign(printed_long_name.slice(2));
     upper(arg->_metavar);
     return *arg;
@@ -365,24 +353,22 @@ bool Parser::parse_args(const vector<StringSlice>& args, PrintTarget error) cons
 }
 
 bool Parser::parse_args(int argc, const char* const* argv, PrintTarget error) const {
-    String storage;
+    String         storage;
     vector<size_t> cuts(argc, 0);
-    for (size_t i: range(argc)) {
+    for (size_t i : range(argc)) {
         storage.append(utf8::decode(argv[i]));
         cuts[i] = storage.size();
     }
-    size_t begin = 0;
+    size_t              begin = 0;
     vector<StringSlice> args(argc, "");
-    for (size_t i: range(argc)) {
+    for (size_t i : range(argc)) {
         args[i] = storage.slice(begin, cuts[i] - begin);
-        begin = cuts[i];
+        begin   = cuts[i];
     }
     return parse_args(args, error);
 }
 
-const String& Parser::name() const {
-    return _name;
-}
+const String& Parser::name() const { return _name; }
 
 ParserUsage Parser::usage() const {
     ParserUsage result = {*this};
@@ -395,13 +381,13 @@ ParserHelp Parser::help() const {
 }
 
 void Parser::print_usage_to(PrintTarget out) const {
-    typedef pair<Rune, shared_ptr<Argument> > ShortArg;
-    typedef pair<StringSlice, shared_ptr<Argument> > LongArg;
+    typedef pair<Rune, shared_ptr<Argument>>        ShortArg;
+    typedef pair<StringSlice, shared_ptr<Argument>> LongArg;
 
     print(out, _name);
 
     bool has_argless_options = false;
-    for (const ShortArg& arg: _short_options_by_name) {
+    for (const ShortArg& arg : _short_options_by_name) {
         if (!arg.second->_action.takes_value()) {
             if (!has_argless_options) {
                 print(out, " [-");
@@ -414,13 +400,13 @@ void Parser::print_usage_to(PrintTarget out) const {
         print(out, "]");
     }
 
-    for (const ShortArg& arg: _short_options_by_name) {
+    for (const ShortArg& arg : _short_options_by_name) {
         if (arg.second->_action.takes_value()) {
             print(out, format(" [-{0} {1}]", rune(arg.first), arg.second->_metavar));
         }
     }
 
-    for (const LongArg& arg: _long_options_by_name) {
+    for (const LongArg& arg : _long_options_by_name) {
         if (arg.second->_action.takes_value()) {
             print(out, format(" [{0}={1}]", arg.first, arg.second->_metavar));
         } else {
@@ -429,15 +415,15 @@ void Parser::print_usage_to(PrintTarget out) const {
     }
 
     int nesting = 0;
-    for (const shared_ptr<Argument>& arg: _argument_specs) {
-        for (int i: range(arg->_min_args)) {
+    for (const shared_ptr<Argument>& arg : _argument_specs) {
+        for (int i : range(arg->_min_args)) {
             static_cast<void>(i);
             print(out, format(" {0}", arg->_metavar));
         }
         if (arg->_max_args == std::numeric_limits<int>::max()) {
             print(out, format(" [{0}...]", arg->_metavar));
         } else {
-            for (int i: range(arg->_max_args - arg->_min_args)) {
+            for (int i : range(arg->_max_args - arg->_min_args)) {
                 static_cast<void>(i);
                 ++nesting;
                 print(out, format(" [{0}", arg->_metavar));
@@ -458,7 +444,7 @@ void Parser::print_help_to(PrintTarget out) const {
 
     if (!_argument_specs.empty()) {
         print(body, "\narguments:\n");
-        for (const shared_ptr<Argument>& arg: _argument_specs) {
+        for (const shared_ptr<Argument>& arg : _argument_specs) {
             print(body, format("  {0}", arg->_metavar));
             if (!arg->_help.empty()) {
                 int padding = 20 - arg->_metavar.size();
@@ -476,44 +462,45 @@ void Parser::print_help_to(PrintTarget out) const {
 
     if (!_option_specs.empty()) {
         print(body, "\noptions:\n");
-        for (const shared_ptr<Argument>& arg: _option_specs) {
+        for (const shared_ptr<Argument>& arg : _option_specs) {
             int padding = 22;
             switch (arg->_type) {
-              case Argument::SHORT_OPTION:
-                if (arg->_action.takes_value()) {
-                    print(body, format("  {0} {1}", arg->_short_option_name, arg->_metavar));
-                    padding -= 3 + arg->_short_option_name.size() + arg->_metavar.size();
-                } else {
-                    print(body, format("  {0}", arg->_short_option_name));
-                    padding -= 2 + arg->_short_option_name.size();
-                }
-                break;
+                case Argument::SHORT_OPTION:
+                    if (arg->_action.takes_value()) {
+                        print(body, format("  {0} {1}", arg->_short_option_name, arg->_metavar));
+                        padding -= 3 + arg->_short_option_name.size() + arg->_metavar.size();
+                    } else {
+                        print(body, format("  {0}", arg->_short_option_name));
+                        padding -= 2 + arg->_short_option_name.size();
+                    }
+                    break;
 
-              case Argument::LONG_OPTION:
-                if (arg->_action.takes_value()) {
-                    print(body, format("      {0}={1}", arg->_long_option_name, arg->_metavar));
-                    padding -= 7 + arg->_long_option_name.size() + arg->_metavar.size();
-                } else {
-                    print(body, format("      {0}", arg->_long_option_name));
-                    padding -= 6 + arg->_long_option_name.size();
-                }
-                break;
+                case Argument::LONG_OPTION:
+                    if (arg->_action.takes_value()) {
+                        print(body,
+                              format("      {0}={1}", arg->_long_option_name, arg->_metavar));
+                        padding -= 7 + arg->_long_option_name.size() + arg->_metavar.size();
+                    } else {
+                        print(body, format("      {0}", arg->_long_option_name));
+                        padding -= 6 + arg->_long_option_name.size();
+                    }
+                    break;
 
-              case Argument::BOTH_OPTION:
-                if (arg->_action.takes_value()) {
-                    print(body, format("  {0}, {1}={2}", arg->_short_option_name,
-                            arg->_long_option_name, arg->_metavar));
-                    padding -= 5 + arg->_short_option_name.size() + arg->_long_option_name.size() +
-                        arg->_metavar.size();
-                } else {
-                    print(body, format("  {0}, {1}", arg->_short_option_name,
-                                arg->_long_option_name));
-                    padding -= 4 + arg->_short_option_name.size() + arg->_long_option_name.size();
-                }
-                break;
+                case Argument::BOTH_OPTION:
+                    if (arg->_action.takes_value()) {
+                        print(body, format("  {0}, {1}={2}", arg->_short_option_name,
+                                           arg->_long_option_name, arg->_metavar));
+                        padding -= 5 + arg->_short_option_name.size() +
+                                   arg->_long_option_name.size() + arg->_metavar.size();
+                    } else {
+                        print(body, format("  {0}, {1}", arg->_short_option_name,
+                                           arg->_long_option_name));
+                        padding -=
+                                4 + arg->_short_option_name.size() + arg->_long_option_name.size();
+                    }
+                    break;
 
-              default:
-                break;
+                default: break;
             }
 
             if (!arg->_help.empty()) {
@@ -531,7 +518,7 @@ void Parser::print_help_to(PrintTarget out) const {
 
     if (has_subparsers()) {
         print(body, "\ncommands:\n");
-        for (const shared_ptr<Parser>& arg: _subparsers) {
+        for (const shared_ptr<Parser>& arg : _subparsers) {
             String usage(arg->usage());
             print(body, format("  {0}", usage));
             if (!arg->_description.empty()) {
@@ -550,8 +537,8 @@ void Parser::print_help_to(PrintTarget out) const {
 }
 
 bool Parser::has_long_option(StringSlice option) const {
-    return (_long_options_by_name.find(option) != _long_options_by_name.end())
-        || ((_parent != NULL) && (_parent->has_long_option(option)));
+    return (_long_options_by_name.find(option) != _long_options_by_name.end()) ||
+           ((_parent != NULL) && (_parent->has_long_option(option)));
 }
 
 const Argument& Parser::long_option(StringSlice option) const {
@@ -567,8 +554,8 @@ bool Parser::long_option_takes_value(StringSlice option) const {
 }
 
 bool Parser::has_short_option(Rune option) const {
-    return (_short_options_by_name.find(option) != _short_options_by_name.end())
-        || ((_parent != NULL) && (_parent->has_short_option(option)));
+    return (_short_options_by_name.find(option) != _short_options_by_name.end()) ||
+           ((_parent != NULL) && (_parent->has_short_option(option)));
 }
 
 const Argument& Parser::short_option(Rune option) const {
@@ -583,9 +570,7 @@ bool Parser::short_option_takes_value(Rune option) const {
     return short_option(option)._action.takes_value();
 }
 
-bool Parser::has_subparsers() const {
-    return !_subparsers.empty();
-}
+bool Parser::has_subparsers() const { return !_subparsers.empty(); }
 
 bool Parser::has_subparser(StringSlice name) const {
     return _subparsers_by_name.find(name) != _subparsers_by_name.end();
@@ -595,14 +580,15 @@ const Parser& Parser::subparser(StringSlice name) const {
     return *_subparsers_by_name.find(name)->second;
 }
 
-Action::Action(const shared_ptr<Impl>& impl): _impl(impl) { }
-Action::Action(const Action& other): _impl(other._impl) { }
-Action& Action::operator=(const Action& other) { _impl = other._impl; return *this; }
-Action::~Action() { }
-
-bool Action::takes_value() const {
-    return (_impl.get() != NULL) && _impl->takes_value();
+Action::Action(const shared_ptr<Impl>& impl) : _impl(impl) {}
+Action::Action(const Action& other) : _impl(other._impl) {}
+Action& Action::operator=(const Action& other) {
+    _impl = other._impl;
+    return *this;
 }
+Action::~Action() {}
+
+bool Action::takes_value() const { return (_impl.get() != NULL) && _impl->takes_value(); }
 
 bool Action::process(PrintTarget error) const {
     return (_impl.get() == NULL) || _impl->process(error);
@@ -613,14 +599,14 @@ bool Action::process(StringSlice value, PrintTarget error) const {
 }
 
 Argument::Argument(
-        Type type, const StringSlice& short_option_name,
-        const StringSlice& long_option_name, Action action):
-        _type(type),
-        _short_option_name(short_option_name),
-        _long_option_name(long_option_name),
-        _action(action),
-        _min_args(0),
-        _max_args(1) { }
+        Type type, const StringSlice& short_option_name, const StringSlice& long_option_name,
+        Action action)
+        : _type(type),
+          _short_option_name(short_option_name),
+          _long_option_name(long_option_name),
+          _action(action),
+          _min_args(0),
+          _max_args(1) {}
 
 Argument& Argument::help(PrintItem s) {
     _help.assign(s);
@@ -679,14 +665,9 @@ template <typename T>
 bool store_integral_argument(T& to, StringSlice value, PrintTarget error) {
     StringToIntResult result = string_to_int(value, to);
     switch (result.failure) {
-      case StringToIntResult::NONE:
-        return true;
-      case StringToIntResult::INVALID_LITERAL:
-        print(error, "invalid integer");
-        return false;
-      case StringToIntResult::INTEGER_OVERFLOW:
-        print(error, "integer overflow");
-        return false;
+        case StringToIntResult::NONE: return true;
+        case StringToIntResult::INVALID_LITERAL: print(error, "invalid integer"); return false;
+        case StringToIntResult::INTEGER_OVERFLOW: print(error, "integer overflow"); return false;
     }
     return false;
 }
@@ -701,34 +682,50 @@ bool store_float_argument(T& to, StringSlice value, PrintTarget error) {
     }
 }
 
-bool store_argument(int8_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(uint8_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(int16_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(uint16_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(int32_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(uint32_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(int64_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(uint64_t& to, StringSlice value, PrintTarget error) { return store_integral_argument(to, value, error); }
-bool store_argument(float& to, StringSlice value, PrintTarget error) { return store_float_argument(to, value, error); }
-bool store_argument(double& to, StringSlice value, PrintTarget error) { return store_float_argument(to, value, error); }
-
-void print_to(PrintTarget out, ParserUsage usage) {
-    usage.parser.print_usage_to(out);
+bool store_argument(int8_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(uint8_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(int16_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(uint16_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(int32_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(uint32_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(int64_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(uint64_t& to, StringSlice value, PrintTarget error) {
+    return store_integral_argument(to, value, error);
+}
+bool store_argument(float& to, StringSlice value, PrintTarget error) {
+    return store_float_argument(to, value, error);
+}
+bool store_argument(double& to, StringSlice value, PrintTarget error) {
+    return store_float_argument(to, value, error);
 }
 
-void print_to(PrintTarget out, ParserHelp help) {
-    help.parser.print_help_to(out);
-}
+void print_to(PrintTarget out, ParserUsage usage) { usage.parser.print_usage_to(out); }
+
+void print_to(PrintTarget out, ParserHelp help) { help.parser.print_help_to(out); }
 
 struct HelpAction : public Action::Impl {
-    HelpAction(const Parser& parser, int exit_code): parser(parser), exit_code(exit_code) { }
+    HelpAction(const Parser& parser, int exit_code) : parser(parser), exit_code(exit_code) {}
     virtual bool takes_value() const { return false; }
     virtual bool process(PrintTarget error) const {
         print(io::err, parser.help());
         exit(exit_code);
     }
     const Parser& parser;
-    int exit_code;
+    int           exit_code;
 };
 
 Action help(const Parser& parser, int exit_code) {
@@ -736,8 +733,8 @@ Action help(const Parser& parser, int exit_code) {
 }
 
 struct VersionAction : public Action::Impl {
-    VersionAction(StringSlice string): string(string) { }
-    virtual bool takes_value() const { return false; }
+    VersionAction(StringSlice string) : string(string) {}
+    virtual bool              takes_value() const { return false; }
     virtual bool process(PrintTarget error) const {
         print(io::err, string);
         exit(0);
@@ -745,9 +742,7 @@ struct VersionAction : public Action::Impl {
     StringSlice string;
 };
 
-Action version(StringSlice string) {
-    return shared_ptr<Action::Impl>(new VersionAction(string));
-}
+Action version(StringSlice string) { return shared_ptr<Action::Impl>(new VersionAction(string)); }
 
 }  // namespace args
 }  // namespace sfz

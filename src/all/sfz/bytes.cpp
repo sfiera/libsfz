@@ -27,68 +27,47 @@ const size_t kDefaultBytesSize = 16;
 const size_t Bytes::npos;
 const size_t BytesSlice::npos;
 
-Bytes::Bytes()
-    : _data(new uint8_t[kDefaultBytesSize]),
-      _size(0),
-      _capacity(kDefaultBytesSize) { }
+Bytes::Bytes() : _data(new uint8_t[kDefaultBytesSize]), _size(0), _capacity(kDefaultBytesSize) {}
 
 Bytes::Bytes(const Bytes& bytes)
-    : _data(new uint8_t[bytes._capacity]),
-      _size(bytes._size),
-      _capacity(bytes._capacity) {
+        : _data(new uint8_t[bytes._capacity]), _size(bytes._size), _capacity(bytes._capacity) {
     memcpy(_data.get(), bytes._data.get(), _size);
 }
 
 Bytes::Bytes(WriteItem item)
-    : _data(new uint8_t[kDefaultBytesSize]),
-      _size(0),
-      _capacity(kDefaultBytesSize) {
+        : _data(new uint8_t[kDefaultBytesSize]), _size(0), _capacity(kDefaultBytesSize) {
     item.write_to(*this);
 }
 
 Bytes::Bytes(const uint8_t* data, size_t size)
-    : _data(new uint8_t[max(size, kDefaultBytesSize)]),
-      _size(size),
-      _capacity(max(size, kDefaultBytesSize)) {
+        : _data(new uint8_t[max(size, kDefaultBytesSize)]),
+          _size(size),
+          _capacity(max(size, kDefaultBytesSize)) {
     memcpy(_data.get(), data, size);
 }
 
 Bytes::Bytes(size_t num, uint8_t byte)
-    : _data(new uint8_t[max(num, kDefaultBytesSize)]),
-      _size(num),
-      _capacity(max(num, kDefaultBytesSize)) {
+        : _data(new uint8_t[max(num, kDefaultBytesSize)]),
+          _size(num),
+          _capacity(max(num, kDefaultBytesSize)) {
     memset(_data.get(), byte, num);
 }
 
-Bytes::~Bytes() { }
+Bytes::~Bytes() {}
 
-void Bytes::assign(Bytes&& bytes) {
-    *this = std::move(bytes);
-}
+void Bytes::assign(Bytes&& bytes) { *this = std::move(bytes); }
 
-uint8_t* Bytes::data() {
-    return _data.get();
-}
+uint8_t* Bytes::data() { return _data.get(); }
 
-const uint8_t* Bytes::data() const {
-    return _data.get();
-}
+const uint8_t* Bytes::data() const { return _data.get(); }
 
-size_t Bytes::size() const {
-    return _size;
-}
+size_t Bytes::size() const { return _size; }
 
-void Bytes::push(const BytesSlice& bytes) {
-    append(bytes.data(), bytes.size());
-}
+void Bytes::push(const BytesSlice& bytes) { append(bytes.data(), bytes.size()); }
 
-void Bytes::push(size_t num, uint8_t byte) {
-    append(num, byte);
-}
+void Bytes::push(size_t num, uint8_t byte) { append(num, byte); }
 
-void Bytes::append(WriteItem item) {
-    item.write_to(*this);
-}
+void Bytes::append(WriteItem item) { item.write_to(*this); }
 
 void Bytes::append(const uint8_t* data, size_t size) {
     reserve(size + _size);
@@ -119,45 +98,25 @@ void Bytes::assign(size_t num, uint8_t byte) {
     _size = num;
 }
 
-uint8_t Bytes::at(size_t loc) const {
-    return slice().at(loc);
-}
+uint8_t Bytes::at(size_t loc) const { return slice().at(loc); }
 
-size_t Bytes::find(uint8_t byte) const {
-    return slice().find(byte);
-}
+size_t Bytes::find(uint8_t byte) const { return slice().find(byte); }
 
-size_t Bytes::find(const BytesSlice& bytes) const {
-    return slice().find(bytes);
-}
+size_t Bytes::find(const BytesSlice& bytes) const { return slice().find(bytes); }
 
-size_t Bytes::rfind(uint8_t byte) const {
-    return slice().rfind(byte);
-}
+size_t Bytes::rfind(uint8_t byte) const { return slice().rfind(byte); }
 
-size_t Bytes::rfind(const BytesSlice& bytes) const {
-    return slice().rfind(bytes);
-}
+size_t Bytes::rfind(const BytesSlice& bytes) const { return slice().rfind(bytes); }
 
-void Bytes::clear() {
-    _size = 0;
-}
+void Bytes::clear() { _size = 0; }
 
-bool Bytes::empty() const {
-    return _size == 0;
-}
+bool Bytes::empty() const { return _size == 0; }
 
-BytesSlice Bytes::slice() const {
-    return *this;
-}
+BytesSlice Bytes::slice() const { return *this; }
 
-BytesSlice Bytes::slice(size_t index) const {
-    return slice().slice(index);
-}
+BytesSlice Bytes::slice(size_t index) const { return slice().slice(index); }
 
-BytesSlice Bytes::slice(size_t index, size_t size) const {
-    return slice().slice(index, size);
-}
+BytesSlice Bytes::slice(size_t index, size_t size) const { return slice().slice(index, size); }
 
 void Bytes::replace(size_t index, size_t num, const BytesSlice& bytes) {
     Bytes tail(slice(index + num));
@@ -189,29 +148,18 @@ void Bytes::resize(size_t size, uint8_t byte) {
     }
 }
 
-BytesSlice::BytesSlice()
-    : _data(NULL),
-      _size(0) { }
+BytesSlice::BytesSlice() : _data(NULL), _size(0) {}
 
-BytesSlice::BytesSlice(const Bytes& bytes)
-    : _data(bytes.data()),
-      _size(bytes.size()) { }
+BytesSlice::BytesSlice(const Bytes& bytes) : _data(bytes.data()), _size(bytes.size()) {}
 
 BytesSlice::BytesSlice(const char* data)
-    : _data(reinterpret_cast<const uint8_t*>(data)),
-      _size(strlen(data)) { }
+        : _data(reinterpret_cast<const uint8_t*>(data)), _size(strlen(data)) {}
 
-BytesSlice::BytesSlice(const uint8_t* data, size_t size)
-    : _data(data),
-      _size(size) { }
+BytesSlice::BytesSlice(const uint8_t* data, size_t size) : _data(data), _size(size) {}
 
-const uint8_t* BytesSlice::data() const {
-    return _data;
-}
+const uint8_t* BytesSlice::data() const { return _data; }
 
-size_t BytesSlice::size() const {
-    return _size;
-}
+size_t BytesSlice::size() const { return _size; }
 
 uint8_t BytesSlice::at(size_t loc) const {
     if (loc >= _size) {
@@ -221,7 +169,7 @@ uint8_t BytesSlice::at(size_t loc) const {
 }
 
 size_t BytesSlice::find(uint8_t byte) const {
-    for (size_type i: range(_size)) {
+    for (size_type i : range(_size)) {
         if (at(i) == byte) {
             return i;
         }
@@ -233,7 +181,7 @@ size_t BytesSlice::find(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
         return BytesSlice::npos;
     }
-    for (size_type i: range(_size - bytes.size() + 1)) {
+    for (size_type i : range(_size - bytes.size() + 1)) {
         if (slice(i, bytes.size()) == bytes) {
             return i;
         }
@@ -242,7 +190,7 @@ size_t BytesSlice::find(const BytesSlice& bytes) const {
 }
 
 size_t BytesSlice::rfind(uint8_t byte) const {
-    for (size_type i: range(_size)) {
+    for (size_type i : range(_size)) {
         if (at(_size - i - 1) == byte) {
             return _size - i - 1;
         }
@@ -254,7 +202,7 @@ size_t BytesSlice::rfind(const BytesSlice& bytes) const {
     if (_size < bytes.size()) {
         return BytesSlice::npos;
     }
-    for (size_type i: range(_size - bytes.size() + 1)) {
+    for (size_type i : range(_size - bytes.size() + 1)) {
         if (slice(_size - bytes.size() - i, bytes.size()) == bytes) {
             return _size - bytes.size() - i;
         }
@@ -262,13 +210,9 @@ size_t BytesSlice::rfind(const BytesSlice& bytes) const {
     return BytesSlice::npos;
 }
 
-bool BytesSlice::empty() const {
-    return _size == 0;
-}
+bool BytesSlice::empty() const { return _size == 0; }
 
-BytesSlice BytesSlice::slice() const {
-    return *this;
-}
+BytesSlice BytesSlice::slice() const { return *this; }
 
 BytesSlice BytesSlice::slice(size_t index) const {
     if (index > _size) {
@@ -309,8 +253,7 @@ void swap(BytesSlice& x, BytesSlice& y) {
 }
 
 bool operator==(const BytesSlice& x, const BytesSlice& y) {
-    return (x.size() == y.size())
-        && (memcmp(x.data(), y.data(), x.size()) == 0);
+    return (x.size() == y.size()) && (memcmp(x.data(), y.data(), x.size()) == 0);
 }
 
 bool operator<(const BytesSlice& x, const BytesSlice& y) {

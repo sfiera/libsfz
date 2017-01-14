@@ -23,11 +23,11 @@ class NetworkBytes {
     // @param [in] t        The integer to represent the bytes of.
     explicit NetworkBytes(T t);
 
-    size_t size() const;
-    uint8_t* data();
+    size_t         size() const;
+    uint8_t*       data();
     const uint8_t* data() const;
 
-    T value() const;
+    T    value() const;
     void set_value(T t);
 
   private:

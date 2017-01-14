@@ -8,8 +8,8 @@
 
 #include <map>
 #include <memory>
-#include <vector>
 #include <sfz/string-map.hpp>
+#include <vector>
 
 namespace sfz {
 
@@ -45,8 +45,8 @@ class Json {
     size_t size() const;
 
     const StringSlice string() const;
-    const double number() const;
-    const bool boolean() const;
+    const double      number() const;
+    const bool        boolean() const;
 
   private:
     friend bool operator==(const Json& x, const Json& y);
@@ -73,12 +73,12 @@ class JsonVisitor {
   public:
     virtual ~JsonVisitor();
 
-    virtual void visit_object(const StringMap<Json>& value) const = 0;
+    virtual void visit_object(const StringMap<Json>& value) const  = 0;
     virtual void visit_array(const std::vector<Json>& value) const = 0;
-    virtual void visit_string(const StringSlice& value) const = 0;
-    virtual void visit_number(double value) const = 0;
-    virtual void visit_bool(bool value) const = 0;
-    virtual void visit_null() const = 0;
+    virtual void visit_string(const StringSlice& value) const      = 0;
+    virtual void visit_number(double value) const                  = 0;
+    virtual void visit_bool(bool value) const                      = 0;
+    virtual void visit_null() const                                = 0;
 };
 
 class JsonDefaultVisitor : public JsonVisitor {
@@ -100,7 +100,9 @@ JsonPrettyPrinter pretty_print(const Json& value);
 void print_to(PrintTarget out, const Json& json);
 void print_to(PrintTarget out, const JsonPrettyPrinter& j);
 
-struct JsonPrettyPrinter { const Json& json; };
+struct JsonPrettyPrinter {
+    const Json& json;
+};
 
 }  // namespace sfz
 

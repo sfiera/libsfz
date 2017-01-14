@@ -17,8 +17,14 @@ namespace {
 
 typedef Test OptionalTest;
 
-template <typename T> const T& const_(T& t) { return t; }
-template <typename T> const T* const_(T* t) { return t; }
+template <typename T>
+const T& const_(T& t) {
+    return t;
+}
+template <typename T>
+const T* const_(T* t) {
+    return t;
+}
 
 TEST_F(OptionalTest, Int) {
     Optional<int> o;

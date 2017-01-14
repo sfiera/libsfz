@@ -54,7 +54,7 @@ def main():
 def check_submodules():
     REQUIRED_SUBMODULES = [
         "build/lib",
-        "ext/gmock-gyp",
+        "ext/gmock",
     ]
     missing = False
     for module in REQUIRED_SUBMODULES:

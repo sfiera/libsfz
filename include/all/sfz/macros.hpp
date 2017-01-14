@@ -7,8 +7,8 @@
 #define SFZ_MACROS_HPP_
 
 #define DISALLOW_COPY_AND_ASSIGN(CLASS) \
-  private: \
-    CLASS(const CLASS&); \
+  private:                              \
+    CLASS(const CLASS&);                \
     CLASS& operator=(const CLASS&);
 
 #endif  // SFZ_MACROS_HPP_

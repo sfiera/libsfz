@@ -17,15 +17,15 @@ using testing::Test;
 namespace other {
 
 enum Grapheme {
-    AESC = 0,
-    ETH = 1,
+    AESC  = 0,
+    ETH   = 1,
     THORN = 2,
-    WYNN = 3,
-    YOGH = 4,
+    WYNN  = 3,
+    YOGH  = 4,
 };
 
 struct Mapping {
-    Grapheme grapheme;
+    Grapheme  grapheme;
     sfz::Rune code_point;
 };
 
@@ -42,14 +42,13 @@ void read_from(sfz::ReadSource in, Mapping& mapping) {
     sfz::read(in, mapping.grapheme);
     sfz::read(in, mapping.code_point);
 }
-
 };
 
 namespace sfz {
 namespace {
 
 template <int size>
-BytesSlice char_bytes(const char (&data)[size]) {
+BytesSlice    char_bytes(const char (&data)[size]) {
     return BytesSlice(reinterpret_cast<const uint8_t*>(data), size - 1);
 }
 
@@ -112,10 +111,15 @@ TEST_F(ReadItemTest, ReadUint8) {
 
 TEST_F(ReadItemTest, ReadLargerInts) {
     BytesSlice bytes = char_bytes(
-                    "\000\001" "\000\000\000\002" "\000\000\000\000\000\000\000\003"
-                    "\000\144" "\047\020"
-                    "\000\000\047\020" "\073\232\312\000"
-                    "\000\000\000\000\073\232\312\000" "\015\340\266\263\247\144\000\000");
+            "\000\001"
+            "\000\000\000\002"
+            "\000\000\000\000\000\000\000\003"
+            "\000\144"
+            "\047\020"
+            "\000\000\047\020"
+            "\073\232\312\000"
+            "\000\000\000\000\073\232\312\000"
+            "\015\340\266\263\247\144\000\000");
     EXPECT_THAT(read<int16_t>(bytes), Eq(1));
     EXPECT_THAT(read<int32_t>(bytes), Eq(2));
     EXPECT_THAT(read<int64_t>(bytes), Eq(3));

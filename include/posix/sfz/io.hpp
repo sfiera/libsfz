@@ -13,7 +13,7 @@ namespace sfz {
 namespace io {
 
 struct Io {
-    int fd;
+    int  fd;
     void push(const StringSlice& string);
     void push(size_t num, Rune rune);
 };

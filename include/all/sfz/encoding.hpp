@@ -16,8 +16,10 @@ class BytesSlice;
 class PrintTarget;
 class StringSlice;
 class WriteTarget;
-template <typename T> struct EncodedString;
-template <typename T> struct DecodedBytes;
+template <typename T>
+struct EncodedString;
+template <typename T>
+struct DecodedBytes;
 
 // Constants for replacing code points which cannot be encoded.
 //
@@ -130,21 +132,25 @@ inline EncodedString<MacRoman> decode(const BytesSlice& bytes);
 
 namespace sfz {
 
-template <typename T> struct EncodedString {
+template <typename T>
+struct EncodedString {
     const BytesSlice& bytes;
-    EncodedString(const BytesSlice& b) : bytes(b) { }
+    EncodedString(const BytesSlice& b) : bytes(b) {}
 };
 
-template <typename T> struct DecodedBytes {
+template <typename T>
+struct DecodedBytes {
     const StringSlice& string;
-    DecodedBytes(const StringSlice& s) : string(s) { }
+    DecodedBytes(const StringSlice& s) : string(s) {}
 };
 
-template <typename T> void print_to(PrintTarget out, const EncodedString<T>& string) {
+template <typename T>
+void print_to(PrintTarget out, const EncodedString<T>& string) {
     T::decode_to(out, string.bytes);
 }
 
-template <typename T> void write_to(WriteTarget out, const DecodedBytes<T>& bytes) {
+template <typename T>
+void write_to(WriteTarget out, const DecodedBytes<T>& bytes) {
     T::encode_to(out, bytes.string);
 }
 

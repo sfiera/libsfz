@@ -21,17 +21,13 @@ using std::numeric_limits;
 
 namespace sfz {
 
-Sha1::Sha1() {
-    reset();
-}
+Sha1::Sha1() { reset(); }
 
-Sha1::Sha1(const Sha1& other) {
-    memcpy(this, &other, sizeof(Sha1));
-}
+Sha1::Sha1(const Sha1& other) { memcpy(this, &other, sizeof(Sha1)); }
 
 void Sha1::reset() {
-    _size = 0;
-    _message_block_index = 0;
+    _size                   = 0;
+    _message_block_index    = 0;
     _intermediate.digest[0] = 0x67452301;
     _intermediate.digest[1] = 0xefcdab89;
     _intermediate.digest[2] = 0x98badcfe;
@@ -101,9 +97,11 @@ inline void permute(
 }  // namespace
 
 void Sha1::process_message_block() {
-    static const uint32_t k[] = { 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6, };
+    static const uint32_t k[] = {
+            0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6,
+    };
 
-    uint32_t w[80];
+    uint32_t   w[80];
     BytesSlice block(_message_block, 64);
     read(block, w, 16);
     for (int i = 16; i < 80; ++i) {
@@ -137,13 +135,9 @@ void Sha1::process_message_block() {
     _message_block_index = 0;
 }
 
-void read_from(ReadSource in, Sha1::Digest& digest) {
-    read(in, digest.digest, 5);
-}
+void read_from(ReadSource in, Sha1::Digest& digest) { read(in, digest.digest, 5); }
 
-void write_to(WriteTarget out, const Sha1::Digest& digest) {
-    write(out, digest.digest, 5);
-}
+void write_to(WriteTarget out, const Sha1::Digest& digest) { write(out, digest.digest, 5); }
 
 void print_to(PrintTarget out, const Sha1::Digest& digest) {
     for (int i = 0; i < 5; ++i) {
@@ -153,7 +147,7 @@ void print_to(PrintTarget out, const Sha1::Digest& digest) {
 
 Sha1::Digest file_digest(const StringSlice& path) {
     MappedFile file(path);
-    Sha1 sha;
+    Sha1       sha;
     sha.push(file.data());
     return sha.digest();
 }
@@ -178,8 +172,8 @@ Sha1::Digest tree_digest(const StringSlice& path) {
 
         // Ignore empty directories.  Directories which are not empty will be included in the
         // resulting digest by virtue of the inclusion of their files.
-        void pre_directory(const StringSlice& path, const Stat&) const { }
-        void post_directory(const StringSlice& path, const Stat&) const { }
+        void pre_directory(const StringSlice& path, const Stat&) const {}
+        void post_directory(const StringSlice& path, const Stat&) const {}
 
         // Throw exceptions on anything that might break our logical view of a tree as a
         // hierarchical listing of of regular files.
@@ -191,16 +185,14 @@ Sha1::Digest tree_digest(const StringSlice& path) {
         }
 
         // Ignore broken symlinks; they effectively don't exist.
-        void broken_symlink(const StringSlice& path, const Stat&) const { }
+        void broken_symlink(const StringSlice& path, const Stat&) const {}
 
         // Can't happen during WALK_LOGICAL.
-        void symlink(const StringSlice& path, const Stat&) const { }
+        void symlink(const StringSlice& path, const Stat&) const {}
 
-        Sha1& sha;
+        Sha1&     sha;
         const int prefix_size;
-        DigestWalker(Sha1& sha, int prefix_size):
-                sha(sha),
-                prefix_size(prefix_size) { }
+        DigestWalker(Sha1& sha, int prefix_size) : sha(sha), prefix_size(prefix_size) {}
     };
     Sha1 sha;
     walk(path, WALK_LOGICAL, DigestWalker(sha, path.size() + 1));
@@ -211,8 +203,6 @@ bool operator==(const Sha1::Digest& lhs, const Sha1::Digest& rhs) {
     return memcmp(lhs.digest, rhs.digest, 5 * sizeof(uint32_t)) == 0;
 }
 
-bool operator!=(const Sha1::Digest& lhs, const Sha1::Digest& rhs) {
-    return !(lhs == rhs);
-}
+bool operator!=(const Sha1::Digest& lhs, const Sha1::Digest& rhs) { return !(lhs == rhs); }
 
 }  // namespace sfz

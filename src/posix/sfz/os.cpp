@@ -8,11 +8,11 @@
 #include <fcntl.h>
 #include <fts.h>
 #include <string.h>
+#include <unistd.h>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/posix-format.hpp>
-#include <unistd.h>
 
 namespace sfz {
 
@@ -20,25 +20,25 @@ namespace path {
 
 bool exists(const StringSlice& path) {
     CString c_str(path);
-    Stat st;
+    Stat    st;
     return (stat(c_str.data(), &st) == 0);
 }
 
 bool isdir(const StringSlice& path) {
     CString c_str(path);
-    Stat st;
+    Stat    st;
     return (stat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFDIR);
 }
 
 bool isfile(const StringSlice& path) {
     CString c_str(path);
-    Stat st;
+    Stat    st;
     return (stat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFREG);
 }
 
 bool islink(const StringSlice& path) {
     CString c_str(path);
-    Stat st;
+    Stat    st;
     return (lstat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFLNK);
 }
 
@@ -88,7 +88,7 @@ void symlink(const StringSlice& content, const StringSlice& container) {
 
 int open(const StringSlice& path, int oflag, mode_t mode) {
     CString c_str(path);
-    int fd = ::open(c_str.data(), oflag, mode);
+    int     fd = ::open(c_str.data(), oflag, mode);
     if (fd < 0) {
         throw Exception(format("open: {0}: {1}", path, posix_strerror()));
     }
@@ -134,15 +134,15 @@ void rmtree(const StringSlice& path) {
     if (path::exists(path)) {
         class RmtreeVisitor : public TreeWalker {
           public:
-            void pre_directory(    const StringSlice& path, const Stat&) const { }
-            void cycle_directory(  const StringSlice& path, const Stat&) const { }
+            void pre_directory(const StringSlice& path, const Stat&) const {}
+            void cycle_directory(const StringSlice& path, const Stat&) const {}
 
-            void post_directory(   const StringSlice& path, const Stat&) const { rmdir(path); }
+            void post_directory(const StringSlice& path, const Stat&) const { rmdir(path); }
 
-            void file(             const StringSlice& path, const Stat&) const { unlink(path); }
-            void symlink(          const StringSlice& path, const Stat&) const { unlink(path); }
-            void broken_symlink(   const StringSlice& path, const Stat&) const { unlink(path); }
-            void other(            const StringSlice& path, const Stat&) const { unlink(path); }
+            void file(const StringSlice& path, const Stat&) const { unlink(path); }
+            void symlink(const StringSlice& path, const Stat&) const { unlink(path); }
+            void broken_symlink(const StringSlice& path, const Stat&) const { unlink(path); }
+            void other(const StringSlice& path, const Stat&) const { unlink(path); }
         };
         RmtreeVisitor visitor;
         walk(path, WALK_PHYSICAL, visitor);
@@ -150,7 +150,7 @@ void rmtree(const StringSlice& path) {
 }
 
 TemporaryDirectory::TemporaryDirectory(const StringSlice& prefix) {
-    String str(format("/tmp/{0}XXXXXX", prefix));
+    String  str(format("/tmp/{0}XXXXXX", prefix));
     CString c_str(str);
     if (!mkdtemp(c_str.data())) {
         throw Exception("mkdtemp() failed");
@@ -158,20 +158,17 @@ TemporaryDirectory::TemporaryDirectory(const StringSlice& prefix) {
     _path.assign(utf8::decode(c_str.data()));
 }
 
-TemporaryDirectory::~TemporaryDirectory() {
-    rmtree(_path);
-}
+TemporaryDirectory::~TemporaryDirectory() { rmtree(_path); }
 
-const String& TemporaryDirectory::path() const {
-    return _path;
-}
+const String& TemporaryDirectory::path() const { return _path; }
 
 namespace {
 
 class FtsCloser {
   public:
-    FtsCloser(FTS* fts) : _fts(fts) { }
+    FtsCloser(FTS* fts) : _fts(fts) {}
     ~FtsCloser() { fts_close(_fts); }
+
   private:
     FTS* _fts;
     DISALLOW_COPY_AND_ASSIGN(FtsCloser);
@@ -184,9 +181,9 @@ int compare_ftsent(const FTSENT** lhs, const FTSENT** rhs) {
 }  // namespace
 
 void walk(const StringSlice& root, WalkType type, const TreeWalker& visitor) {
-    CString c_str(root);
-    char* const pathv[] = { c_str.data(), NULL };
-    int options = FTS_NOCHDIR;
+    CString     c_str(root);
+    char* const pathv[] = {c_str.data(), NULL};
+    int         options = FTS_NOCHDIR;
     if (type == WALK_PHYSICAL) {
         options |= FTS_PHYSICAL;
     } else {
@@ -199,30 +196,30 @@ void walk(const StringSlice& root, WalkType type, const TreeWalker& visitor) {
     }
     FtsCloser deleter(fts);
     while (FTSENT* ent = fts_read(fts)) {
-        String path(utf8::decode(ent->fts_path));
+        String      path(utf8::decode(ent->fts_path));
         const Stat& st = *ent->fts_statp;
         switch (ent->fts_info) {
-          case FTS_D:        visitor.pre_directory(     path, st); break;
-          case FTS_DC:       visitor.cycle_directory(   path, st); break;
-          case FTS_DEFAULT:  visitor.other(             path, st); break;
-          case FTS_DP:       visitor.post_directory(    path, st); break;
-          case FTS_F:        visitor.file(              path, st); break;
-          case FTS_SL:       visitor.symlink(           path, st); break;
-          case FTS_SLNONE:   visitor.broken_symlink(    path, st); break;
+            case FTS_D: visitor.pre_directory(path, st); break;
+            case FTS_DC: visitor.cycle_directory(path, st); break;
+            case FTS_DEFAULT: visitor.other(path, st); break;
+            case FTS_DP: visitor.post_directory(path, st); break;
+            case FTS_F: visitor.file(path, st); break;
+            case FTS_SL: visitor.symlink(path, st); break;
+            case FTS_SLNONE: visitor.broken_symlink(path, st); break;
 
-          case FTS_DNR:
-          case FTS_ERR:
-          case FTS_NS:
-            throw Exception(format("fts_read: {0}: {1}", path, posix_strerror(ent->fts_errno)));
+            case FTS_DNR:
+            case FTS_ERR:
+            case FTS_NS:
+                throw Exception(
+                        format("fts_read: {0}: {1}", path, posix_strerror(ent->fts_errno)));
 
-          case FTS_DOT:
-          case FTS_NSOK:
-          default:
-            throw Exception(format("walk: got invalid type {0}", ent->fts_info));
+            case FTS_DOT:
+            case FTS_NSOK:
+            default: throw Exception(format("walk: got invalid type {0}", ent->fts_info));
         }
     }
 }
 
-TreeWalker::~TreeWalker() { }
+TreeWalker::~TreeWalker() {}
 
 }  // namespace sfz

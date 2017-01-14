@@ -6,34 +6,34 @@
 #ifndef SFZ_STRING_MAP_HPP_
 #define SFZ_STRING_MAP_HPP_
 
-#include <map>
-#include <utility>
 #include <stdlib.h>
+#include <map>
 #include <sfz/macros.hpp>
 #include <sfz/string.hpp>
+#include <utility>
 
 namespace sfz {
 
-template <typename T, typename Compare = std::less<StringSlice> >
+template <typename T, typename Compare = std::less<StringSlice>>
 class StringMap {
   public:
-    typedef StringSlice                             key_type;
-    typedef T                                       mapped_type;
-    typedef std::pair<const key_type, mapped_type>  value_type;
-    typedef size_t                                  size_type;
+    typedef StringSlice key_type;
+    typedef T           mapped_type;
+    typedef std::pair<const key_type, mapped_type> value_type;
+    typedef size_t size_type;
 
     class iterator;
     class const_iterator;
 
-    StringMap() { }
+    StringMap() {}
     explicit StringMap(const StringMap& other);
-    ~StringMap() { }
+    ~StringMap() {}
 
     mapped_type& operator[](const key_type& key);
     std::pair<iterator, bool> insert(const value_type& pair);
 
     size_type size() const { return _map.size(); }
-    bool empty() const { return _map.empty(); }
+    bool      empty() const { return _map.empty(); }
 
     void clear() { _map.clear(); }
     void erase(iterator pos);
@@ -43,13 +43,13 @@ class StringMap {
     iterator find(const key_type& key);
     const_iterator find(const key_type& key) const;
 
-    iterator begin();
+    iterator       begin();
     const_iterator begin() const;
-    iterator end();
+    iterator       end();
     const_iterator end() const;
-    iterator rbegin();
+    iterator       rbegin();
     const_iterator rbegin() const;
-    iterator rend();
+    iterator       rend();
     const_iterator rend() const;
 
     void swap(StringMap& from) { _map.swap(from._map); }
@@ -57,20 +57,17 @@ class StringMap {
   private:
     struct WrappedValue;
     typedef std::map<StringSlice, std::shared_ptr<WrappedValue>, Compare> internal_map;
-    typedef typename internal_map::iterator wrapped_iterator;
+    typedef typename internal_map::iterator       wrapped_iterator;
     typedef typename internal_map::const_iterator wrapped_const_iterator;
 
     struct WrappedValue {
         const String key_storage;
         std::pair<const StringSlice, mapped_type> pair;
 
-        WrappedValue(const StringSlice& k)
-            : key_storage(k),
-              pair(key_storage, mapped_type()) { }
+        WrappedValue(const StringSlice& k) : key_storage(k), pair(key_storage, mapped_type()) {}
 
         WrappedValue(const StringSlice& k, const mapped_type& v)
-            : key_storage(k),
-              pair(key_storage, v) { }
+                : key_storage(k), pair(key_storage, v) {}
 
         DISALLOW_COPY_AND_ASSIGN(WrappedValue);
     };
@@ -78,21 +75,27 @@ class StringMap {
     template <typename wrapped_iterator>
     class iterator_base {
       public:
-        typedef typename wrapped_iterator::iterator_category    iterator_category;
-        typedef typename StringMap::value_type                  value_type;
-        typedef typename wrapped_iterator::difference_type      difference_type;
-        typedef value_type*                                     pointer;
-        typedef value_type&                                     reference;
+        typedef typename wrapped_iterator::iterator_category iterator_category;
+        typedef typename StringMap::value_type               value_type;
+        typedef typename wrapped_iterator::difference_type   difference_type;
+        typedef value_type*                                  pointer;
+        typedef value_type&                                  reference;
 
-        iterator_base() { }
-        iterator_base(wrapped_iterator it) : _it(it) { }
+        iterator_base() {}
+        iterator_base(wrapped_iterator it) : _it(it) {}
 
         reference operator*() const { return _it->second->pair; }
         pointer operator->() const { return &_it->second->pair; }
 
-        iterator_base& operator++() { ++_it; return *this; }
+        iterator_base& operator++() {
+            ++_it;
+            return *this;
+        }
         iterator_base operator++(int) { return _it++; }
-        iterator_base& operator--() { --_it; return *this; }
+        iterator_base& operator--() {
+            --_it;
+            return *this;
+        }
         iterator_base operator--(int) { return _it--; }
 
         bool operator==(iterator_base it) { return _it == it._it; }
@@ -129,35 +132,36 @@ bool operator!=(const StringMap<T, Compare>& x, const StringMap<T, Compare>& y) 
 template <typename T, typename Compare>
 class StringMap<T, Compare>::const_iterator : public iterator_base<wrapped_const_iterator> {
   public:
-    const_iterator() { }
+    const_iterator() {}
 
   private:
     friend class StringMap;
     friend class iterator;
-    const_iterator(wrapped_const_iterator it) : iterator_base<wrapped_const_iterator>(it) { }
+    const_iterator(wrapped_const_iterator it) : iterator_base<wrapped_const_iterator>(it) {}
 };
 
 template <typename T, typename Compare>
 class StringMap<T, Compare>::iterator : public iterator_base<wrapped_iterator> {
   public:
-    iterator() { }
-    iterator(const_iterator it) : iterator_base<wrapped_iterator>(it._it) { }
+    iterator() {}
+    iterator(const_iterator it) : iterator_base<wrapped_iterator>(it._it) {}
 
   private:
     friend class StringMap;
-    iterator(wrapped_iterator it) : iterator_base<wrapped_iterator>(it) { }
+    iterator(wrapped_iterator it) : iterator_base<wrapped_iterator>(it) {}
 };
 
 template <typename T, typename Compare>
-void StringMap<T, Compare>::erase(iterator pos) { _map.erase(pos); }
+void StringMap<T, Compare>::erase(iterator pos) {
+    _map.erase(pos);
+}
 template <typename T, typename Compare>
 void StringMap<T, Compare>::erase(iterator start, iterator end) {
     _map.erase(start, end);
 }
 
 template <typename T, typename Compare>
-typename StringMap<T, Compare>::iterator StringMap<T, Compare>::find(
-        const key_type& key) {
+typename StringMap<T, Compare>::iterator StringMap<T, Compare>::find(const key_type& key) {
     return _map.find(key);
 }
 template <typename T, typename Compare>
@@ -176,7 +180,7 @@ typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::begin() co
 }
 template <typename T, typename Compare>
 typename StringMap<T, Compare>::iterator StringMap<T, Compare>::end() {
-    return _map.end(); 
+    return _map.end();
 }
 template <typename T, typename Compare>
 typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::end() const {
@@ -201,7 +205,7 @@ typename StringMap<T, Compare>::const_iterator StringMap<T, Compare>::rend() con
 
 template <typename T, typename Compare>
 StringMap<T, Compare>::StringMap(const StringMap& other) {
-    for (const value_type& item: other) {
+    for (const value_type& item : other) {
         insert(item);
     }
 }
@@ -221,9 +225,9 @@ typename StringMap<T, Compare>::mapped_type& StringMap<T, Compare>::operator[](
 template <typename T, typename Compare>
 std::pair<typename StringMap<T, Compare>::iterator, bool> StringMap<T, Compare>::insert(
         const value_type& pair) {
-    const StringSlice& key = pair.first;
+    const StringSlice& key   = pair.first;
     const mapped_type& value = pair.second;
-    wrapped_iterator it = _map.find(key);
+    wrapped_iterator   it    = _map.find(key);
     if (it == _map.end()) {
         std::shared_ptr<WrappedValue> inserted(new WrappedValue(key, value));
         it = _map.insert(typename internal_map::value_type(inserted->key_storage, inserted)).first;

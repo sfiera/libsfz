@@ -31,27 +31,21 @@ const size_t StringSlice::npos;
 
 // String implementation.
 
-String::String() {
-    initialize(0);
-}
+String::String() { initialize(0); }
 
 String::String(const String& string) {
     initialize(string._capacity);
     append(PrintItem(string));
 }
 
-void String::assign(String&& string) {
-    *this = std::move(string);
-}
+void String::assign(String&& string) { *this = std::move(string); }
 
 String::String(const PrintItem& item) {
     initialize(0);
     append(item);
 }
 
-void String::append(const PrintItem& item) {
-    item.print_to(*this);
-}
+void String::append(const PrintItem& item) { item.print_to(*this); }
 
 void String::assign(const PrintItem& item) {
     clear();
@@ -77,7 +71,7 @@ void String::assign(size_t num, Rune rune) {
 
 void String::push(const StringSlice& string) {
     reserve(_size + string._size);
-    for (Rune r: string) {
+    for (Rune r : string) {
         append(1, r);
     }
 }
@@ -89,11 +83,9 @@ void String::push(size_t num, Rune rune) {
     resize(_size + num, rune);
 }
 
-String::~String() { }
+String::~String() {}
 
-void String::clear() {
-    _size = 0;
-}
+void String::clear() { _size = 0; }
 
 void String::reserve(size_t capacity) {
     if (_capacity < capacity) {
@@ -111,7 +103,7 @@ void String::reserve(size_t capacity) {
 void String::resize(size_t size, Rune rune) {
     if (size > _size) {
         reserve(size);
-        for (size_t i: range(_size, size)) {
+        for (size_t i : range(_size, size)) {
             _data[i] = rune;
         }
     }
@@ -125,102 +117,76 @@ void String::replace(size_t index, size_t num, const StringSlice& string) {
     append(tail);
 }
 
-size_t String::size() const {
-    return slice().size();
-}
+size_t String::size() const { return slice().size(); }
 
-Rune String::at(size_t loc) const {
-    return slice().at(loc);
-}
+Rune String::at(size_t loc) const { return slice().at(loc); }
 
-bool String::empty() const {
-    return slice().empty();
-}
+bool String::empty() const { return slice().empty(); }
 
-size_t String::find(Rune rune, size_t index) const {
-    return slice().find(rune, index);
-}
+size_t String::find(Rune rune, size_t index) const { return slice().find(rune, index); }
 
 size_t String::find(const StringSlice& string, size_t index) const {
     return slice().find(string, index);
 }
 
-size_t String::rfind(Rune rune, size_t index) const {
-    return slice().rfind(rune, index);
-}
+size_t String::rfind(Rune rune, size_t index) const { return slice().rfind(rune, index); }
 
 size_t String::rfind(const StringSlice& string, size_t index) const {
     return slice().rfind(string, index);
 }
 
-StringSlice String::slice() const {
-    return *this;
-}
+StringSlice String::slice() const { return *this; }
 
-StringSlice String::slice(size_t loc) const {
-    return slice().slice(loc);
-}
+StringSlice String::slice(size_t loc) const { return slice().slice(loc); }
 
-StringSlice String::slice(size_t loc, size_t size) const {
-    return slice().slice(loc, size);
-}
+StringSlice String::slice(size_t loc, size_t size) const { return slice().slice(loc, size); }
 
 void String::initialize(size_t capacity) {
     capacity = max(capacity, kDefaultStringSize);
     _data.reset(new Rune[capacity]);
-    _size = 0;
+    _size     = 0;
     _capacity = capacity;
 }
 
 // StringSlice implementation.
 
-StringSlice::StringSlice()
-        : _data(NULL),
-          _encoding(sizeof(uint8_t)),
-          _size(0) { }
+StringSlice::StringSlice() : _data(NULL), _encoding(sizeof(uint8_t)), _size(0) {}
 
 StringSlice::StringSlice(const String& string)
         : _data(reinterpret_cast<uint8_t*>(string._data.get())),
           _encoding(sizeof(Rune)),
-          _size(string._size) { }
+          _size(string._size) {}
 
 StringSlice::StringSlice(const char* ascii_string) {
     BytesSlice bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
-    for (uint8_t byte: bytes) {
+    for (uint8_t byte : bytes) {
         if (byte & 0x80) {
             throw Exception("string is not ASCII");
         }
     }
-    _data = bytes.data();
+    _data     = bytes.data();
     _encoding = sizeof(uint8_t);
-    _size = bytes.size();
+    _size     = bytes.size();
 }
 
-size_t StringSlice::size() const {
-    return _size;
-}
+size_t StringSlice::size() const { return _size; }
 
 Rune StringSlice::at(size_t loc) const {
     if (loc >= _size) {
         throw Exception("out-of-bounds");
     }
     switch (_encoding) {
-      case sizeof(uint8_t):
-        return _data[loc];
-      case sizeof(uint16_t):
-        return reinterpret_cast<const uint16_t*>(_data)[loc];
-      case sizeof(uint32_t):
-        return reinterpret_cast<const uint32_t*>(_data)[loc];
+        case sizeof(uint8_t): return _data[loc];
+        case sizeof(uint16_t): return reinterpret_cast<const uint16_t*>(_data)[loc];
+        case sizeof(uint32_t): return reinterpret_cast<const uint32_t*>(_data)[loc];
     }
     return '\0';
 }
 
-bool StringSlice::empty() const {
-    return _size == 0;
-}
+bool StringSlice::empty() const { return _size == 0; }
 
 size_t StringSlice::find(Rune rune, size_t index) const {
-    for (size_t i: range(index, _size)) {
+    for (size_t i : range(index, _size)) {
         if (at(i) == rune) {
             return i;
         }
@@ -232,7 +198,7 @@ size_t StringSlice::find(const StringSlice& string, size_t index) const {
     if (index + string._size > _size) {
         return npos;
     }
-    for (size_t i: range(index, _size - string._size + 1)) {
+    for (size_t i : range(index, _size - string._size + 1)) {
         if (slice(i, string._size) == string) {
             return i;
         }
@@ -244,7 +210,7 @@ size_t StringSlice::rfind(Rune rune, size_t index) const {
     if (index == npos) {
         index = _size - 1;
     }
-    for (size_t i: range(index + 1)) {
+    for (size_t i : range(index + 1)) {
         if (at(index - i) == rune) {
             return index - i;
         }
@@ -262,7 +228,7 @@ size_t StringSlice::rfind(const StringSlice& string, size_t index) const {
     if (index + string._size > _size) {
         index = _size - string._size;
     }
-    for (size_t i: range(index - string._size + 1)) {
+    for (size_t i : range(index - string._size + 1)) {
         if (slice(index - i, string._size) == string) {
             return index - i;
         }
@@ -270,9 +236,7 @@ size_t StringSlice::rfind(const StringSlice& string, size_t index) const {
     return npos;
 }
 
-StringSlice StringSlice::slice() const {
-    return *this;
-}
+StringSlice StringSlice::slice() const { return *this; }
 
 StringSlice StringSlice::slice(size_t loc) const {
     if (loc > _size) {
@@ -288,35 +252,26 @@ StringSlice StringSlice::slice(size_t loc, size_t size) const {
     return StringSlice(_data + (loc * _encoding), size, _encoding);
 }
 
-StringSlice::const_iterator StringSlice::begin() const {
-    return const_iterator(_data, _encoding);
-}
+StringSlice::const_iterator StringSlice::begin() const { return const_iterator(_data, _encoding); }
 
 StringSlice::const_iterator StringSlice::end() const {
     return const_iterator(_data + (_size * _encoding), _encoding);
 }
 
 StringSlice::StringSlice(const uint8_t* data, size_t size, int encoding)
-        : _data(data),
-          _encoding(encoding),
-          _size(size) { }
+        : _data(data), _encoding(encoding), _size(size) {}
 
 // StringSlice::const_iterator implementation.
 
-StringSlice::iterator::iterator() { }
+StringSlice::iterator::iterator() {}
 
-StringSlice::iterator::iterator(const uint8_t* it, int encoding)
-        : _it(it),
-          _encoding(encoding) { }
+StringSlice::iterator::iterator(const uint8_t* it, int encoding) : _it(it), _encoding(encoding) {}
 
 StringSlice::iterator::value_type StringSlice::iterator::operator*() const {
     switch (_encoding) {
-      case sizeof(uint8_t):
-        return *_it;
-      case sizeof(uint16_t):
-        return *reinterpret_cast<const uint16_t*>(_it);
-      case sizeof(uint32_t):
-        return *reinterpret_cast<const uint32_t*>(_it);
+        case sizeof(uint8_t): return *_it;
+        case sizeof(uint16_t): return *reinterpret_cast<const uint16_t*>(_it);
+        case sizeof(uint32_t): return *reinterpret_cast<const uint32_t*>(_it);
     }
     return 0;
 }
@@ -377,8 +332,8 @@ void swap(StringSlice& x, StringSlice& y) {
 }
 
 bool operator==(const String& x, const String& y) {
-    return (x._size == y._size)
-        && (memcmp(x._data.get(), y._data.get(), x._size * sizeof(Rune)) == 0);
+    return (x._size == y._size) &&
+           (memcmp(x._data.get(), y._data.get(), x._size * sizeof(Rune)) == 0);
 }
 
 bool operator<(const String& x, const String& y) {
