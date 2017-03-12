@@ -23,7 +23,6 @@ static_library("libsfz") {
     "src/all/sfz/endian.cpp",
     "src/all/sfz/exception.cpp",
     "src/all/sfz/format.cpp",
-    "src/all/sfz/json.cpp",
     "src/all/sfz/print.cpp",
     "src/all/sfz/read.cpp",
     "src/all/sfz/string-utils.cpp",
@@ -102,16 +101,6 @@ executable("format-test") {
 executable("io-test") {
   sources = [
     "src/all/sfz/io.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("json-test") {
-  sources = [
-    "src/all/sfz/json.test.cpp",
   ]
   deps = [
     ":libsfz",

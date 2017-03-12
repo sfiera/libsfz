@@ -11,7 +11,6 @@ test: all
 	out/cur/encoding-test
 	out/cur/format-test
 	out/cur/io-test
-	out/cur/json-test
 	out/cur/optional-test
 	out/cur/os-test
 	out/cur/print-test
