@@ -16,6 +16,7 @@ config("libsfz_public") {
 
 static_library("libsfz") {
   sources = [
+    "include/all/sfz/args.hpp",
     "include/all/sfz/digest.hpp",
     "include/all/sfz/encoding.hpp",
     "include/all/sfz/os.hpp",
@@ -57,7 +58,7 @@ executable("algorithm-test") {
 
 executable("args-test") {
   sources = [
-    "src/all/sfz/algorithm.test.cpp",
+    "src/all/sfz/args.test.cpp",
   ]
   deps = [
     ":libsfz",
