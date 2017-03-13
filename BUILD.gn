@@ -34,7 +34,6 @@ static_library("libsfz") {
     "src/all/sfz/string.cpp",
     "src/all/sfz/write.cpp",
     "src/posix/sfz/file.cpp",
-    "src/posix/sfz/io.cpp",
     "src/posix/sfz/os.cpp",
     "src/posix/sfz/posix-format.cpp",
     "src/posix/sfz/posix-format.hpp",
@@ -99,16 +98,6 @@ executable("encoding-test") {
 executable("format-test") {
   sources = [
     "src/all/sfz/format.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("io-test") {
-  sources = [
-    "src/all/sfz/io.test.cpp",
   ]
   deps = [
     ":libsfz",

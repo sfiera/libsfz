@@ -14,7 +14,6 @@
 #include <sfz/exception.hpp>
 #include <sfz/file.hpp>
 #include <sfz/format.hpp>
-#include <sfz/io.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/optional.hpp>
 #include <sfz/os.hpp>

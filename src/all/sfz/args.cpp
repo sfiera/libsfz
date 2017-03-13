@@ -9,7 +9,6 @@
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
-#include <sfz/io.hpp>
 #include <sfz/range.hpp>
 #include <sfz/string-utils.hpp>
 
