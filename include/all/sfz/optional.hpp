@@ -14,133 +14,109 @@
 namespace sfz {
 
 template <typename T>
-class Optional {
+class optional {
   public:
-    Optional();
-    Optional(const Optional& other);
-    Optional& operator=(const Optional& other);
-    ~Optional();
+    optional();
+    optional(const optional& other);
+    optional& operator=(const optional& other);
+    ~optional();
 
-    bool has() const { return _has; }
-    void clear();
+    constexpr operator bool() const { return has_value(); }
+    constexpr bool has_value() const { return _has_value; }
 
+    T* operator->() { return data(); }
+    const T* operator->() const { return data(); }
+    T& operator*() { return *data(); }
+    const T& operator*() const { return *data(); }
+
+    T&       value() { return *exception_or(data()); }
+    const T& value() const { return *exception_or(data()); }
+
+    void swap(optional& other);
+    void reset();
     template <typename... Args>
-    void set(Args&&... args);
-
-    T* get() { return null_or(data()); }
-    T* operator->() { return exception_or(data()); }
-    T& operator*() { return *exception_or(data()); }
-
-    const T* get() const { return null_or(data()); }
-    const T* operator->() const { return exception_or(data()); }
-    const T& operator*() const { return *exception_or(data()); }
+    void emplace(Args&&... args);
 
   private:
     T*       data();
     const T* data() const;
-    template <typename U>
-    U null_or(U u) const;
+
     template <typename U>
     U exception_or(U u) const;
 
-    bool    _has;
+    bool    _has_value;
     uint8_t _data[sizeof(T)];
 };
 
 template <typename T>
-void copy(Optional<T>& to, const T& from);
-template <typename T>
-void copy(Optional<T>& to, const Optional<T>& from);
+optional<T>::optional() : _has_value(false) {}
 
 template <typename T>
-Optional<T>::Optional() : _has(false) {}
-
-template <typename T>
-Optional<T>::Optional(const Optional& other) : _has(false) {
-    if (other.has()) {
-        set(*other);
+optional<T>::optional(const optional& other) : _has_value(false) {
+    if (other.has_value()) {
+        emplace(*other);
     }
 }
 
 template <typename T>
-Optional<T>& Optional<T>::operator=(const Optional& other) {
-    if (other.has()) {
-        if (has()) {
+optional<T> make_optional(T&& value) {
+    optional<T> o;
+    o.emplace(std::forward<T&&>(value));
+    return o;
+}
+
+template <typename T>
+optional<T>& optional<T>::operator=(const optional& other) {
+    if (other.has_value()) {
+        if (has_value()) {
             **this = *other;
         } else {
-            set(*other);
+            emplace(*other);
         }
     } else {
-        clear();
+        reset();
     }
     return *this;
 }
 
 template <typename T>
-Optional<T>::~Optional() {
-    clear();
+optional<T>::~optional() {
+    reset();
 }
 
 template <typename T>
-void Optional<T>::clear() {
-    if (_has) {
+void optional<T>::reset() {
+    if (_has_value) {
         data()->~T();
-        _has = false;
+        _has_value = false;
     }
 }
 
 template <typename T>
 template <typename... Args>
-void Optional<T>::set(Args&&... args) {
-    clear();
+void optional<T>::emplace(Args&&... args) {
+    reset();
     new (data()) T(std::forward<Args&&>(args)...);
-    _has = true;
+    _has_value = true;
 }
 
 template <typename T>
-T* Optional<T>::data() {
+T* optional<T>::data() {
     return reinterpret_cast<T*>(_data);
 }
 
 template <typename T>
-const T* Optional<T>::data() const {
+const T* optional<T>::data() const {
     return reinterpret_cast<const T*>(_data);
 }
 
 template <typename T>
 template <typename U>
-U Optional<T>::null_or(U u) const {
-    if (_has) {
+U optional<T>::exception_or(U u) const {
+    if (_has_value) {
         return u;
     }
-    return NULL;
-}
-
-template <typename T>
-template <typename U>
-U Optional<T>::exception_or(U u) const {
-    if (_has) {
-        return u;
-    }
-    throw std::runtime_error("!has()");
-}
-
-template <typename T>
-void copy(Optional<T>& to, const T& from) {
-    if (to.has()) {
-        copy(*to, from);
-    } else {
-        to.set(from);
-    }
-}
-
-template <typename T>
-void copy(Optional<T>& to, const Optional<T>& from) {
-    if (from.has()) {
-        copy(to, *from);
-    } else {
-        to.clear();
-    }
+    throw std::runtime_error("!has_value()");
 }
 
 }  // namespace sfz

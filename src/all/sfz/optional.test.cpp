@@ -28,138 +28,109 @@ const T* const_(T* t) {
 }
 
 TEST_F(OptionalTest, Int) {
-    Optional<int> o;
-    EXPECT_THAT(o.has(), Eq(false));
-    EXPECT_THAT(o.get(), Eq<int*>(NULL));
-    EXPECT_THAT(const_(o).get(), Eq<int*>(NULL));
-    EXPECT_THROW(*o, std::runtime_error);
-    EXPECT_THROW(*const_(o), std::runtime_error);
+    optional<int> o;
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
 
-    o.clear();
-    EXPECT_THAT(o.has(), Eq(false));
-    EXPECT_THAT(o.get(), Eq<int*>(NULL));
-    EXPECT_THAT(const_(o).get(), Eq<int*>(NULL));
-    EXPECT_THROW(*o, std::runtime_error);
-    EXPECT_THROW(*const_(o), std::runtime_error);
+    o.reset();
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
 
-    o.set();
-    EXPECT_THAT(o.has(), Eq(true));
-    EXPECT_THAT(*o.get(), Eq(0));
-    EXPECT_THAT(*const_(o).get(), Eq(0));
+    o.emplace();
+    EXPECT_THAT(o.has_value(), Eq(true));
+    EXPECT_THAT(o.value(), Eq(0));
+    EXPECT_THAT(const_(o).value(), Eq(0));
     EXPECT_THAT(*o, Eq(0));
     EXPECT_THAT(*const_(o), Eq(0));
 
-    o.set(123);
-    EXPECT_THAT(o.has(), Eq(true));
-    EXPECT_THAT(*o.get(), Eq(123));
-    EXPECT_THAT(*const_(o).get(), Eq(123));
+    o.emplace(123);
+    EXPECT_THAT(o.has_value(), Eq(true));
+    EXPECT_THAT(o.value(), Eq(123));
+    EXPECT_THAT(const_(o).value(), Eq(123));
     EXPECT_THAT(*o, Eq(123));
     EXPECT_THAT(*const_(o), Eq(123));
 
-    o.clear();
-    EXPECT_THAT(o.has(), Eq(false));
-    EXPECT_THAT(o.get(), Eq<int*>(NULL));
-    EXPECT_THAT(const_(o).get(), Eq<int*>(NULL));
-    EXPECT_THROW(*o, std::runtime_error);
-    EXPECT_THROW(*const_(o), std::runtime_error);
+    o.reset();
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
 }
 
 TEST_F(OptionalTest, String) {
-    Optional<String> o;
-    EXPECT_THAT(o.has(), Eq(false));
-    EXPECT_THAT(o.get(), Eq<String*>(NULL));
-    EXPECT_THAT(const_(o).get(), Eq<String*>(NULL));
-    EXPECT_THROW(*o, std::runtime_error);
-    EXPECT_THROW(*const_(o), std::runtime_error);
-    EXPECT_THROW(o->slice(), std::runtime_error);
-    EXPECT_THROW(const_(o)->slice(), std::runtime_error);
+    optional<String> o;
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
 
-    o.clear();
-    EXPECT_THAT(o.has(), Eq(false));
-    EXPECT_THAT(o.get(), Eq<String*>(NULL));
-    EXPECT_THAT(const_(o).get(), Eq<String*>(NULL));
-    EXPECT_THROW(*o, std::runtime_error);
-    EXPECT_THROW(*const_(o), std::runtime_error);
-    EXPECT_THROW(o->slice(), std::runtime_error);
-    EXPECT_THROW(const_(o)->slice(), std::runtime_error);
+    o.reset();
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
 
-    o.set();
-    EXPECT_THAT(o.has(), Eq(true));
-    EXPECT_THAT(*o.get(), Eq<StringSlice>(""));
-    EXPECT_THAT(*const_(o).get(), Eq<StringSlice>(""));
+    o.emplace();
+    EXPECT_THAT(o.has_value(), Eq(true));
+    EXPECT_THAT(o.value(), Eq<StringSlice>(""));
+    EXPECT_THAT(const_(o).value(), Eq<StringSlice>(""));
     EXPECT_THAT(*o, Eq<StringSlice>(""));
     EXPECT_THAT(*const_(o), Eq<StringSlice>(""));
     EXPECT_THAT(o->slice(), Eq<StringSlice>(""));
     EXPECT_THAT(const_(o)->slice(), Eq<StringSlice>(""));
 
-    o.set("123");
-    EXPECT_THAT(o.has(), Eq(true));
-    EXPECT_THAT(*o.get(), Eq<StringSlice>("123"));
-    EXPECT_THAT(*const_(o).get(), Eq<StringSlice>("123"));
+    o.emplace("123");
+    EXPECT_THAT(o.has_value(), Eq(true));
+    EXPECT_THAT(o.value(), Eq<StringSlice>("123"));
+    EXPECT_THAT(const_(o).value(), Eq<StringSlice>("123"));
     EXPECT_THAT(*o, Eq<StringSlice>("123"));
     EXPECT_THAT(*const_(o), Eq<StringSlice>("123"));
     EXPECT_THAT(o->slice(), Eq<StringSlice>("123"));
     EXPECT_THAT(const_(o)->slice(), Eq<StringSlice>("123"));
 
-    o.set(3, 'z');
-    EXPECT_THAT(o.has(), Eq(true));
-    EXPECT_THAT(*o.get(), Eq<StringSlice>("zzz"));
-    EXPECT_THAT(*const_(o).get(), Eq<StringSlice>("zzz"));
+    o.emplace(3, 'z');
+    EXPECT_THAT(o.has_value(), Eq(true));
+    EXPECT_THAT(o.value(), Eq<StringSlice>("zzz"));
+    EXPECT_THAT(const_(o).value(), Eq<StringSlice>("zzz"));
     EXPECT_THAT(*o, Eq<StringSlice>("zzz"));
     EXPECT_THAT(*const_(o), Eq<StringSlice>("zzz"));
     EXPECT_THAT(o->slice(), Eq<StringSlice>("zzz"));
     EXPECT_THAT(const_(o)->slice(), Eq<StringSlice>("zzz"));
 
-    o.clear();
-    EXPECT_THAT(o.has(), Eq(false));
-    EXPECT_THAT(o.get(), Eq<String*>(NULL));
-    EXPECT_THAT(const_(o).get(), Eq<String*>(NULL));
-    EXPECT_THROW(*o, std::runtime_error);
-    EXPECT_THROW(*const_(o), std::runtime_error);
-    EXPECT_THROW(o->slice(), std::runtime_error);
-    EXPECT_THROW(const_(o)->slice(), std::runtime_error);
+    o.reset();
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
 }
 
 TEST_F(OptionalTest, CopyAssign) {
-    // Test copy constructor from both !has() and has().
-    Optional<int> o;
-    Optional<int> o2(o);  // from !has().
-    EXPECT_THAT(o2.has(), Eq(false));
+    // Test copy constructor from both !has_value() and has_value().
+    optional<int> o;
+    optional<int> o2(o);  // from !has_value().
+    EXPECT_THAT(o2.has_value(), Eq(false));
 
-    Optional<int> o3;
-    o3.set(123);
-    Optional<int> o4(o3);  // From has().
+    optional<int> o3;
+    o3.emplace(123);
+    optional<int> o4(o3);  // From has_value().
     EXPECT_THAT(*o4, Eq(123));
 
     *o4 = 456;
 
-    // Test all edges in assignment from Optional<T>:
-    o = o2;  // !has() to !has().
-    EXPECT_THAT(o.has(), Eq(false));
-    o = o3;  // !has() to has().
+    // Test all edges in assignment from optional<T>:
+    o = o2;  // !has_value() to !has_value().
+    EXPECT_THAT(o.has_value(), Eq(false));
+    o = o3;  // !has_value() to has_value().
     EXPECT_THAT(*o, Eq(123));
-    o = o4;  // has() to has().
+    o = o4;  // has_value() to has_value().
     EXPECT_THAT(*o, Eq(456));
-    o = o2;  // has() to !has().
-    EXPECT_THAT(o.has(), Eq(false));
+    o = o2;  // has_value() to !has_value().
+    EXPECT_THAT(o.has_value(), Eq(false));
 
-    // Copy from non-Optional<T>:
-    o.clear();
-    copy(o, 123);  // !has() to has().
+    // Copy from non-optional<T>:
+    o.reset();
+    o = make_optional(123);  // !has_value() to has_value().
     EXPECT_THAT(*o, Eq(123));
-    copy(o, 456);  // has() to has().
+    o = make_optional(456);  // has_value() to has_value().
     EXPECT_THAT(*o, Eq(456));
-
-    // Test all edges in copying from Optional<T>:
-    o.clear();
-    copy(o, o2);  // !has() to !has().
-    EXPECT_THAT(o.has(), Eq(false));
-    copy(o, o3);  // !has() to has().
-    EXPECT_THAT(*o, Eq(123));
-    copy(o, o4);  // has() to has().
-    EXPECT_THAT(*o, Eq(456));
-    copy(o, o2);  // has() to !has().
-    EXPECT_THAT(o.has(), Eq(false));
 }
 
 }  // namespace

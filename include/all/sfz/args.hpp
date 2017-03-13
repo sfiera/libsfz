@@ -52,10 +52,10 @@ void integer_option(pn::string_view value, T* out) {
 }
 
 template <typename T>
-void integer_option(pn::string_view value, ::sfz::Optional<T>* out) {
+void integer_option(pn::string_view value, ::sfz::optional<T>* out) {
     T i;
     integer_option(value, &i);
-    out->set(i);
+    out->emplace(i);
 }
 
 template <>
@@ -73,10 +73,10 @@ void float_option(pn::string_view value, T* out) {
 }
 
 template <typename T>
-void float_option(pn::string_view value, ::sfz::Optional<T>* out) {
+void float_option(pn::string_view value, ::sfz::optional<T>* out) {
     T d;
     float_option(value, &d);
-    out->set(d);
+    out->emplace(d);
 }
 
 template <typename T>

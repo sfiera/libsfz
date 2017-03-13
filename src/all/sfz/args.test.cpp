@@ -287,8 +287,8 @@ TEST_F(ArgsTest, LongOptionsAll) {
 }
 
 struct ArgumentsOnly {
-    Optional<int32_t>    one;
-    Optional<pn::string> two;
+    optional<int32_t>    one;
+    optional<pn::string> two;
     vector<int32_t>      three;
 
     ArgumentsOnly() {}
@@ -296,12 +296,12 @@ struct ArgumentsOnly {
     args::callbacks callbacks() {
         args::callbacks callbacks;
         callbacks.argument = [this](pn::string_view arg) {
-            if (!one.has()) {
+            if (!one.has_value()) {
                 int32_t value;
                 args::integer_option(arg, &value);
-                one.set(value);
-            } else if (!two.has()) {
-                two.set(arg.copy());
+                one.emplace(value);
+            } else if (!two.has_value()) {
+                two.emplace(arg.copy());
             } else {
                 int32_t value;
                 args::integer_option(arg, &value);
@@ -319,8 +319,8 @@ struct ArgumentsOnly {
 TEST_F(ArgsTest, ArgumentsEmpty) {
     ArgumentsOnly opts;
     pass(opts.callbacks());
-    EXPECT_THAT(opts.one.has(), Eq(false));
-    EXPECT_THAT(opts.two.has(), Eq(false));
+    EXPECT_THAT(opts.one.has_value(), Eq(false));
+    EXPECT_THAT(opts.two.has_value(), Eq(false));
     EXPECT_THAT(opts.three, IsEmpty());
 }
 
@@ -328,7 +328,7 @@ TEST_F(ArgsTest, ArgumentsOne) {
     ArgumentsOnly opts;
     pass(opts.callbacks(), "1");
     EXPECT_THAT(*opts.one, Eq(1));
-    EXPECT_THAT(opts.two.has(), Eq(false));
+    EXPECT_THAT(opts.two.has_value(), Eq(false));
     EXPECT_THAT(opts.three, ElementsAre());
 }
 
@@ -406,8 +406,8 @@ class CutTool {
             }
         };
         callbacks.argument = [this](pn::string_view arg) {
-            if (!_string.has()) {
-                _string.set(arg.copy());
+            if (!_string.has_value()) {
+                _string.emplace(arg.copy());
             } else {
                 return false;
             }
@@ -434,7 +434,7 @@ class CutTool {
     }
 
   private:
-    sfz::Optional<pn::string> _string;
+    sfz::optional<pn::string> _string;
     int64_t                   _limit;
     pn::string                _delimiter;
 
@@ -465,8 +465,8 @@ struct Calculator {
     Calculator() { reset(); }
 
     void reset() {
-        _x.clear();
-        _y.clear();
+        _x.reset();
+        _y.reset();
         _op           = 0;
         _int_division = false;
     }
@@ -489,7 +489,7 @@ struct Calculator {
             return false;
         };
         callbacks.argument = [this](pn::string_view arg) {
-            if (!_x.has()) {
+            if (!_x.has_value()) {
                 args::float_option(arg, &_x);
             } else if (_op == 0) {
                 if (arg == "abs") {
@@ -501,7 +501,7 @@ struct Calculator {
                 } else {
                     throw std::runtime_error("unknown command");
                 }
-            } else if (!_y.has()) {
+            } else if (!_y.has_value()) {
                 switch (_op) {
                     case 'a': return false;
                     case '+': args::float_option(arg, &_y); return true;
@@ -533,8 +533,8 @@ struct Calculator {
     }
 
   private:
-    sfz::Optional<double> _x;
-    sfz::Optional<double> _y;
+    sfz::optional<double> _x;
+    sfz::optional<double> _y;
     char                  _op;
     bool                  _int_division;
 
