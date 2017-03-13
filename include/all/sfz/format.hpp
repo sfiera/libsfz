@@ -12,19 +12,13 @@
 
 namespace sfz {
 
-struct EscapedString;
 struct FormattedInt;
 class Integer;
-struct QuotedString;
 
 FormattedInt dec(Integer value, size_t min_width = 1);
 FormattedInt hex(Integer value, size_t min_width = 1);
 FormattedInt oct(Integer value, size_t min_width = 1);
 FormattedInt bin(Integer value, size_t min_width = 1);
-
-EscapedString escape(const StringSlice& string);
-
-QuotedString quote(const StringSlice& string);
 
 // Implementation details follow.
 
@@ -74,26 +68,6 @@ inline FormattedInt oct(Integer value, size_t min_width) {
 
 inline FormattedInt bin(Integer value, size_t min_width) {
     FormattedInt result = {value, 2, min_width};
-    return result;
-}
-
-struct EscapedString {
-    const StringSlice& string;
-};
-void print_to(PrintTarget out, const EscapedString& value);
-
-inline EscapedString escape(const StringSlice& string) {
-    EscapedString result = {string};
-    return result;
-}
-
-struct QuotedString {
-    const StringSlice& string;
-};
-void print_to(PrintTarget out, const QuotedString& value);
-
-inline QuotedString quote(const StringSlice& string) {
-    QuotedString result = {string};
     return result;
 }
 
