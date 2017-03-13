@@ -6,7 +6,6 @@
 #ifndef SFZ_SFZ_HPP_
 #define SFZ_SFZ_HPP_
 
-#include <sfz/algorithm.hpp>
 #include <sfz/args.hpp>
 #include <sfz/bytes.hpp>
 #include <sfz/digest.hpp>

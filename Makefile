@@ -4,7 +4,6 @@ all:
 	@$(NINJA)
 
 test: all
-	out/cur/algorithm-test
 	out/cur/args-test
 	out/cur/bytes-test
 	out/cur/digest-test

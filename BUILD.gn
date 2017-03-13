@@ -44,16 +44,6 @@ static_library("libsfz") {
   public_configs = [ ":libsfz_public" ]
 }
 
-executable("algorithm-test") {
-  sources = [
-    "src/all/sfz/algorithm.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
 executable("args-test") {
   sources = [
     "src/all/sfz/args.test.cpp",

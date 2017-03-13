@@ -8,7 +8,6 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <sfz/algorithm.hpp>
 #include <stdexcept>
 
 namespace sfz {
