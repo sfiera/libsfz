@@ -66,7 +66,8 @@ void sha1::finish() {
         process_message_block();
     }
     memset(_message_block + _message_block_index, '\0', 56 - _message_block_index);
-    NetworkBytes<uint64_t> size_bytes(_size);
+    pn::data size_bytes;
+    size_bytes.open("w").write(_size);
     memcpy(_message_block + 56, size_bytes.data(), 8);
     process_message_block();
 }
@@ -96,9 +97,11 @@ void sha1::process_message_block() {
             0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6,
     };
 
-    uint32_t   w[80];
-    BytesSlice block(_message_block, 64);
-    read(block, w, 16);
+    uint32_t w[80];
+    pn::file block = pn::data_view{_message_block, 64}.open();
+    for (int i = 0; i < 16; ++i) {
+        block.read(&w[i]);
+    }
     for (int i = 16; i < 80; ++i) {
         w[i] = left_rotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
     }

@@ -14,9 +14,6 @@
 
 namespace sfz {
 
-class Bytes;
-class BytesSlice;
-
 // Computes the SHA-1 digest of some sequence of bytes.
 //
 // Based on the code provided by RFC 3174.
