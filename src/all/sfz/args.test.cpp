@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <sfz/encoding.hpp>
-#include <sfz/macros.hpp>
 #include <sfz/optional.hpp>
 #include <sfz/range.hpp>
 #include <stdexcept>
@@ -120,6 +119,9 @@ struct ShortOptions {
               verbosity(0),
               quality(5) {}
 
+    ShortOptions(const ShortOptions&) = delete;
+    ShortOptions(ShortOptions&&)      = delete;
+
     args::callbacks callbacks() {
         args::callbacks callbacks;
         callbacks.short_option = [this](pn::rune opt, args::callbacks::get_value_f get_value) {
@@ -143,9 +145,6 @@ struct ShortOptions {
         };
         return callbacks;
     }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(ShortOptions);
 };
 
 TEST_F(ArgsTest, ShortOptionsNone) {
@@ -226,6 +225,9 @@ TEST_F(ArgsTest, ShortOptionsFail) {
 struct Greeter {
     Greeter() : _exclamation_point(true), _greeting("Hello"), _name("world"), _times(1) {}
 
+    Greeter(const Greeter&) = delete;
+    Greeter(Greeter&&)      = delete;
+
     args::callbacks callbacks() {
         args::callbacks callbacks;
         callbacks.long_option = [this](
@@ -268,8 +270,6 @@ struct Greeter {
     pn::string _greeting;
     pn::string _name;
     int        _times;
-
-    DISALLOW_COPY_AND_ASSIGN(Greeter);
 };
 
 TEST_F(ArgsTest, LongOptionsNone) {
@@ -292,6 +292,9 @@ struct ArgumentsOnly {
 
     ArgumentsOnly() {}
 
+    ArgumentsOnly(const ArgumentsOnly&) = delete;
+    ArgumentsOnly(ArgumentsOnly&&)      = delete;
+
     args::callbacks callbacks() {
         args::callbacks callbacks;
         callbacks.argument = [this](pn::string_view arg) {
@@ -310,9 +313,6 @@ struct ArgumentsOnly {
         };
         return callbacks;
     }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(ArgumentsOnly);
 };
 
 TEST_F(ArgsTest, ArgumentsEmpty) {
@@ -384,6 +384,9 @@ class CutTool {
   public:
     CutTool() : _limit(std::numeric_limits<int64_t>::max()), _delimiter("\t") {}
 
+    CutTool(const CutTool&) = delete;
+    CutTool(CutTool&&)      = delete;
+
     args::callbacks callbacks() {
         args::callbacks callbacks;
         callbacks.short_option = [this](
@@ -438,8 +441,6 @@ class CutTool {
     pn::string                _delimiter;
 
     vector<pn::string_view> _result;
-
-    DISALLOW_COPY_AND_ASSIGN(CutTool);
 };
 
 TEST_F(ArgsTest, CutSimple) {
@@ -462,6 +463,9 @@ TEST_F(ArgsTest, CutLong) {
 
 struct Calculator {
     Calculator() { reset(); }
+
+    Calculator(const Calculator&) = delete;
+    Calculator(Calculator&&)      = delete;
 
     void reset() {
         _x.reset();
@@ -536,8 +540,6 @@ struct Calculator {
     sfz::optional<double> _y;
     char                  _op;
     bool                  _int_division;
-
-    DISALLOW_COPY_AND_ASSIGN(Calculator);
 };
 
 TEST_F(ArgsTest, CalculatorMinimal) {

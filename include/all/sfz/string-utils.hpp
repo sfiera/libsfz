@@ -8,7 +8,6 @@
 
 #include <stdint.h>
 #include <pn/fwd>
-#include <sfz/macros.hpp>
 
 namespace sfz {
 

@@ -8,7 +8,6 @@
 
 #include <sys/stat.h>
 #include <pn/string>
-#include <sfz/macros.hpp>
 
 namespace sfz {
 
@@ -40,13 +39,15 @@ void rmtree(pn::string_view path);
 class TemporaryDirectory {
   public:
     TemporaryDirectory(pn::string_view prefix);
+    TemporaryDirectory(const TemporaryDirectory&) = delete;
+    TemporaryDirectory(TemporaryDirectory&&)      = delete;
+
     ~TemporaryDirectory();
 
     const pn::string& path() const;
 
   private:
     pn::string _path;
-    DISALLOW_COPY_AND_ASSIGN(TemporaryDirectory);
 };
 
 class TreeWalker;

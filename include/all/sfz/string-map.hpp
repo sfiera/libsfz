@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <map>
 #include <pn/string>
-#include <sfz/macros.hpp>
 #include <utility>
 
 namespace sfz {
@@ -70,7 +69,8 @@ class StringMap {
         WrappedValue(const pn::string_view& k, const mapped_type& v)
                 : key_storage(k.copy()), pair(key_storage, v) {}
 
-        DISALLOW_COPY_AND_ASSIGN(WrappedValue);
+        WrappedValue(const WrappedValue&) = delete;
+        WrappedValue(WrappedValue&&)      = delete;
     };
 
     template <typename wrapped_iterator>
@@ -108,7 +108,7 @@ class StringMap {
 
     internal_map _map;
 
-    StringMap& operator=(const StringMap&);  // DISALLOW_ASSIGN
+    StringMap& operator=(const StringMap&) = delete;
 };
 
 template <typename T, typename Compare>

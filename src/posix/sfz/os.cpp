@@ -148,11 +148,12 @@ namespace {
 class FtsCloser {
   public:
     FtsCloser(FTS* fts) : _fts(fts) {}
+    FtsCloser(const FtsCloser&) = delete;
+    FtsCloser(FtsCloser&&)      = delete;
     ~FtsCloser() { fts_close(_fts); }
 
   private:
     FTS* _fts;
-    DISALLOW_COPY_AND_ASSIGN(FtsCloser);
 };
 
 int compare_ftsent(const FTSENT** lhs, const FTSENT** rhs) {
