@@ -10,6 +10,7 @@
 #include <limits>
 #include <sfz/bytes.hpp>
 #include <sfz/format.hpp>
+#include <sfz/string.hpp>
 
 using std::numeric_limits;
 using testing::Eq;

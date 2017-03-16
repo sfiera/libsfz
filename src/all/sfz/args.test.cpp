@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <sfz/encoding.hpp>
-#include <sfz/format.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/optional.hpp>
 #include <sfz/range.hpp>

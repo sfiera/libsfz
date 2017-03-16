@@ -10,7 +10,6 @@
 #include <pn/file>
 #include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
-#include <sfz/format.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/range.hpp>
 #include <stdexcept>

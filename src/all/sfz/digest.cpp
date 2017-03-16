@@ -11,7 +11,6 @@
 #include <sfz/encoding.hpp>
 #include <sfz/endian.hpp>
 #include <sfz/file.hpp>
-#include <sfz/format.hpp>
 #include <sfz/os.hpp>
 #include <sfz/read.hpp>
 #include <sfz/write.hpp>

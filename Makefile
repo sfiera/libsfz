@@ -9,7 +9,6 @@ test: all
 	out/cur/bytes-test
 	out/cur/digest-test
 	out/cur/encoding-test
-	out/cur/format-test
 	out/cur/optional-test
 	out/cur/os-test
 	out/cur/print-test

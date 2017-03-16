@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <sfz/format.hpp>
+#include <sfz/string.hpp>
 
 namespace sfz {
 

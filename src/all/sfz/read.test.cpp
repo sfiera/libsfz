@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 #include <pn/file>
 #include <sfz/bytes.hpp>
-#include <sfz/format.hpp>
+#include <sfz/string.hpp>
 #include <stdexcept>
 
 using testing::Eq;

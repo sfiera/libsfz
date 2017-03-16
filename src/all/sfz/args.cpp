@@ -7,7 +7,6 @@
 
 #include <stdlib.h>
 #include <sfz/encoding.hpp>
-#include <sfz/format.hpp>
 #include <sfz/range.hpp>
 #include <sfz/string-utils.hpp>
 #include <stdexcept>
