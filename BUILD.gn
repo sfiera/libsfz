@@ -25,7 +25,6 @@ static_library("libsfz") {
     "src/all/sfz/bytes.cpp",
     "src/all/sfz/digest.cpp",
     "src/all/sfz/encoding.cpp",
-    "src/all/sfz/endian.cpp",
     "src/all/sfz/format.cpp",
     "src/all/sfz/print.cpp",
     "src/all/sfz/read.cpp",

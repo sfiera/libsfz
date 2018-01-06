@@ -5,8 +5,9 @@
 
 #include <sfz/write.hpp>
 
+#include <pn/data>
+#include <pn/file>
 #include <sfz/bytes.hpp>
-#include <sfz/endian.hpp>
 #include <sfz/range.hpp>
 
 namespace sfz {
@@ -20,7 +21,8 @@ inline void write_bytes_to(const void* target, WriteTarget out, size_t count) {
 template <typename T>
 inline void write_integers_to(const void* target, WriteTarget out, size_t count) {
     for (size_t i : range(count)) {
-        NetworkBytes<T> bytes(reinterpret_cast<const T*>(target)[i]);
+        pn::data bytes;
+        bytes.open("w").write(reinterpret_cast<const T*>(target)[i]);
         out.push(BytesSlice(bytes.data(), bytes.size()));
     }
 }

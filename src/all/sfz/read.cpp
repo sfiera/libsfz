@@ -5,8 +5,9 @@
 
 #include <sfz/read.hpp>
 
+#include <pn/data>
+#include <pn/file>
 #include <sfz/bytes.hpp>
-#include <sfz/endian.hpp>
 #include <sfz/range.hpp>
 
 namespace sfz {
@@ -20,9 +21,10 @@ inline void read_bytes_from(void* target, ReadSource in, size_t count) {
 template <typename T>
 inline void read_integers_from(void* target, ReadSource in, size_t count) {
     for (int i : range(count)) {
-        NetworkBytes<T> bytes;
+        Bytes bytes{sizeof(T), 0x00};
         in.shift(bytes.data(), bytes.size());
-        reinterpret_cast<T*>(target)[i] = bytes.value();
+        pn::data_view{bytes.data(), static_cast<int>(bytes.size())}.open().read(
+                &reinterpret_cast<T*>(target)[i]);
     }
 }
 

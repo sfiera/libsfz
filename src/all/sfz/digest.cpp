@@ -9,7 +9,6 @@
 #include <limits>
 #include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
-#include <sfz/endian.hpp>
 #include <sfz/file.hpp>
 #include <sfz/os.hpp>
 #include <sfz/read.hpp>
