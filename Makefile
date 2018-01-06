@@ -14,6 +14,7 @@ test: all
 	out/cur/os-test
 	out/cur/print-test
 	out/cur/read-test
+	out/cur/string-map-test
 	out/cur/string-test
 	out/cur/string-utils-test
 	out/cur/write-test

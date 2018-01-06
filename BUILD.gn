@@ -144,6 +144,16 @@ executable("read-test") {
   ]
 }
 
+executable("string-map-test") {
+  sources = [
+    "src/all/sfz/string-map.test.cpp",
+  ]
+  deps = [
+    ":libsfz",
+    "//ext/gmock:gmock_main",
+  ]
+}
+
 executable("string-utils-test") {
   sources = [
     "src/all/sfz/string-utils.test.cpp",
