@@ -8,6 +8,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sfz/string.hpp>
+#include <stdexcept>
 
 using testing::Eq;
 using testing::Test;
@@ -31,15 +32,15 @@ TEST_F(OptionalTest, Int) {
     EXPECT_THAT(o.has(), Eq(false));
     EXPECT_THAT(o.get(), Eq<int*>(NULL));
     EXPECT_THAT(const_(o).get(), Eq<int*>(NULL));
-    EXPECT_THROW(*o, Exception);
-    EXPECT_THROW(*const_(o), Exception);
+    EXPECT_THROW(*o, std::runtime_error);
+    EXPECT_THROW(*const_(o), std::runtime_error);
 
     o.clear();
     EXPECT_THAT(o.has(), Eq(false));
     EXPECT_THAT(o.get(), Eq<int*>(NULL));
     EXPECT_THAT(const_(o).get(), Eq<int*>(NULL));
-    EXPECT_THROW(*o, Exception);
-    EXPECT_THROW(*const_(o), Exception);
+    EXPECT_THROW(*o, std::runtime_error);
+    EXPECT_THROW(*const_(o), std::runtime_error);
 
     o.set();
     EXPECT_THAT(o.has(), Eq(true));
@@ -59,8 +60,8 @@ TEST_F(OptionalTest, Int) {
     EXPECT_THAT(o.has(), Eq(false));
     EXPECT_THAT(o.get(), Eq<int*>(NULL));
     EXPECT_THAT(const_(o).get(), Eq<int*>(NULL));
-    EXPECT_THROW(*o, Exception);
-    EXPECT_THROW(*const_(o), Exception);
+    EXPECT_THROW(*o, std::runtime_error);
+    EXPECT_THROW(*const_(o), std::runtime_error);
 }
 
 TEST_F(OptionalTest, String) {
@@ -68,19 +69,19 @@ TEST_F(OptionalTest, String) {
     EXPECT_THAT(o.has(), Eq(false));
     EXPECT_THAT(o.get(), Eq<String*>(NULL));
     EXPECT_THAT(const_(o).get(), Eq<String*>(NULL));
-    EXPECT_THROW(*o, Exception);
-    EXPECT_THROW(*const_(o), Exception);
-    EXPECT_THROW(o->slice(), Exception);
-    EXPECT_THROW(const_(o)->slice(), Exception);
+    EXPECT_THROW(*o, std::runtime_error);
+    EXPECT_THROW(*const_(o), std::runtime_error);
+    EXPECT_THROW(o->slice(), std::runtime_error);
+    EXPECT_THROW(const_(o)->slice(), std::runtime_error);
 
     o.clear();
     EXPECT_THAT(o.has(), Eq(false));
     EXPECT_THAT(o.get(), Eq<String*>(NULL));
     EXPECT_THAT(const_(o).get(), Eq<String*>(NULL));
-    EXPECT_THROW(*o, Exception);
-    EXPECT_THROW(*const_(o), Exception);
-    EXPECT_THROW(o->slice(), Exception);
-    EXPECT_THROW(const_(o)->slice(), Exception);
+    EXPECT_THROW(*o, std::runtime_error);
+    EXPECT_THROW(*const_(o), std::runtime_error);
+    EXPECT_THROW(o->slice(), std::runtime_error);
+    EXPECT_THROW(const_(o)->slice(), std::runtime_error);
 
     o.set();
     EXPECT_THAT(o.has(), Eq(true));
@@ -113,10 +114,10 @@ TEST_F(OptionalTest, String) {
     EXPECT_THAT(o.has(), Eq(false));
     EXPECT_THAT(o.get(), Eq<String*>(NULL));
     EXPECT_THAT(const_(o).get(), Eq<String*>(NULL));
-    EXPECT_THROW(*o, Exception);
-    EXPECT_THROW(*const_(o), Exception);
-    EXPECT_THROW(o->slice(), Exception);
-    EXPECT_THROW(const_(o)->slice(), Exception);
+    EXPECT_THROW(*o, std::runtime_error);
+    EXPECT_THROW(*const_(o), std::runtime_error);
+    EXPECT_THROW(o->slice(), std::runtime_error);
+    EXPECT_THROW(const_(o)->slice(), std::runtime_error);
 }
 
 TEST_F(OptionalTest, CopyAssign) {

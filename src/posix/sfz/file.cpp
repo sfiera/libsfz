@@ -11,8 +11,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sfz/exception.hpp>
 #include <sfz/posix-format.hpp>
+#include <stdexcept>
 
 namespace sfz {
 

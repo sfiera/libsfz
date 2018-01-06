@@ -11,6 +11,7 @@
 #include <pn/file>
 #include <pn/string>
 #include <sfz/optional.hpp>
+#include <stdexcept>
 #include <vector>
 
 namespace sfz {

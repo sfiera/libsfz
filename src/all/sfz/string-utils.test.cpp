@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <pn/string>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/string.hpp>
 
 using testing::Eq;

@@ -11,7 +11,6 @@
 #include <sfz/bytes.hpp>
 #include <sfz/digest.hpp>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/file.hpp>
 #include <sfz/format.hpp>
 #include <sfz/macros.hpp>

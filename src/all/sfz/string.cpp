@@ -7,11 +7,13 @@
 
 #include <string.h>
 #include <algorithm>
+#include <pn/file>
+#include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/range.hpp>
+#include <stdexcept>
 
 namespace sfz {
 
@@ -59,7 +61,7 @@ String::String(size_t num, Rune rune) {
 
 void String::append(size_t num, Rune rune) {
     if (!is_valid_code_point(rune)) {
-        throw Exception(format("invalid code point {0}", rune));
+        throw std::runtime_error(pn::format("invalid code point {0}", rune).c_str());
     }
     resize(_size + num, rune);
 }
@@ -78,7 +80,7 @@ void String::push(const StringSlice& string) {
 
 void String::push(size_t num, Rune rune) {
     if (!is_valid_code_point(rune)) {
-        throw Exception(format("invalid code point {0}", rune));
+        throw std::runtime_error(pn::format("invalid code point {0}", rune).c_str());
     }
     resize(_size + num, rune);
 }
@@ -161,7 +163,7 @@ StringSlice::StringSlice(const char* ascii_string) {
     BytesSlice bytes(reinterpret_cast<const uint8_t*>(ascii_string), strlen(ascii_string));
     for (uint8_t byte : bytes) {
         if (byte & 0x80) {
-            throw Exception("string is not ASCII");
+            throw std::runtime_error("string is not ASCII");
         }
     }
     _data     = bytes.data();
@@ -173,7 +175,7 @@ size_t StringSlice::size() const { return _size; }
 
 Rune StringSlice::at(size_t loc) const {
     if (loc >= _size) {
-        throw Exception("out-of-bounds");
+        throw std::runtime_error("out-of-bounds");
     }
     switch (_encoding) {
         case sizeof(uint8_t): return _data[loc];
@@ -240,14 +242,14 @@ StringSlice StringSlice::slice() const { return *this; }
 
 StringSlice StringSlice::slice(size_t loc) const {
     if (loc > _size) {
-        throw Exception("slice out of range");
+        throw std::runtime_error("slice out of range");
     }
     return slice(loc, _size - loc);
 }
 
 StringSlice StringSlice::slice(size_t loc, size_t size) const {
     if (loc + size > _size) {
-        throw Exception("slice out of range");
+        throw std::runtime_error("slice out of range");
     }
     return StringSlice(_data + (loc * _encoding), size, _encoding);
 }

@@ -11,9 +11,9 @@
 #include <unistd.h>
 #include <pn/file>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/posix-format.hpp>
+#include <stdexcept>
 
 namespace sfz {
 

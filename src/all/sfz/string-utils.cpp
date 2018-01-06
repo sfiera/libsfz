@@ -9,9 +9,9 @@
 #include <limits>
 #include <pn/string>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/string.hpp>
+#include <stdexcept>
 
 using std::numeric_limits;
 
@@ -284,7 +284,7 @@ pn::string lower(pn::string_view s) {
 
 CString::CString(const StringSlice& string) {
     if (string.find('\0') != StringSlice::npos) {
-        throw Exception("Tried to create CString from string with embedded NUL");
+        throw std::runtime_error("Tried to create CString from string with embedded NUL");
     }
     _bytes.append(utf8::encode(string));
     _bytes.append(1, '\0');

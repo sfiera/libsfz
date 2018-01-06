@@ -7,10 +7,10 @@
 
 #include <stdlib.h>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 #include <sfz/range.hpp>
 #include <sfz/string-utils.hpp>
+#include <stdexcept>
 
 using std::map;
 using std::pair;

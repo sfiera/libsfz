@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 #include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
+#include <stdexcept>
 
 using testing::ByRef;
 using testing::Eq;
@@ -32,7 +32,7 @@ TEST_F(StringTest, EmptyConst) {
     EXPECT_THAT(string.size(), Eq<size_t>(0));
     EXPECT_THAT(string.empty(), Eq(true));
 
-    EXPECT_THROW(string.at(0), Exception);
+    EXPECT_THROW(string.at(0), std::runtime_error);
 
     EXPECT_THAT(string.find('\0'), Eq(String::npos));
     EXPECT_THAT(string.rfind('\0'), Eq(String::npos));
@@ -48,9 +48,9 @@ TEST_F(StringTest, EmptyConst) {
 
     EXPECT_THAT(string.slice(0), Eq(StringSlice()));
     EXPECT_THAT(string.slice(0, 0), Eq(StringSlice()));
-    EXPECT_THROW(string.slice(1), Exception);
-    EXPECT_THROW(string.slice(0, 1), Exception);
-    EXPECT_THROW(string.slice(1, 0), Exception);
+    EXPECT_THROW(string.slice(1), std::runtime_error);
+    EXPECT_THROW(string.slice(0, 1), std::runtime_error);
+    EXPECT_THROW(string.slice(1, 0), std::runtime_error);
 }
 
 // Test all of the 'const' methods of a non-empty String.
@@ -64,7 +64,7 @@ TEST_F(StringTest, HelloWorldConst) {
     EXPECT_THAT(string.at(4), Eq<Rune>('o'));
     EXPECT_THAT(string.at(8), Eq<Rune>('o'));
     EXPECT_THAT(string.at(12), Eq<Rune>('!'));
-    EXPECT_THROW(string.at(13), Exception);
+    EXPECT_THROW(string.at(13), std::runtime_error);
 
     EXPECT_THAT(string.find('H'), Eq<size_t>(0));
     EXPECT_THAT(string.find('o'), Eq<size_t>(4));
@@ -89,9 +89,9 @@ TEST_F(StringTest, HelloWorldConst) {
     EXPECT_THAT(string.slice(7), Eq("world!"));
     EXPECT_THAT(string.slice(13), Eq(StringSlice("")));
     EXPECT_THAT(string.slice(13, 0), Eq(StringSlice("")));
-    EXPECT_THROW(string.slice(14), Exception);
-    EXPECT_THROW(string.slice(13, 1), Exception);
-    EXPECT_THROW(string.slice(14, 0), Exception);
+    EXPECT_THROW(string.slice(14), std::runtime_error);
+    EXPECT_THROW(string.slice(13, 1), std::runtime_error);
+    EXPECT_THROW(string.slice(14, 0), std::runtime_error);
 }
 
 // Test all six non-default overloads of String's constructor.

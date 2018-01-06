@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <limits>
 #include <sfz/bytes.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/format.hpp>
 
 using std::numeric_limits;

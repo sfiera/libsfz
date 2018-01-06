@@ -8,7 +8,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sfz/bytes.hpp>
-#include <sfz/exception.hpp>
 
 using testing::Eq;
 using testing::Ne;

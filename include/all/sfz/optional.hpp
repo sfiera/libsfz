@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sfz/algorithm.hpp>
-#include <sfz/exception.hpp>
+#include <stdexcept>
 
 namespace sfz {
 
@@ -51,9 +51,6 @@ template <typename T>
 void copy(Optional<T>& to, const T& from);
 template <typename T>
 void copy(Optional<T>& to, const Optional<T>& from);
-
-template <typename T>
-bool store_argument(Optional<T>& to, StringSlice from);
 
 template <typename T>
 Optional<T>::Optional() : _has(false) {}
@@ -125,7 +122,7 @@ U Optional<T>::exception_or(U u) const {
     if (_has) {
         return u;
     }
-    throw Exception("!has()");
+    throw std::runtime_error("!has()");
 }
 
 template <typename T>

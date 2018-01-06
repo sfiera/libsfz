@@ -7,9 +7,10 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <pn/file>
 #include <sfz/bytes.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/format.hpp>
+#include <stdexcept>
 
 using testing::Eq;
 using testing::Test;
@@ -34,7 +35,7 @@ void read_from(sfz::ReadSource in, Grapheme& grapheme) {
     if (byte <= YOGH) {
         grapheme = static_cast<Grapheme>(byte);
     } else {
-        throw sfz::Exception(sfz::format("invalid Grapheme {0}", byte));
+        throw std::runtime_error(pn::format("invalid Grapheme {0}", byte).c_str());
     }
 }
 
@@ -42,13 +43,13 @@ void read_from(sfz::ReadSource in, Mapping& mapping) {
     sfz::read(in, mapping.grapheme);
     sfz::read(in, mapping.code_point);
 }
-};
+};  // namespace other
 
 namespace sfz {
 namespace {
 
 template <int size>
-BytesSlice    char_bytes(const char (&data)[size]) {
+BytesSlice char_bytes(const char (&data)[size]) {
     return BytesSlice(reinterpret_cast<const uint8_t*>(data), size - 1);
 }
 

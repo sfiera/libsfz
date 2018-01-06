@@ -7,9 +7,9 @@
 
 #include <string.h>
 #include <algorithm>
-#include <sfz/exception.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/range.hpp>
+#include <stdexcept>
 
 namespace sfz {
 
@@ -163,7 +163,7 @@ size_t BytesSlice::size() const { return _size; }
 
 uint8_t BytesSlice::at(size_t loc) const {
     if (loc >= _size) {
-        throw Exception("out-of-bounds");
+        throw std::runtime_error("out-of-bounds");
     }
     return _data[loc];
 }
@@ -216,21 +216,21 @@ BytesSlice BytesSlice::slice() const { return *this; }
 
 BytesSlice BytesSlice::slice(size_t index) const {
     if (index > _size) {
-        throw Exception("out-of-bounds");
+        throw std::runtime_error("out-of-bounds");
     }
     return BytesSlice(_data + index, _size - index);
 }
 
 BytesSlice BytesSlice::slice(size_t index, size_t size) const {
     if (index + size > _size) {
-        throw Exception("out-of-bounds");
+        throw std::runtime_error("out-of-bounds");
     }
     return BytesSlice(_data + index, size);
 }
 
 void BytesSlice::shift(size_t size) {
     if (size > _size) {
-        throw Exception("out-of-bounds");
+        throw std::runtime_error("out-of-bounds");
     }
     _data += size;
     _size -= size;

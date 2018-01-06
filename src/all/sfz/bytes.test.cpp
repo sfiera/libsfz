@@ -8,8 +8,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
 #include <sfz/string.hpp>
+#include <stdexcept>
 
 using testing::ByRef;
 using testing::Eq;
@@ -32,7 +32,7 @@ TEST_F(BytesTest, EmptyConst) {
     EXPECT_THAT(bytes.size(), Eq<size_t>(0));
     EXPECT_THAT(bytes.empty(), Eq(true));
 
-    EXPECT_THROW(bytes.at(0), Exception);
+    EXPECT_THROW(bytes.at(0), std::runtime_error);
 
     EXPECT_THAT(bytes.find('\0'), Eq(Bytes::npos));
     EXPECT_THAT(bytes.rfind('\0'), Eq(Bytes::npos));
@@ -48,9 +48,9 @@ TEST_F(BytesTest, EmptyConst) {
 
     EXPECT_THAT(bytes.slice(0), Eq(BytesSlice()));
     EXPECT_THAT(bytes.slice(0, 0), Eq(BytesSlice()));
-    EXPECT_THROW(bytes.slice(1), Exception);
-    EXPECT_THROW(bytes.slice(0, 1), Exception);
-    EXPECT_THROW(bytes.slice(1, 0), Exception);
+    EXPECT_THROW(bytes.slice(1), std::runtime_error);
+    EXPECT_THROW(bytes.slice(0, 1), std::runtime_error);
+    EXPECT_THROW(bytes.slice(1, 0), std::runtime_error);
 }
 
 // Test all of the 'const' methods of a non-empty Bytes.
@@ -64,7 +64,7 @@ TEST_F(BytesTest, HelloWorldConst) {
     EXPECT_THAT(bytes.at(4), Eq<uint8_t>('o'));
     EXPECT_THAT(bytes.at(8), Eq<uint8_t>('o'));
     EXPECT_THAT(bytes.at(12), Eq<uint8_t>('!'));
-    EXPECT_THROW(bytes.at(13), Exception);
+    EXPECT_THROW(bytes.at(13), std::runtime_error);
 
     EXPECT_THAT(bytes.find('H'), Eq<size_t>(0));
     EXPECT_THAT(bytes.find('o'), Eq<size_t>(4));
@@ -89,9 +89,9 @@ TEST_F(BytesTest, HelloWorldConst) {
     EXPECT_THAT(bytes.slice(7), Eq("world!"));
     EXPECT_THAT(bytes.slice(13), Eq(BytesSlice("")));
     EXPECT_THAT(bytes.slice(13, 0), Eq(BytesSlice("")));
-    EXPECT_THROW(bytes.slice(14), Exception);
-    EXPECT_THROW(bytes.slice(13, 1), Exception);
-    EXPECT_THROW(bytes.slice(14, 0), Exception);
+    EXPECT_THROW(bytes.slice(14), std::runtime_error);
+    EXPECT_THROW(bytes.slice(13, 1), std::runtime_error);
+    EXPECT_THROW(bytes.slice(14, 0), std::runtime_error);
 }
 
 // Test all six non-default overloads of Bytes's constructor.
