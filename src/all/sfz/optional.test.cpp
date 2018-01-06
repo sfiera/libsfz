@@ -7,7 +7,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <sfz/string.hpp>
+#include <pn/string>
 #include <stdexcept>
 
 using testing::Eq;
@@ -59,7 +59,7 @@ TEST_F(OptionalTest, Int) {
 }
 
 TEST_F(OptionalTest, String) {
-    optional<String> o;
+    optional<pn::string> o;
     EXPECT_THAT(o.has_value(), Eq(false));
     EXPECT_THROW(o.value(), std::runtime_error);
     EXPECT_THROW(const_(o).value(), std::runtime_error);
@@ -71,30 +71,30 @@ TEST_F(OptionalTest, String) {
 
     o.emplace();
     EXPECT_THAT(o.has_value(), Eq(true));
-    EXPECT_THAT(o.value(), Eq<StringSlice>(""));
-    EXPECT_THAT(const_(o).value(), Eq<StringSlice>(""));
-    EXPECT_THAT(*o, Eq<StringSlice>(""));
-    EXPECT_THAT(*const_(o), Eq<StringSlice>(""));
-    EXPECT_THAT(o->slice(), Eq<StringSlice>(""));
-    EXPECT_THAT(const_(o)->slice(), Eq<StringSlice>(""));
+    EXPECT_THAT(o.value(), Eq<pn::string_view>(""));
+    EXPECT_THAT(const_(o).value(), Eq<pn::string_view>(""));
+    EXPECT_THAT(*o, Eq<pn::string_view>(""));
+    EXPECT_THAT(*const_(o), Eq<pn::string_view>(""));
+    EXPECT_THAT(o->substr(0), Eq<pn::string_view>(""));
+    EXPECT_THAT(const_(o)->substr(0), Eq<pn::string_view>(""));
 
     o.emplace("123");
     EXPECT_THAT(o.has_value(), Eq(true));
-    EXPECT_THAT(o.value(), Eq<StringSlice>("123"));
-    EXPECT_THAT(const_(o).value(), Eq<StringSlice>("123"));
-    EXPECT_THAT(*o, Eq<StringSlice>("123"));
-    EXPECT_THAT(*const_(o), Eq<StringSlice>("123"));
-    EXPECT_THAT(o->slice(), Eq<StringSlice>("123"));
-    EXPECT_THAT(const_(o)->slice(), Eq<StringSlice>("123"));
+    EXPECT_THAT(o.value(), Eq<pn::string_view>("123"));
+    EXPECT_THAT(const_(o).value(), Eq<pn::string_view>("123"));
+    EXPECT_THAT(*o, Eq<pn::string_view>("123"));
+    EXPECT_THAT(*const_(o), Eq<pn::string_view>("123"));
+    EXPECT_THAT(o->substr(0), Eq<pn::string_view>("123"));
+    EXPECT_THAT(const_(o)->substr(0), Eq<pn::string_view>("123"));
 
-    o.emplace(3, 'z');
+    o.emplace("zzzz", 3);
     EXPECT_THAT(o.has_value(), Eq(true));
-    EXPECT_THAT(o.value(), Eq<StringSlice>("zzz"));
-    EXPECT_THAT(const_(o).value(), Eq<StringSlice>("zzz"));
-    EXPECT_THAT(*o, Eq<StringSlice>("zzz"));
-    EXPECT_THAT(*const_(o), Eq<StringSlice>("zzz"));
-    EXPECT_THAT(o->slice(), Eq<StringSlice>("zzz"));
-    EXPECT_THAT(const_(o)->slice(), Eq<StringSlice>("zzz"));
+    EXPECT_THAT(o.value(), Eq<pn::string_view>("zzz"));
+    EXPECT_THAT(const_(o).value(), Eq<pn::string_view>("zzz"));
+    EXPECT_THAT(*o, Eq<pn::string_view>("zzz"));
+    EXPECT_THAT(*const_(o), Eq<pn::string_view>("zzz"));
+    EXPECT_THAT(o->substr(0), Eq<pn::string_view>("zzz"));
+    EXPECT_THAT(const_(o)->substr(0), Eq<pn::string_view>("zzz"));
 
     o.reset();
     EXPECT_THAT(o.has_value(), Eq(false));

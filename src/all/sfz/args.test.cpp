@@ -52,7 +52,7 @@ class ArgsTest : public Test {
     void pass(const args::callbacks& callbacks, const arguments&... args) {
         char* const argv[] = {strdup(args)...};
         int         argc   = sizeof...(args);
-        String      error;
+        pn::string  error;
         try {
             args::parse(argc, argv, callbacks);
         } catch (std::exception& e) {
@@ -69,7 +69,7 @@ class ArgsTest : public Test {
     void fail(const char* message, const args::callbacks& callbacks, const arguments&... args) {
         char* const argv[] = {strdup(args)...};
         int         argc   = sizeof...(args);
-        String      error;
+        pn::string  error;
         try {
             args::parse(argc, argv, callbacks);
         } catch (std::runtime_error& e) {
