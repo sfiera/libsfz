@@ -37,7 +37,7 @@ Integer::Integer(unsigned long value) : _negative(false), _abs(value) {}
 
 Integer::Integer(unsigned long long value) : _negative(false), _abs(value) {}
 
-static pn::string int_to_string(Integer i, size_t base, size_t min_width) {
+static pn::string int_to_string(Integer i, int base, int min_width) {
     static const char kDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
     char     buffer[64];
@@ -57,7 +57,7 @@ static pn::string int_to_string(Integer i, size_t base, size_t min_width) {
         result += pn::rune{'-'};
     }
     if (size < min_width) {
-        for (size_t i = size; i < min_width; ++i) {
+        for (int i = size; i < min_width; ++i) {
             result += pn::rune{'0'};
         }
     }
@@ -65,9 +65,9 @@ static pn::string int_to_string(Integer i, size_t base, size_t min_width) {
     return result;
 }
 
-pn::string dec(Integer value, size_t min_width) { return int_to_string(value, 10, min_width); }
-pn::string hex(Integer value, size_t min_width) { return int_to_string(value, 16, min_width); }
-pn::string oct(Integer value, size_t min_width) { return int_to_string(value, 8, min_width); }
-pn::string bin(Integer value, size_t min_width) { return int_to_string(value, 2, min_width); }
+pn::string dec(Integer value, int min_width) { return int_to_string(value, 10, min_width); }
+pn::string hex(Integer value, int min_width) { return int_to_string(value, 16, min_width); }
+pn::string oct(Integer value, int min_width) { return int_to_string(value, 8, min_width); }
+pn::string bin(Integer value, int min_width) { return int_to_string(value, 2, min_width); }
 
 }  // namespace sfz

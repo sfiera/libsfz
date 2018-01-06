@@ -43,7 +43,7 @@ pn::string_view basename(pn::string_view path) {
     if (path == "/") {
         return path;
     }
-    size_t pos = path.rfind(pn::rune{'/'});
+    int pos = path.rfind(pn::rune{'/'});
     if (pos == path.npos) {
         return path;
     } else if (pos == path.size() - 1) {
@@ -54,7 +54,7 @@ pn::string_view basename(pn::string_view path) {
 }
 
 pn::string_view dirname(pn::string_view path) {
-    size_t pos = path.rfind(pn::rune{'/'});
+    int pos = path.rfind(pn::rune{'/'});
     if (pos == 0) {
         return "/";
     } else if (pos == path.npos) {
@@ -116,8 +116,14 @@ void rmtree(pn::string_view path) {
     if (path::exists(path)) {
         class RmtreeVisitor : public TreeWalker {
           public:
-            void pre_directory(pn::string_view path, const Stat&) const {}
-            void cycle_directory(pn::string_view path, const Stat&) const {}
+            void pre_directory(pn::string_view path, const Stat& stat) const {
+                static_cast<void>(path);
+                static_cast<void>(stat);
+            }
+            void cycle_directory(pn::string_view path, const Stat& stat) const {
+                static_cast<void>(path);
+                static_cast<void>(stat);
+            }
 
             void post_directory(pn::string_view path, const Stat&) const { rmdir(path); }
 

@@ -5,6 +5,13 @@ config("libsfz_private") {
     "include/posix",
     "src/posix",
   ]
+  cflags = [
+    "-Wall",
+    "-Wextra",
+    "-Wsign-compare",
+    "-Wnarrowing",
+    "-Werror",
+  ]
 }
 
 config("libsfz_public") {

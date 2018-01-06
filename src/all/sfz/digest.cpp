@@ -34,7 +34,8 @@ void sha1::write(pn::data_view input) {
     if (input.empty()) {
         return;
     }
-    if (((numeric_limits<uint64_t>::max() - _size) / 8) < input.size()) {
+    if (((numeric_limits<uint64_t>::max() - _size) / 8) <
+        static_cast<std::make_unsigned<pn::data_view::size_type>::type>(input.size())) {
         throw std::runtime_error("message is too long");
     }
     pn::data_view remainder = input;
@@ -192,8 +193,14 @@ sha1::digest tree_digest(pn::string_view path) {
 
         // Ignore empty directories.  Directories which are not empty will be included in the
         // resulting digest by virtue of the inclusion of their files.
-        void pre_directory(pn::string_view path, const Stat&) const {}
-        void post_directory(pn::string_view path, const Stat&) const {}
+        void pre_directory(pn::string_view path, const Stat& stat) const {
+            static_cast<void>(path);
+            static_cast<void>(stat);
+        }
+        void post_directory(pn::string_view path, const Stat& stat) const {
+            static_cast<void>(path);
+            static_cast<void>(stat);
+        }
 
         // Throw exceptions on anything that might break our logical view of a tree as a
         // hierarchical listing of of regular files.
@@ -205,10 +212,16 @@ sha1::digest tree_digest(pn::string_view path) {
         }
 
         // Ignore broken symlinks; they effectively don't exist.
-        void broken_symlink(pn::string_view path, const Stat&) const {}
+        void broken_symlink(pn::string_view path, const Stat& stat) const {
+            static_cast<void>(path);
+            static_cast<void>(stat);
+        }
 
         // Can't happen during WALK_LOGICAL.
-        void symlink(pn::string_view path, const Stat&) const {}
+        void symlink(pn::string_view path, const Stat&) const {
+            static_cast<void>(path);
+            static_cast<void>(stat);
+        }
 
         sha1&     sha;
         const int prefix_size;

@@ -34,8 +34,6 @@ mapped_file::mapped_file(pn::string_view path)
     if (_data == MAP_FAILED) {
         throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
     }
-
-    _file = std::move(_file);
 }
 
 mapped_file::~mapped_file() { munmap(_data, _size); }

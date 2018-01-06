@@ -13,10 +13,10 @@ namespace sfz {
 
 class Integer;
 
-pn::string dec(Integer value, size_t min_width = 1);
-pn::string hex(Integer value, size_t min_width = 1);
-pn::string oct(Integer value, size_t min_width = 1);
-pn::string bin(Integer value, size_t min_width = 1);
+pn::string dec(Integer value, int min_width = 1);
+pn::string hex(Integer value, int min_width = 1);
+pn::string oct(Integer value, int min_width = 1);
+pn::string bin(Integer value, int min_width = 1);
 
 // Implementation details follow.
 
