@@ -6,6 +6,8 @@
 #include <sfz/encoding.hpp>
 
 #include <algorithm>
+#include <pn/data>
+#include <pn/string>
 #include <sfz/bytes.hpp>
 #include <sfz/range.hpp>
 #include <sfz/string.hpp>
@@ -35,44 +37,52 @@ bool is_valid_code_point(Rune rune) { return (rune <= 0x10ffff) && (!is_surrogat
 
 namespace ascii {
 
-void Ascii::encode_to(WriteTarget out, const StringSlice& string) {
-    for (Rune r : string) {
-        if (r > 0x7f) {
-            out.push(1, kAsciiUnknownCodePoint);
-        } else {
-            out.push(1, r);
+pn::data encode(pn::string_view string) {
+    pn::data out;
+    for (pn::rune r : string) {
+        uint8_t byte = kAsciiUnknownCodePoint;
+        if (r.value() < 0x80) {
+            byte = r.value();
         }
+        out += pn::data_view{&byte, 1};
     }
+    return out;
 }
 
-void Ascii::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    for (uint8_t byte : bytes) {
-        if (byte & 0x80) {
-            out.push(1, kUnknownCodePoint);
+pn::string decode(pn::data_view data) {
+    pn::string out;
+    for (uint8_t byte : data) {
+        if (byte < 0x80) {
+            out += pn::rune{byte};
         } else {
-            out.push(1, byte);
+            out += pn::rune{kUnknownCodePoint};
         }
     }
+    return out;
 }
 
 }  // namespace ascii
 
 namespace latin1 {
 
-void Latin1::encode_to(WriteTarget out, const StringSlice& string) {
-    for (Rune r : string) {
-        if (r > 0xff) {
-            out.push(1, kAsciiUnknownCodePoint);
-        } else {
-            out.push(1, r);
+pn::data encode(pn::string_view string) {
+    pn::data out;
+    for (pn::rune r : string) {
+        uint8_t byte = '?';
+        if (r.value() < 0x100) {
+            byte = r.value();
         }
+        out += pn::data_view{&byte, 1};
     }
+    return out;
 }
 
-void Latin1::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    for (uint8_t byte : bytes) {
-        out.push(1, byte);
+pn::string decode(pn::data_view data) {
+    pn::string out;
+    for (uint8_t byte : data) {
+        out += pn::rune{byte};
     }
+    return out;
 }
 
 }  // namespace latin1
@@ -317,32 +327,35 @@ uint16_t kMacRomanSupplement[0x80] = {
 
 }  // namespace
 
-void MacRoman::encode_to(WriteTarget out, const StringSlice& string) {
-    for (Rune r : string) {
-        if (r <= 0x7f) {
-            out.push(1, r);
+pn::data encode(pn::string_view string) {
+    pn::data out;
+    for (pn::rune r : string) {
+        uint8_t byte = '?';
+        if (r.value() < 0x80) {
+            byte = r.value();
         } else {
             for (int i : range(0x80)) {
-                if (r == kMacRomanSupplement[i]) {
-                    out.push(1, 0x80 + i);
-                    goto next_rune;
+                if (r.value() == kMacRomanSupplement[i]) {
+                    byte = 0x80 + i;
+                    break;
                 }
             }
-            out.push(1, kAsciiUnknownCodePoint);
         }
-    next_rune:
-        continue;
+        out += pn::data_view{&byte, 1};
     }
+    return out;
 }
 
-void MacRoman::decode_to(PrintTarget out, const BytesSlice& bytes) {
-    for (uint8_t byte : bytes) {
+pn::string decode(pn::data_view data) {
+    pn::string out;
+    for (uint8_t byte : data) {
         if (byte < 0x80) {
-            out.push(1, byte);
+            out += pn::rune{byte};
         } else {
-            out.push(1, kMacRomanSupplement[byte - 0x80]);
+            out += pn::rune{kMacRomanSupplement[byte - 0x80]};
         }
     }
+    return out;
 }
 
 }  // namespace macroman

@@ -118,7 +118,7 @@ TEST_F(BytesTest, AllNonEmptyConstructors) {
     }
     {
         StringSlice string(expected);
-        const Bytes bytes(ascii::encode(string));
+        const Bytes bytes(utf8::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
@@ -156,7 +156,7 @@ TEST_F(BytesTest, AllAssignOverloads) {
     {
         StringSlice string(expected);
         Bytes       bytes("Hello, ");
-        bytes.assign(ascii::encode(string));
+        bytes.assign(utf8::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
     }
     {
@@ -190,7 +190,7 @@ TEST_F(BytesTest, AllAppendOverloads) {
     {
         StringSlice string("world!");
         Bytes       bytes("Hello, ");
-        bytes.append(ascii::encode(string));
+        bytes.append(utf8::encode(string));
         EXPECT_THAT(bytes, Eq(expected));
     }
     {

@@ -118,7 +118,7 @@ TEST_F(StringTest, AllNonEmptyConstructors) {
     }
     {
         BytesSlice   bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
-        const String string(ascii::decode(bytes));
+        const String string(utf8::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
     }
     {
@@ -156,7 +156,7 @@ TEST_F(StringTest, AllAssignOverloads) {
     {
         BytesSlice bytes(reinterpret_cast<const uint8_t*>(expected), strlen(expected));
         String     string("Hello, ");
-        string.assign(ascii::decode(bytes));
+        string.assign(utf8::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
     }
     {
@@ -190,7 +190,7 @@ TEST_F(StringTest, AllAppendOverloads) {
     {
         BytesSlice bytes(reinterpret_cast<const uint8_t*>("world!"), 6);
         String     string("Hello, ");
-        string.append(ascii::decode(bytes));
+        string.append(utf8::decode(bytes));
         EXPECT_THAT(string, Eq(expected));
     }
     {

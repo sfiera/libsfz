@@ -17,6 +17,7 @@ config("libsfz_public") {
 static_library("libsfz") {
   sources = [
     "include/all/sfz/digest.hpp",
+    "include/all/sfz/encoding.hpp",
     "include/all/sfz/os.hpp",
     "include/posix/sfz/file.hpp",
     "src/all/sfz/args.cpp",

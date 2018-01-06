@@ -7,6 +7,7 @@
 #define SFZ_ENCODING_HPP_
 
 #include <stdint.h>
+#include <pn/fwd>
 #include <sfz/print.hpp>
 #include <sfz/write.hpp>
 
@@ -52,13 +53,8 @@ bool is_valid_code_point(Rune rune);
 // the binary representation is never set.
 namespace ascii {
 
-struct Ascii {
-    static void encode_to(WriteTarget out, const StringSlice& string);
-    static void decode_to(PrintTarget out, const BytesSlice& bytes);
-};
-
-inline DecodedBytes<Ascii> encode(const StringSlice& string);
-inline EncodedString<Ascii> decode(const BytesSlice& bytes);
+pn::data   encode(pn::string_view string);
+pn::string decode(pn::data_view data);
 
 }  // namespace ascii
 
@@ -73,13 +69,8 @@ inline EncodedString<Ascii> decode(const BytesSlice& bytes);
 // Latin-1-encoded strings.
 namespace latin1 {
 
-struct Latin1 {
-    static void encode_to(WriteTarget out, const StringSlice& string);
-    static void decode_to(PrintTarget out, const BytesSlice& bytes);
-};
-
-inline DecodedBytes<Latin1> encode(const StringSlice& string);
-inline EncodedString<Latin1> decode(const BytesSlice& bytes);
+pn::data   encode(pn::string_view string);
+pn::string decode(pn::data_view data);
 
 }  // namespace latin1
 
@@ -100,7 +91,7 @@ struct Utf8 {
     static void decode_to(PrintTarget out, const BytesSlice& bytes);
 };
 
-inline DecodedBytes<Utf8> encode(const StringSlice& string);
+inline DecodedBytes<Utf8>  encode(const StringSlice& string);
 inline EncodedString<Utf8> decode(const BytesSlice& bytes);
 
 }  // namespace utf8
@@ -116,13 +107,8 @@ inline EncodedString<Utf8> decode(const BytesSlice& bytes);
 // MacRoman-encoded strings.
 namespace macroman {
 
-struct MacRoman {
-    static void encode_to(WriteTarget out, const StringSlice& string);
-    static void decode_to(PrintTarget out, const BytesSlice& bytes);
-};
-
-inline DecodedBytes<MacRoman> encode(const StringSlice& string);
-inline EncodedString<MacRoman> decode(const BytesSlice& bytes);
+pn::data   encode(pn::string_view string);
+pn::string decode(pn::data_view data);
 
 }  // namespace macroman
 
@@ -154,25 +140,10 @@ void write_to(WriteTarget out, const DecodedBytes<T>& bytes) {
     T::encode_to(out, bytes.string);
 }
 
-namespace ascii {
-inline DecodedBytes<Ascii> encode(const StringSlice& string) { return string; }
-inline EncodedString<Ascii> decode(const BytesSlice& bytes) { return bytes; }
-}  // namespace ascii
-
-namespace latin1 {
-inline DecodedBytes<Latin1> encode(const StringSlice& string) { return string; }
-inline EncodedString<Latin1> decode(const BytesSlice& bytes) { return bytes; }
-}  // namespace latin1
-
 namespace utf8 {
-inline DecodedBytes<Utf8> encode(const StringSlice& string) { return string; }
+inline DecodedBytes<Utf8>  encode(const StringSlice& string) { return string; }
 inline EncodedString<Utf8> decode(const BytesSlice& bytes) { return bytes; }
 }  // namespace utf8
-
-namespace macroman {
-inline DecodedBytes<MacRoman> encode(const StringSlice& string) { return string; }
-inline EncodedString<MacRoman> decode(const BytesSlice& bytes) { return bytes; }
-}  // namespace macroman
 
 }  // namespace sfz
 

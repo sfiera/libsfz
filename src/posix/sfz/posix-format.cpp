@@ -30,11 +30,9 @@ void print_to(PrintTarget out, const PosixStrerror& error) {
     // strerror_r() is locale-dependent, so we have no guarantee that it is in fact ASCII, as
     // is presently assumed.
     BytesSlice bytes(reinterpret_cast<uint8_t*>(buf), strlen(buf));
-    print(out, ascii::decode(bytes));
+    print(out, utf8::decode(bytes));
 }
 
-PosixStrerror posix_strerror(int error) {
-    return PosixStrerror{error ? error : errno};
-}
+PosixStrerror posix_strerror(int error) { return PosixStrerror{error ? error : errno}; }
 
 }  // namespace sfz

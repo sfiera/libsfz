@@ -7,6 +7,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <pn/data>
+#include <pn/string>
 #include <sfz/bytes.hpp>
 #include <sfz/range.hpp>
 #include <sfz/string.hpp>
@@ -56,155 +58,157 @@ TEST_F(EncodingTest, IsValidCodePoint) {
 typedef Test AsciiEncodingTest;
 
 TEST_F(AsciiEncodingTest, DecodeValid) {
-    Bytes bytes;
-    for (int i : range(0x80)) {
-        bytes.append(1, i);
+    pn::data data;
+    for (uint8_t i : range(0x80)) {
+        data += pn::data_view{&i, 1};
     }
 
-    String string(ascii::decode(bytes));
-    ASSERT_THAT(string.size(), Eq(bytes.size()));
-    for (int i : range(string.size())) {
-        EXPECT_THAT(string.at(i), Eq<Rune>(i));
+    pn::string string = ascii::decode(data);
+    ASSERT_THAT(string.size(), Eq(data.size()));
+    auto it = string.begin();
+    for (uint32_t i : range(string.size())) {
+        EXPECT_THAT(*(it++), Eq(pn::rune{i}));
     }
 }
 
 TEST_F(AsciiEncodingTest, EncodeValid) {
-    String string;
-    for (int i : range(0x80)) {
-        string.append(1, i);
+    pn::string string;
+    for (uint32_t i : range(0x80)) {
+        string += pn::rune{i};
     }
 
-    Bytes bytes(ascii::encode(string));
-    ASSERT_THAT(bytes.size(), Eq(string.size()));
-    for (size_t i : range(bytes.size())) {
-        EXPECT_THAT(bytes.at(i), Eq<uint8_t>(i));
+    pn::data data = ascii::encode(string);
+    ASSERT_THAT(data.size(), Eq(string.size()));
+    for (uint8_t i : range(data.size())) {
+        EXPECT_THAT(data[i], Eq(i));
     }
 }
 
 TEST_F(AsciiEncodingTest, DecodeInvalid) {
-    Bytes bytes;
-    for (int i : range(0x80, 0x100)) {
-        bytes.append(1, i);
+    pn::data data;
+    for (uint8_t i : range(0x80, 0x100)) {
+        data += pn::data_view{&i, 1};
     }
 
-    String string(ascii::decode(bytes));
-    ASSERT_THAT(string.size(), Eq(bytes.size()));
-    for (int i : range(string.size())) {
-        EXPECT_THAT(string.at(i), Eq(kUnknownCodePoint));
+    pn::string string = ascii::decode(data);
+    ASSERT_THAT(string.size(), Eq(3 * data.size()));
+    auto it = string.begin();
+    for (int i : range(data.size())) {
+        EXPECT_THAT(*(it++), Eq(pn::rune{kUnknownCodePoint}));
     }
 }
 
 TEST_F(AsciiEncodingTest, EncodeInvalid) {
-    String string;
-    for (int i : range(0x8, 0x100)) {
-        string.append(1, i * 0x10);
+    pn::string string;
+    for (uint32_t i : range(0x8, 0x100)) {
+        string += pn::rune{i * 0x10};
     }
 
-    Bytes bytes(ascii::encode(string));
-    ASSERT_THAT(bytes.size(), Eq(string.size()));
-    for (int i : range(bytes.size())) {
-        EXPECT_THAT(bytes.at(i), Eq(kAsciiUnknownCodePoint));
+    pn::data data = ascii::encode(string);
+    ASSERT_THAT(data.size(), Eq(0x100 - 0x8));
+    for (int i : range(data.size())) {
+        EXPECT_THAT(data[i], Eq(kAsciiUnknownCodePoint));
     }
 }
 
 typedef Test Latin1EncodingTest;
 
 TEST_F(Latin1EncodingTest, Decode) {
-    Bytes bytes;
-    for (int i : range(0x100)) {
-        bytes.append(1, i);
+    pn::data data;
+    for (uint8_t i : range(0x100)) {
+        data += pn::data_view{&i, 1};
     }
 
-    String string(latin1::decode(bytes));
-    ASSERT_THAT(string.size(), Eq(bytes.size()));
-    for (int i : range(string.size())) {
-        EXPECT_THAT(string.at(i), Eq<Rune>(i));
+    pn::string string(latin1::decode(data));
+    ASSERT_THAT(string.size(), Eq(0x180));
+    auto it = string.begin();
+    for (uint32_t i : range(data.size())) {
+        EXPECT_THAT(*(it++), Eq(pn::rune{i}));
     }
 }
 
 TEST_F(Latin1EncodingTest, EncodeValid) {
-    String string;
-    for (int i : range(0x100)) {
-        string.append(1, i);
+    pn::string string;
+    for (uint32_t i : range(0x100)) {
+        string += pn::rune{i};
     }
 
-    Bytes bytes(latin1::encode(string));
-    ASSERT_THAT(bytes.size(), Eq(string.size()));
-    for (int i : range(bytes.size())) {
-        EXPECT_THAT(bytes.at(i), Eq<uint8_t>(i));
+    pn::data data(latin1::encode(string));
+    ASSERT_THAT(data.size(), Eq(0x100));
+    for (uint8_t i : range(data.size())) {
+        EXPECT_THAT(data[i], Eq(i));
     }
 }
 
 TEST_F(Latin1EncodingTest, EncodeInvalid) {
-    String string;
-    for (int i : range(0x1, 0x100)) {
+    pn::string string;
+    for (uint32_t i : range(0x1, 0x100)) {
         // Some of these generated code points will be in the surrogate code point range, meaning
         // they cannot be appended to the string.  Append kUnknownCodePoint instead, which is
         // valid, but unencodable, so it will end up being encoded as kAsciiUnknownCodePoint.
         if (is_valid_code_point(i * 0x100)) {
-            string.append(1, i * 0x100);
+            string += pn::rune{i * 0x100};
         } else {
-            string.append(1, kUnknownCodePoint);
+            string += pn::rune{kUnknownCodePoint};
         }
     }
 
-    Bytes bytes(latin1::encode(string));
-    ASSERT_THAT(bytes.size(), Eq(string.size()));
-    for (int i : range(bytes.size())) {
-        EXPECT_THAT(bytes.at(i), Eq(kAsciiUnknownCodePoint));
+    pn::data data(latin1::encode(string));
+    ASSERT_THAT(data.size(), Eq(0x100 - 0x1));
+    for (int i : range(data.size())) {
+        EXPECT_THAT(data[i], Eq(kAsciiUnknownCodePoint));
     }
 }
 
 typedef Test MacRomanEncodingTest;
 
-const char kMacRomanSupplement[] =
+const pn::string_view kMacRomanSupplement =
         "ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø"
         "¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ";
 
 TEST_F(MacRomanEncodingTest, Decode) {
-    Bytes bytes;
-    for (int i : range(0x100)) {
-        bytes.append(1, i);
+    pn::data data;
+    for (uint8_t i : range(0x100)) {
+        data += pn::data_view{&i, 1};
     }
 
-    String string(macroman::decode(bytes));
-    ASSERT_THAT(string.size(), Eq(bytes.size()));
-    for (int i : range(0x80)) {
-        EXPECT_THAT(string.at(i), Eq<Rune>(i));
+    pn::string string(macroman::decode(data));
+    ASSERT_THAT(string.size(), Eq(0x80 + kMacRomanSupplement.size()));
+    auto it = string.begin();
+    for (uint8_t i : range(0x80)) {
+        EXPECT_THAT(*(it++), Eq(pn::rune{i}));
     }
-    const String supplement(utf8::decode(kMacRomanSupplement));
-    EXPECT_THAT(string.slice(0x80), Eq<StringSlice>(supplement));
+    EXPECT_THAT(string.substr(0x80), Eq(kMacRomanSupplement));
 }
 
 TEST_F(MacRomanEncodingTest, EncodeValid) {
-    String string;
-    for (int i : range(0x80)) {
-        string.append(1, i);
+    pn::string string;
+    for (uint32_t i : range(0x80)) {
+        string += pn::rune{i};
     }
-    string.append(utf8::decode(kMacRomanSupplement));
+    string += kMacRomanSupplement;
 
-    Bytes bytes(macroman::encode(string));
-    ASSERT_THAT(bytes.size(), Eq(string.size()));
-    for (int i : range(bytes.size())) {
-        EXPECT_THAT(bytes.at(i), Eq<uint8_t>(i));
+    pn::data data(macroman::encode(string));
+    ASSERT_THAT(data.size(), Eq(0x100));
+    for (uint8_t i : range(data.size())) {
+        EXPECT_THAT(data[i], Eq(i));
     }
 }
 
 TEST_F(MacRomanEncodingTest, EncodeInvalid) {
-    const String supplement(utf8::decode(kMacRomanSupplement));
-    String       string;
-    for (int i : range(0x8, 0x100)) {
-        if (supplement.find(i * 0x10) == String::npos) {
-            string.append(1, i * 0x10);
+    pn::string string;
+    for (uint32_t i : range(0x8, 0x100)) {
+        if (kMacRomanSupplement.find(pn::rune{i * 0x10}) == kMacRomanSupplement.npos) {
+            string += pn::rune{i * 0x10};
         } else {
-            string.append(1, kUnknownCodePoint);
+            string += pn::rune{kUnknownCodePoint};
         }
     }
 
-    Bytes bytes(macroman::encode(string));
-    ASSERT_THAT(bytes.size(), Eq(string.size()));
-    for (int i : range(bytes.size())) {
-        EXPECT_THAT(bytes.at(i), Eq<uint8_t>(kAsciiUnknownCodePoint));
+    pn::data data(macroman::encode(string));
+    ASSERT_THAT(data.size(), Eq(0x100 - 0x8));
+    for (int i : range(data.size())) {
+        EXPECT_THAT(data[i], Eq(kAsciiUnknownCodePoint));
     }
 }
 
