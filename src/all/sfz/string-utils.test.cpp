@@ -7,6 +7,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <pn/string>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/string.hpp>
@@ -93,8 +94,8 @@ class StringUtilitiesTest : public Test {
         for (const TestData<T>& input : inputs) {
             T actual;
             if (input.failure == StringToIntResult::NONE) {
-                EXPECT_THAT(string_to_float(input.string, actual), Eq(true)) << "input: "
-                                                                             << input.string;
+                EXPECT_THAT(string_to_float(input.string, actual), Eq(true))
+                        << "input: " << input.string;
                 EXPECT_THAT(actual, NanSensitiveFloatEq(input.expected.value));
             } else {
                 EXPECT_THAT(string_to_float(input.string, actual), Eq(false))
@@ -108,37 +109,13 @@ class StringUtilitiesTest : public Test {
         for (const TestData<T>& input : inputs) {
             T actual;
             if (input.failure == StringToIntResult::NONE) {
-                EXPECT_THAT(string_to_float(input.string, actual), Eq(true)) << "input: "
-                                                                             << input.string;
+                EXPECT_THAT(string_to_float(input.string, actual), Eq(true))
+                        << "input: " << input.string;
                 EXPECT_THAT(actual, NanSensitiveDoubleEq(input.expected.value));
             } else {
                 EXPECT_THAT(string_to_float(input.string, actual), Eq(false))
                         << "input: " << input.string << "; output: " << actual;
             }
-        }
-    }
-
-    template <typename T, int size>
-    void RunUpper(const TestData<T> (&inputs)[size]) {
-        for (const TestData<T>& input : inputs) {
-            String actual(utf8::decode(input.string));
-            String expected(utf8::decode(input.expected.value));
-            upper(actual);
-            CString actual_c_str(actual);
-            EXPECT_THAT(actual, Eq<StringSlice>(expected)) << "input: " << input.string
-                                                           << "; actual: " << actual_c_str.data();
-        }
-    }
-
-    template <typename T, int size>
-    void RunLower(const TestData<T> (&inputs)[size]) {
-        for (const TestData<T>& input : inputs) {
-            String actual(utf8::decode(input.string));
-            String expected(utf8::decode(input.expected.value));
-            lower(actual);
-            CString actual_c_str(actual);
-            EXPECT_THAT(actual, Eq<StringSlice>(expected)) << "input: " << input.string
-                                                           << "; actual: " << actual_c_str.data();
         }
     }
 };
@@ -412,29 +389,29 @@ TEST_F(StringUtilitiesTest, Double) {
 }
 
 TEST_F(StringUtilitiesTest, Upper) {
-    TestData<const char*> inputs[] = {
-            {NONE, "", ""},
-            {NONE, "a", "A"},
-            {NONE, "Na", "NA"},
-            {NONE, "WTF", "WTF"},
-            {NONE, "w00t", "W00T"},
-            {NONE, "Ελένη", "Ελένη"},
-            {NONE, "林さん", "林さん"},
+    std::pair<pn::string_view, pn::string_view> inputs[] = {
+            {"", ""},         {"a", "A"},         {"Na", "NA"},         {"WTF", "WTF"},
+            {"w00t", "W00T"}, {"Ελένη", "Ελένη"}, {"林さん", "林さん"},
     };
-    RunUpper(inputs);
+    for (const auto& input : inputs) {
+        pn::string      actual   = upper(input.first);
+        pn::string_view expected = input.second;
+        EXPECT_THAT(actual, Eq(expected))
+                << "input: " << input.first.copy().c_str() << "; actual: " << actual.c_str();
+    }
 }
 
 TEST_F(StringUtilitiesTest, Lower) {
-    TestData<const char*> inputs[] = {
-            {NONE, "", ""},
-            {NONE, "A", "a"},
-            {NONE, "Na", "na"},
-            {NONE, "ill", "ill"},
-            {NONE, "HNO2", "hno2"},
-            {NONE, "Ελένη", "Ελένη"},
-            {NONE, "林さん", "林さん"},
+    std::pair<pn::string_view, pn::string_view> inputs[] = {
+            {"", ""},         {"A", "a"},         {"Na", "na"},         {"ill", "ill"},
+            {"HNO2", "hno2"}, {"Ελένη", "Ελένη"}, {"林さん", "林さん"},
     };
-    RunLower(inputs);
+    for (const auto& input : inputs) {
+        pn::string      actual   = lower(input.first);
+        pn::string_view expected = input.second;
+        EXPECT_THAT(actual, Eq(expected))
+                << "input: " << input.first.copy().c_str() << "; actual: " << actual.c_str();
+    }
 }
 
 }  // namespace

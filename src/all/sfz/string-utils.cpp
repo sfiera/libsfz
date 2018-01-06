@@ -7,6 +7,7 @@
 
 #include <wctype.h>
 #include <limits>
+#include <pn/string>
 #include <sfz/encoding.hpp>
 #include <sfz/exception.hpp>
 #include <sfz/format.hpp>
@@ -263,6 +264,22 @@ void lower(String& s) {
             *begin = towlower(*begin);
         }
     }
+}
+
+pn::string upper(pn::string_view s) {
+    pn::string out;
+    for (pn::rune r : s) {
+        out += pn::rune(towupper(r.value()));
+    }
+    return out;
+}
+
+pn::string lower(pn::string_view s) {
+    pn::string out;
+    for (pn::rune r : s) {
+        out += pn::rune(towlower(r.value()));
+    }
+    return out;
 }
 
 CString::CString(const StringSlice& string) {

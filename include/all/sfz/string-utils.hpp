@@ -7,6 +7,7 @@
 #define SFZ_STRING_UTILS_HPP_
 
 #include <stdint.h>
+#include <pn/fwd>
 #include <sfz/bytes.hpp>
 #include <sfz/macros.hpp>
 #include <sfz/string.hpp>
@@ -39,6 +40,9 @@ bool partition(StringSlice& found, StringSlice separator, StringSlice& input);
 
 void upper(String& s);
 void lower(String& s);
+
+pn::string upper(pn::string_view s);
+pn::string lower(pn::string_view s);
 
 class CString {
   public:
