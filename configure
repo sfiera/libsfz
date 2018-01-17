@@ -60,8 +60,7 @@ def check_submodules():
 
     if missing:
         print("Some submodules are missing. Run:")
-        print("  $ git submodule init")
-        print("  $ git submodule update")
+        print("  $ git submodule update --init")
         sys.exit(1)
 
 
