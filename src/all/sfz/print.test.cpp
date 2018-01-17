@@ -8,6 +8,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <limits>
+#include <pn/string>
 #include <sfz/bytes.hpp>
 #include <sfz/format.hpp>
 #include <sfz/string.hpp>
@@ -46,9 +47,9 @@ void print_to(sfz::PrintTarget out, Grapheme grapheme) {
 void print_to(sfz::PrintTarget out, const Mapping& mapping) {
     print_to(out, mapping.grapheme);
     out.push(" U+");
-    sfz::PrintItem(sfz::hex(mapping.code_point, 4)).print_to(out);
+    sfz::PrintItem(sfz::hex(mapping.code_point, 4).c_str()).print_to(out);
 }
-};
+};  // namespace other
 
 namespace sfz {
 namespace {

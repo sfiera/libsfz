@@ -7,6 +7,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <pn/string>
 #include <sfz/bytes.hpp>
 
 using testing::Eq;
@@ -17,18 +18,16 @@ namespace sfz {
 namespace {
 
 struct TestData {
-    PrintItem   value;
-    StringSlice expected;
+    pn::string      value;
+    pn::string_view expected;
 };
 
 class FormatterTest : public Test {
   protected:
     template <int size>
-    void Run(const StringSlice& prefix, const TestData (&data)[size]) {
+    void Run(const TestData (&data)[size]) {
         for (const TestData& test : data) {
-            String s(prefix);
-            test.value.print_to(s);
-            EXPECT_THAT(s, Eq(test.expected));
+            EXPECT_THAT(test.value, Eq(test.expected));
         }
     }
 };
@@ -36,31 +35,28 @@ class FormatterTest : public Test {
 TEST_F(FormatterTest, IntFormatterBase) {
     const TestData data[] = {
             // Binary.
-            {bin(0), "base: 0"},
-            {bin(5), "base: 101"},
+            {bin(0), "0"},
+            {bin(5), "101"},
             {bin(0xffffffffffffffffull),
-             "base: 11111111111111111111111111111111"
+             "11111111111111111111111111111111"
              "11111111111111111111111111111111"},
             // Octal.
-            {oct(00), "base: 0"},
-            {oct(012345670), "base: 12345670"},
-            {oct(0xffffffffffffffffull), "base: 1777777777777777777777"},
+            {oct(00), "0"},
+            {oct(012345670), "12345670"},
+            {oct(0xffffffffffffffffull), "1777777777777777777777"},
             // Hexadecimal.
-            {hex(0x0), "base: 0"},
-            {hex(0x123456789abcdef0ull), "base: 123456789abcdef0"},
-            {hex(0xffffffffffffffffull), "base: ffffffffffffffff"},
+            {hex(0x0), "0"},
+            {hex(0x123456789abcdef0ull), "123456789abcdef0"},
+            {hex(0xffffffffffffffffull), "ffffffffffffffff"},
     };
-    Run("base: ", data);
+    Run(data);
 }
 
 TEST_F(FormatterTest, IntFormatterWidth) {
     const TestData data[] = {
-            {bin(21, 3), "base: 10101"},
-            {oct(21, 3), "base: 025"},
-            {dec(21, 3), "base: 021"},
-            {hex(21, 3), "base: 015"},
+            {bin(21, 3), "10101"}, {oct(21, 3), "025"}, {dec(21, 3), "021"}, {hex(21, 3), "015"},
     };
-    Run("base: ", data);
+    Run(data);
 }
 
 }  // namespace

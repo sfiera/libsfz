@@ -5,6 +5,7 @@
 
 #include <sfz/format.hpp>
 
+#include <pn/string>
 #include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/range.hpp>
@@ -38,28 +39,37 @@ Integer::Integer(unsigned long value) : _negative(false), _abs(value) {}
 
 Integer::Integer(unsigned long long value) : _negative(false), _abs(value) {}
 
-void print_to(PrintTarget out, const FormattedInt& value) {
+static pn::string int_to_string(Integer i, size_t base, size_t min_width) {
     static const char kDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    uint8_t  buffer[64];
-    size_t   size = 0;
-    uint8_t* data = buffer + 64;
-    uint64_t v    = value.value.abs();
+    char     buffer[64];
+    int      size = 0;
+    char*    data = buffer + 64;
+    uint64_t v    = i.abs();
 
     while (v > 0) {
         --data;
         ++size;
-        *data = kDigits[v % value.base];
-        v /= value.base;
+        *data = kDigits[v % base];
+        v /= base;
     }
 
-    if (value.value.negative()) {
-        out.push(1, '-');
+    pn::string result;
+    if (i.negative()) {
+        result += pn::rune{'-'};
     }
-    if (size < value.min_width) {
-        out.push(value.min_width - size, '0');
+    if (size < min_width) {
+        for (size_t i = size; i < min_width; ++i) {
+            result += pn::rune{'0'};
+        }
     }
-    print(out, utf8::decode(BytesSlice(data, size)));
+    result += pn::string_view{data, size};
+    return result;
 }
+
+pn::string dec(Integer value, size_t min_width) { return int_to_string(value, 10, min_width); }
+pn::string hex(Integer value, size_t min_width) { return int_to_string(value, 16, min_width); }
+pn::string oct(Integer value, size_t min_width) { return int_to_string(value, 8, min_width); }
+pn::string bin(Integer value, size_t min_width) { return int_to_string(value, 2, min_width); }
 
 }  // namespace sfz

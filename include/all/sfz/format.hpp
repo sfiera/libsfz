@@ -7,18 +7,16 @@
 #define SFZ_FORMAT_HPP_
 
 #include <stdint.h>
-#include <sfz/print.hpp>
-#include <sfz/string.hpp>
+#include <pn/fwd>
 
 namespace sfz {
 
-struct FormattedInt;
 class Integer;
 
-FormattedInt dec(Integer value, size_t min_width = 1);
-FormattedInt hex(Integer value, size_t min_width = 1);
-FormattedInt oct(Integer value, size_t min_width = 1);
-FormattedInt bin(Integer value, size_t min_width = 1);
+pn::string dec(Integer value, size_t min_width = 1);
+pn::string hex(Integer value, size_t min_width = 1);
+pn::string oct(Integer value, size_t min_width = 1);
+pn::string bin(Integer value, size_t min_width = 1);
 
 // Implementation details follow.
 
@@ -43,33 +41,6 @@ class Integer {
     const bool     _negative;
     const uint64_t _abs;
 };
-
-struct FormattedInt {
-    Integer value;
-    int     base;
-    size_t  min_width;
-};
-void print_to(PrintTarget out, const FormattedInt& value);
-
-inline FormattedInt dec(Integer value, size_t min_width) {
-    FormattedInt result = {value, 10, min_width};
-    return result;
-}
-
-inline FormattedInt hex(Integer value, size_t min_width) {
-    FormattedInt result = {value, 16, min_width};
-    return result;
-}
-
-inline FormattedInt oct(Integer value, size_t min_width) {
-    FormattedInt result = {value, 8, min_width};
-    return result;
-}
-
-inline FormattedInt bin(Integer value, size_t min_width) {
-    FormattedInt result = {value, 2, min_width};
-    return result;
-}
 
 }  // namespace sfz
 
