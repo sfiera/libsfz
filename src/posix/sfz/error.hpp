@@ -11,17 +11,8 @@
 
 namespace sfz {
 
-int posix_errno();
-
-struct PosixStrerror;
-PosixStrerror posix_strerror(int error = 0);
-
-struct PosixStrerror {
-    PosixStrerror(int e) : error{e} {}
-    pn::string string();
-    int        error;
-};
-void print_to(PrintTarget out, const PosixStrerror& error);
+int        posix_errno();
+pn::string posix_strerror(int error = 0);
 
 }  // namespace sfz
 

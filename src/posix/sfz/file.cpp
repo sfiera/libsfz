@@ -11,7 +11,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sfz/posix-format.hpp>
+#include <sfz/error.hpp>
 #include <stdexcept>
 
 namespace sfz {
@@ -19,21 +19,20 @@ namespace sfz {
 mapped_file::mapped_file(pn::string_view path)
         : _path(path.copy()), _file(pn::open(_path.c_str(), "r")) {
     if (!_file) {
-        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
     }
     struct stat st;
     if (fstat(fileno(_file.c_obj()), &st) < 0) {
-        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
     }
     if (S_ISDIR(st.st_mode)) {
-        throw std::runtime_error(
-                pn::format("{0}: {1}", path, posix_strerror(EISDIR).string()).c_str());
+        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror(EISDIR)).c_str());
     }
     _size = st.st_size;
     _data = reinterpret_cast<uint8_t*>(
             mmap(NULL, _size, PROT_READ, MAP_PRIVATE, fileno(_file.c_obj()), 0));
     if (_data == MAP_FAILED) {
-        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
     }
 
     _file = std::move(_file);

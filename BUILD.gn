@@ -32,10 +32,10 @@ static_library("libsfz") {
     "src/all/sfz/string-utils.cpp",
     "src/all/sfz/string.cpp",
     "src/all/sfz/write.cpp",
+    "src/posix/sfz/error.cpp",
+    "src/posix/sfz/error.hpp",
     "src/posix/sfz/file.cpp",
     "src/posix/sfz/os.cpp",
-    "src/posix/sfz/posix-format.cpp",
-    "src/posix/sfz/posix-format.hpp",
   ]
   public_deps = [
     "//ext/procyon:procyon-cpp",

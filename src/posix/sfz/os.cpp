@@ -11,8 +11,8 @@
 #include <unistd.h>
 #include <pn/file>
 #include <sfz/encoding.hpp>
+#include <sfz/error.hpp>
 #include <sfz/format.hpp>
-#include <sfz/posix-format.hpp>
 #include <stdexcept>
 
 namespace sfz {
@@ -70,29 +70,26 @@ pn::string_view dirname(pn::string_view path) {
 
 void chdir(pn::string_view path) {
     if (::chdir(path.copy().c_str()) < 0) {
-        throw std::runtime_error(
-                pn::format("chdir: {0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("chdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
 void symlink(pn::string_view content, pn::string_view container) {
     if (::symlink(content.copy().data(), container.copy().data()) < 0) {
         throw std::runtime_error(
-                pn::format("symlink: {0}: {1}", container, posix_strerror().string()).c_str());
+                pn::format("symlink: {0}: {1}", container, posix_strerror()).c_str());
     }
 }
 
 void mkdir(pn::string_view path, mode_t mode) {
     if (::mkdir(path.copy().c_str(), mode) != 0) {
-        throw std::runtime_error(
-                pn::format("mkdir: {0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("mkdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
 void mkfifo(pn::string_view path, mode_t mode) {
     if (::mkfifo(path.copy().c_str(), mode) != 0) {
-        throw std::runtime_error(
-                pn::format("mkfifo: {0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("mkfifo: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
@@ -105,15 +102,13 @@ void makedirs(pn::string_view path, mode_t mode) {
 
 void unlink(pn::string_view path) {
     if (::unlink(path.copy().c_str()) < 0) {
-        throw std::runtime_error(
-                pn::format("unlink: {0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("unlink: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
 void rmdir(pn::string_view path) {
     if (::rmdir(path.copy().c_str()) < 0) {
-        throw std::runtime_error(
-                pn::format("rmdir: {0}: {1}", path, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("rmdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
@@ -178,8 +173,7 @@ void walk(pn::string_view root, WalkType type, const TreeWalker& visitor) {
 
     FTS* fts = fts_open(pathv, options, compare_ftsent);
     if (fts == NULL) {
-        throw std::runtime_error(
-                pn::format("fts_open: {0}: {1}", root, posix_strerror().string()).c_str());
+        throw std::runtime_error(pn::format("fts_open: {0}: {1}", root, posix_strerror()).c_str());
     }
     FtsCloser deleter(fts);
     while (FTSENT* ent = fts_read(fts)) {
@@ -197,8 +191,7 @@ void walk(pn::string_view root, WalkType type, const TreeWalker& visitor) {
             case FTS_ERR:
             case FTS_NS:
                 throw std::runtime_error(
-                        pn::format("fts_read: {0}: {1}", ent->fts_path, posix_strerror().string())
-                                .c_str());
+                        pn::format("fts_read: {0}: {1}", ent->fts_path, posix_strerror()).c_str());
 
             case FTS_DOT:
             case FTS_NSOK:
