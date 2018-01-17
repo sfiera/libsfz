@@ -7,6 +7,7 @@
 
 #include <fcntl.h>
 #include <fts.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <pn/file>

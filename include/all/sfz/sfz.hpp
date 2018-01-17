@@ -7,7 +7,6 @@
 #define SFZ_SFZ_HPP_
 
 #include <sfz/args.hpp>
-#include <sfz/bytes.hpp>
 #include <sfz/digest.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/file.hpp>
@@ -15,12 +14,8 @@
 #include <sfz/macros.hpp>
 #include <sfz/optional.hpp>
 #include <sfz/os.hpp>
-#include <sfz/print.hpp>
 #include <sfz/range.hpp>
-#include <sfz/read.hpp>
 #include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>
-#include <sfz/string.hpp>
-#include <sfz/write.hpp>
 
 #endif  // SFZ_SFZ_HPP_

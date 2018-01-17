@@ -8,7 +8,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <pn/string>
-#include <sfz/bytes.hpp>
 
 using testing::Eq;
 using testing::Ne;

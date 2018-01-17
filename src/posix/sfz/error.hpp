@@ -7,7 +7,6 @@
 #define SFZ_POSIX_FORMAT_HPP_
 
 #include <pn/string>
-#include <sfz/print.hpp>
 
 namespace sfz {
 

@@ -12,7 +12,6 @@
 #include <sfz/macros.hpp>
 #include <sfz/optional.hpp>
 #include <sfz/range.hpp>
-#include <sfz/string.hpp>
 #include <stdexcept>
 
 using std::find;

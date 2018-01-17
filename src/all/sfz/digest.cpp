@@ -7,12 +7,9 @@
 
 #include <string.h>
 #include <limits>
-#include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
 #include <sfz/file.hpp>
 #include <sfz/os.hpp>
-#include <sfz/read.hpp>
-#include <sfz/write.hpp>
 #include <stdexcept>
 
 using std::numeric_limits;

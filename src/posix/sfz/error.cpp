@@ -7,9 +7,7 @@
 
 #include <errno.h>
 #include <string.h>
-#include <sfz/bytes.hpp>
 #include <sfz/encoding.hpp>
-#include <sfz/print.hpp>
 
 namespace sfz {
 

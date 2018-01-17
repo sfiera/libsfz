@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 #include <pn/string>
 #include <sfz/encoding.hpp>
-#include <sfz/string.hpp>
 
 using testing::Eq;
 using testing::NanSensitiveDoubleEq;
@@ -17,17 +16,6 @@ using testing::NanSensitiveFloatEq;
 using testing::Test;
 
 namespace sfz {
-
-void PrintTo(const String& s, std::ostream* ostr) {
-    CString c_str(s);
-    *ostr << c_str.data();
-}
-
-void PrintTo(StringSlice s, std::ostream* ostr) {
-    CString c_str(s);
-    *ostr << c_str.data();
-}
-
 namespace {
 
 template <typename T>
@@ -47,17 +35,6 @@ struct ValueOrMessage<const char*> {
     const char* value;
     const char* message;
 };
-
-MATCHER_P(PrintsTo, expected, "") {
-    sfz::String actual(arg);
-    sfz::String actual_quoted(actual);
-    CString     actual_c_str(actual_quoted);
-    sfz::String expected_quoted(expected);
-    CString     expected_c_str(expected_quoted);
-    *result_listener << "actual " << actual_c_str.data() << " vs. expected "
-                     << expected_c_str.data();
-    return actual == expected;
-}
 
 using StringUtilitiesTest = ::testing::Test;
 

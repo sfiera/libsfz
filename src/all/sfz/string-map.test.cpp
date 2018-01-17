@@ -7,8 +7,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <sfz/encoding.hpp>
-#include <sfz/string.hpp>
 
 using testing::TypedEq;
 

@@ -10,7 +10,6 @@
 #include <map>
 #include <pn/string>
 #include <sfz/macros.hpp>
-#include <sfz/string.hpp>
 #include <utility>
 
 namespace sfz {

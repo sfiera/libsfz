@@ -7,20 +7,9 @@
 #define SFZ_ENCODING_HPP_
 
 #include <stdint.h>
-#include <pn/fwd>
-#include <sfz/print.hpp>
-#include <sfz/write.hpp>
+#include <pn/string>
 
 namespace sfz {
-
-class BytesSlice;
-class PrintTarget;
-class StringSlice;
-class WriteTarget;
-template <typename T>
-struct EncodedString;
-template <typename T>
-struct DecodedBytes;
 
 // Constants for replacing code points which cannot be encoded.
 //
@@ -32,8 +21,8 @@ struct DecodedBytes;
 // encoding that is capable of representing it, such as UCS-2, then kUnknownCodePoint should be
 // used.  If encoding a string into a byte sequence using an encoding that cannot represent
 // kUnknownCodePoint, such as ASCII or Latin-1, then kAsciiUnknownCodePoint should be used instead.
-extern const Rune kUnknownCodePoint;
-extern const Rune kAsciiUnknownCodePoint;
+extern const pn::rune kUnknownCodePoint;
+extern const pn::rune kAsciiUnknownCodePoint;
 
 // Identifies valid code points.
 //
@@ -44,7 +33,7 @@ extern const Rune kAsciiUnknownCodePoint;
 //
 // @param [in] rune     A potential code point to test.
 // @returns             true iff `rune` is a valid code point.
-bool is_valid_code_point(Rune rune);
+bool is_valid_code_point(uint32_t rune);
 
 // ASCII text encoding.
 //
@@ -74,28 +63,6 @@ pn::string decode(pn::data_view data);
 
 }  // namespace latin1
 
-// UTF-8 text encoding.
-//
-// This encoding can represent any valid code point.  It is a variable-width encoding, taking up
-// between 1 and 4 bytes for every code point.  As such, random access to UTF-8-encoded code points
-// is linear time, making it a relatively inefficient in-memory format for strings.
-//
-// All ASCII code points are encoded equivalently in UTF-8; as a consequence, all valid
-// ASCII-encoded strings are also UTF-8-encoded strings with equal values.  Other code points in
-// the basic multilingual plane are encoded with 2 or 3 bytes, and code poins outside of it are
-// encoded with 4 bytes.
-namespace utf8 {
-
-struct Utf8 {
-    static void encode_to(WriteTarget out, const StringSlice& string);
-    static void decode_to(PrintTarget out, const BytesSlice& bytes);
-};
-
-inline DecodedBytes<Utf8>  encode(const StringSlice& string);
-inline EncodedString<Utf8> decode(const BytesSlice& bytes);
-
-}  // namespace utf8
-
 // MacRoman text encoding.
 //
 // This encoding can represent code points in the range [U+00, U+7F], as well as a further set of
@@ -111,39 +78,6 @@ pn::data   encode(pn::string_view string);
 pn::string decode(pn::data_view data);
 
 }  // namespace macroman
-
-}  // namespace sfz
-
-// Implementation details follow.
-
-namespace sfz {
-
-template <typename T>
-struct EncodedString {
-    const BytesSlice& bytes;
-    EncodedString(const BytesSlice& b) : bytes(b) {}
-};
-
-template <typename T>
-struct DecodedBytes {
-    const StringSlice& string;
-    DecodedBytes(const StringSlice& s) : string(s) {}
-};
-
-template <typename T>
-void print_to(PrintTarget out, const EncodedString<T>& string) {
-    T::decode_to(out, string.bytes);
-}
-
-template <typename T>
-void write_to(WriteTarget out, const DecodedBytes<T>& bytes) {
-    T::encode_to(out, bytes.string);
-}
-
-namespace utf8 {
-inline DecodedBytes<Utf8>  encode(const StringSlice& string) { return string; }
-inline EncodedString<Utf8> decode(const BytesSlice& bytes) { return bytes; }
-}  // namespace utf8
 
 }  // namespace sfz
 
