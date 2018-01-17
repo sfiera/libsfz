@@ -21,12 +21,12 @@
 #include <sfz/write.hpp>
 
 using testing::Eq;
-using testing::Test;
+using testing::NotNull;
 
 namespace sfz {
 namespace {
 
-typedef Test Sha1Test;
+using Sha1Test = ::testing::Test;
 
 const Sha1::Digest kEmptyDigest = {{0xda39a3ee, 0x5e6b4b0d, 0x3255bfef, 0x95601890, 0xafd80709}};
 
@@ -274,14 +274,17 @@ TEST_F(Sha1Test, TreeDigest) {
     TemporaryDirectory dir("sha1-test");
 
     for (const TreeData& tree_data : kTreeData) {
-        String path(format("{0}/{1}", dir.path(), utf8::decode(tree_data.path)));
-        String data(utf8::decode(tree_data.data));
+        pn::string      path = pn::format("{0}/{1}", CString(dir.path()).data(), tree_data.path);
+        pn::string_view data = tree_data.data;
 
-        makedirs(path::dirname(path), 0700);
-        ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0600));
-        write(fd, utf8::encode(data));
+        makedirs(path::dirname(String(utf8::decode(path.c_str()))), 0700);
+        {
+            pn::file file = pn::open(path, "w");
+            ASSERT_THAT(file.c_obj(), NotNull());
+            ASSERT_THAT(file.write(data), Eq(true));
+        }
 
-        EXPECT_THAT(file_digest(path), Eq(tree_data.digest));
+        EXPECT_THAT(file_digest(String(utf8::decode(path.c_str()))), Eq(tree_data.digest));
     }
     EXPECT_THAT(tree_digest(dir.path()), Eq(kTreeDigest));
 }

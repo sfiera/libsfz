@@ -146,9 +146,9 @@ void print_to(PrintTarget out, const Sha1::Digest& digest) {
 }
 
 Sha1::Digest file_digest(const StringSlice& path) {
-    MappedFile file(path);
-    Sha1       sha;
-    sha.push(file.data());
+    mapped_file file(CString(path).data());
+    Sha1        sha;
+    sha.push(BytesSlice{file.data().data(), static_cast<size_t>(file.data().size())});
     return sha.digest();
 }
 
@@ -165,9 +165,9 @@ Sha1::Digest tree_digest(const StringSlice& path) {
             write<uint64_t>(sha, path_bytes.size());
             sha.push(path_bytes);
 
-            MappedFile file(path);
+            mapped_file file(CString(path).data());
             write<uint64_t>(sha, file.data().size());
-            sha.push(file.data());
+            sha.push(BytesSlice{file.data().data(), static_cast<size_t>(file.data().size())});
         }
 
         // Ignore empty directories.  Directories which are not empty will be included in the

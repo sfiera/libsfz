@@ -16,6 +16,7 @@ config("libsfz_public") {
 
 static_library("libsfz") {
   sources = [
+    "include/posix/sfz/file.hpp",
     "src/all/sfz/args.cpp",
     "src/all/sfz/bytes.cpp",
     "src/all/sfz/digest.cpp",
@@ -33,6 +34,9 @@ static_library("libsfz") {
     "src/posix/sfz/os.cpp",
     "src/posix/sfz/posix-format.cpp",
     "src/posix/sfz/posix-format.hpp",
+  ]
+  public_deps = [
+    "//ext/procyon:procyon-cpp",
   ]
   configs += [ ":libsfz_private" ]
   public_configs = [ ":libsfz_public" ]
