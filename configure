@@ -35,11 +35,6 @@ def main():
     args = parser.parse_args()
 
     check_submodules()
-    if not check_gn():
-        print("\nYou don't seem to have gn(1). Run:")
-        print("  $ build/lib/scripts/download-gn.py")
-        sys.exit(1)
-
     check_host()
     check_target(args)
 
@@ -111,10 +106,6 @@ def check_mac(args):
                 "* Xcode can be installed via the App Store:\n"
                 "    https://itunes.apple.com/en/app/xcode/id497799835\n"
                 "  After installing, open it and accept the license agreement\n")
-    if not check_ninja():
-        missing["ninja"] = (
-                "* ninja can be installed with Homebrew:\n"
-                "    $ brew install ninja\n")
 
     if missing:
         print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
@@ -137,8 +128,6 @@ def check_linux_native(args):
     missing = collections.OrderedDict()
     if not check_clang("clang++"):
         missing["clang"] = "clang"
-    if not check_ninja():
-        missing["ninja"] = "ninja-build"
 
     if missing:
         print("\nmissing dependencies: %s" % " ".join(missing.keys()))
@@ -152,10 +141,6 @@ def check_linux_native(args):
 
 def check_mac_on_linux(args):
     missing = collections.OrderedDict()
-    if not check_ninja():
-        missing["ninja"] = (
-                "* On Ubuntu, ninja can be installed with:\n"
-                "    $ sudo apt-get install ninja-build")
     if not (check_clang("x86_64-apple-darwin15-clang++") and
             check_libcxx("x86_64-apple-darwin15-clang++")):
         missing["osxcross"] = (
@@ -186,21 +171,6 @@ def check_libcxx(executable=""):
             ("%s -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null" % executable).split(),
             what="libc++",
             input="#include <chrono>\n\nint main() { return std::chrono::seconds(1).count(); }")
-
-
-def check_gn():
-    """Run gn --version."""
-    return cfg.check_bin("build/lib/scripts/gn --version".split(), what="gn")
-
-
-def check_ninja():
-    """Run ninja --version.
-
-    GNU Ninja doesn't have a --version flag, so this check should fail
-    if the user accidentally installed ninja instead of ninja-build.
-    """
-    return (cfg.check_bin("ninja --version".split()) or
-            cfg.check_bin("ninja-build --version".split()))
 
 
 if __name__ == "__main__":
