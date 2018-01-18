@@ -7,171 +7,159 @@
 
 #include <fcntl.h>
 #include <fts.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pn/file>
 #include <sfz/encoding.hpp>
-#include <sfz/exception.hpp>
-#include <sfz/format.hpp>
-#include <sfz/posix-format.hpp>
+#include <sfz/error.hpp>
+#include <stdexcept>
 
 namespace sfz {
 
 namespace path {
 
-bool exists(const StringSlice& path) {
-    CString c_str(path);
-    Stat    st;
-    return (stat(c_str.data(), &st) == 0);
+bool exists(pn::string_view path) {
+    Stat st;
+    return (stat(path.copy().c_str(), &st) == 0);
 }
 
-bool isdir(const StringSlice& path) {
-    CString c_str(path);
-    Stat    st;
-    return (stat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFDIR);
+bool isdir(pn::string_view path) {
+    Stat st;
+    return (stat(path.copy().c_str(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFDIR);
 }
 
-bool isfile(const StringSlice& path) {
-    CString c_str(path);
-    Stat    st;
-    return (stat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFREG);
+bool isfile(pn::string_view path) {
+    Stat st;
+    return (stat(path.copy().c_str(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFREG);
 }
 
-bool islink(const StringSlice& path) {
-    CString c_str(path);
-    Stat    st;
-    return (lstat(c_str.data(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFLNK);
+bool islink(pn::string_view path) {
+    Stat st;
+    return (lstat(path.copy().c_str(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFLNK);
 }
 
-StringSlice basename(const StringSlice& path) {
+pn::string_view basename(pn::string_view path) {
     if (path == "/") {
         return path;
     }
-    size_t pos = path.rfind('/', path.size() - 1);
-    if (pos == StringSlice::npos) {
+    int pos = path.rfind(pn::rune{'/'});
+    if (pos == path.npos) {
         return path;
     } else if (pos == path.size() - 1) {
-        return basename(path.slice(0, path.size() - 1));
+        return basename(path.substr(0, path.size() - 1));
     } else {
-        return path.slice(pos + 1);
+        return path.substr(pos + 1);
     }
 }
 
-StringSlice dirname(const StringSlice& path) {
-    size_t pos = path.rfind('/', path.size() - 1);
+pn::string_view dirname(pn::string_view path) {
+    int pos = path.rfind(pn::rune{'/'});
     if (pos == 0) {
         return "/";
-    } else if (pos == StringSlice::npos) {
+    } else if (pos == path.npos) {
         return ".";
     } else if (pos == path.size() - 1) {
-        return dirname(path.slice(0, path.size() - 1));
+        return dirname(path.substr(0, path.size() - 1));
     } else {
-        return path.slice(0, pos);
+        return path.substr(0, pos);
     }
 }
 
 }  // namespace path
 
-void chdir(const StringSlice& path) {
-    CString c_str(path);
-    if (::chdir(c_str.data()) < 0) {
-        throw Exception(format("chdir: {0}: {1}", path, posix_strerror()));
+void chdir(pn::string_view path) {
+    if (::chdir(path.copy().c_str()) < 0) {
+        throw std::runtime_error(pn::format("chdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
-void symlink(const StringSlice& content, const StringSlice& container) {
-    CString content_c_str(content);
-    CString container_c_str(container);
-    if (::symlink(content_c_str.data(), container_c_str.data()) < 0) {
-        throw Exception(format("symlink: {0}: {1}", container, posix_strerror()));
+void symlink(pn::string_view content, pn::string_view container) {
+    if (::symlink(content.copy().data(), container.copy().data()) < 0) {
+        throw std::runtime_error(
+                pn::format("symlink: {0}: {1}", container, posix_strerror()).c_str());
     }
 }
 
-int open(const StringSlice& path, int oflag, mode_t mode) {
-    CString c_str(path);
-    int     fd = ::open(c_str.data(), oflag, mode);
-    if (fd < 0) {
-        throw Exception(format("open: {0}: {1}", path, posix_strerror()));
-    }
-    return fd;
-}
-
-void mkdir(const StringSlice& path, mode_t mode) {
-    CString c_str(path);
-    if (::mkdir(c_str.data(), mode) != 0) {
-        throw Exception(format("mkdir: {0}: {1}", path, posix_strerror()));
+void mkdir(pn::string_view path, mode_t mode) {
+    if (::mkdir(path.copy().c_str(), mode) != 0) {
+        throw std::runtime_error(pn::format("mkdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
-void mkfifo(const StringSlice& path, mode_t mode) {
-    CString c_str(path);
-    if (::mkfifo(c_str.data(), mode) != 0) {
-        throw Exception(format("mkfifo: {0}: {1}", path, posix_strerror()));
+void mkfifo(pn::string_view path, mode_t mode) {
+    if (::mkfifo(path.copy().c_str(), mode) != 0) {
+        throw std::runtime_error(pn::format("mkfifo: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
-void makedirs(const StringSlice& path, mode_t mode) {
+void makedirs(pn::string_view path, mode_t mode) {
     if (!path::isdir(path)) {
         makedirs(path::dirname(path), mode);
         mkdir(path, mode);
     }
 }
 
-void unlink(const StringSlice& path) {
-    CString c_str(path);
-    if (::unlink(c_str.data()) < 0) {
-        throw Exception(format("unlink: {0}: {1}", path, posix_strerror()));
+void unlink(pn::string_view path) {
+    if (::unlink(path.copy().c_str()) < 0) {
+        throw std::runtime_error(pn::format("unlink: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
-void rmdir(const StringSlice& path) {
-    CString c_str(path);
-    if (::rmdir(c_str.data()) < 0) {
-        throw Exception(format("rmdir: {0}: {1}", path, posix_strerror()));
+void rmdir(pn::string_view path) {
+    if (::rmdir(path.copy().c_str()) < 0) {
+        throw std::runtime_error(pn::format("rmdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
-void rmtree(const StringSlice& path) {
+void rmtree(pn::string_view path) {
     if (path::exists(path)) {
         class RmtreeVisitor : public TreeWalker {
           public:
-            void pre_directory(const StringSlice& path, const Stat&) const {}
-            void cycle_directory(const StringSlice& path, const Stat&) const {}
+            void pre_directory(pn::string_view path, const Stat& stat) const {
+                static_cast<void>(path);
+                static_cast<void>(stat);
+            }
+            void cycle_directory(pn::string_view path, const Stat& stat) const {
+                static_cast<void>(path);
+                static_cast<void>(stat);
+            }
 
-            void post_directory(const StringSlice& path, const Stat&) const { rmdir(path); }
+            void post_directory(pn::string_view path, const Stat&) const { rmdir(path); }
 
-            void file(const StringSlice& path, const Stat&) const { unlink(path); }
-            void symlink(const StringSlice& path, const Stat&) const { unlink(path); }
-            void broken_symlink(const StringSlice& path, const Stat&) const { unlink(path); }
-            void other(const StringSlice& path, const Stat&) const { unlink(path); }
+            void file(pn::string_view path, const Stat&) const { unlink(path); }
+            void symlink(pn::string_view path, const Stat&) const { unlink(path); }
+            void broken_symlink(pn::string_view path, const Stat&) const { unlink(path); }
+            void other(pn::string_view path, const Stat&) const { unlink(path); }
         };
         RmtreeVisitor visitor;
         walk(path, WALK_PHYSICAL, visitor);
     }
 }
 
-TemporaryDirectory::TemporaryDirectory(const StringSlice& prefix) {
-    String  str(format("/tmp/{0}XXXXXX", prefix));
-    CString c_str(str);
-    if (!mkdtemp(c_str.data())) {
-        throw Exception("mkdtemp() failed");
+TemporaryDirectory::TemporaryDirectory(pn::string_view prefix) {
+    pn::string path = pn::format("/tmp/{0}XXXXXX", prefix);
+    if (!mkdtemp(path.data())) {
+        throw std::runtime_error("mkdtemp() failed");
     }
-    _path.assign(utf8::decode(c_str.data()));
+    _path = std::move(path);
 }
 
 TemporaryDirectory::~TemporaryDirectory() { rmtree(_path); }
 
-const String& TemporaryDirectory::path() const { return _path; }
+const pn::string& TemporaryDirectory::path() const { return _path; }
 
 namespace {
 
 class FtsCloser {
   public:
     FtsCloser(FTS* fts) : _fts(fts) {}
+    FtsCloser(const FtsCloser&) = delete;
+    FtsCloser(FtsCloser&&)      = delete;
     ~FtsCloser() { fts_close(_fts); }
 
   private:
     FTS* _fts;
-    DISALLOW_COPY_AND_ASSIGN(FtsCloser);
 };
 
 int compare_ftsent(const FTSENT** lhs, const FTSENT** rhs) {
@@ -180,10 +168,10 @@ int compare_ftsent(const FTSENT** lhs, const FTSENT** rhs) {
 
 }  // namespace
 
-void walk(const StringSlice& root, WalkType type, const TreeWalker& visitor) {
-    CString     c_str(root);
-    char* const pathv[] = {c_str.data(), NULL};
-    int         options = FTS_NOCHDIR;
+void walk(pn::string_view root, WalkType type, const TreeWalker& visitor) {
+    pn::string  root_copy = root.copy();
+    char* const pathv[]   = {root_copy.data(), NULL};
+    int         options   = FTS_NOCHDIR;
     if (type == WALK_PHYSICAL) {
         options |= FTS_PHYSICAL;
     } else {
@@ -192,30 +180,31 @@ void walk(const StringSlice& root, WalkType type, const TreeWalker& visitor) {
 
     FTS* fts = fts_open(pathv, options, compare_ftsent);
     if (fts == NULL) {
-        throw Exception(format("fts_open: {0}: {1}", root, posix_strerror()));
+        throw std::runtime_error(pn::format("fts_open: {0}: {1}", root, posix_strerror()).c_str());
     }
     FtsCloser deleter(fts);
     while (FTSENT* ent = fts_read(fts)) {
-        String      path(utf8::decode(ent->fts_path));
         const Stat& st = *ent->fts_statp;
         switch (ent->fts_info) {
-            case FTS_D: visitor.pre_directory(path, st); break;
-            case FTS_DC: visitor.cycle_directory(path, st); break;
-            case FTS_DEFAULT: visitor.other(path, st); break;
-            case FTS_DP: visitor.post_directory(path, st); break;
-            case FTS_F: visitor.file(path, st); break;
-            case FTS_SL: visitor.symlink(path, st); break;
-            case FTS_SLNONE: visitor.broken_symlink(path, st); break;
+            case FTS_D: visitor.pre_directory(ent->fts_path, st); break;
+            case FTS_DC: visitor.cycle_directory(ent->fts_path, st); break;
+            case FTS_DEFAULT: visitor.other(ent->fts_path, st); break;
+            case FTS_DP: visitor.post_directory(ent->fts_path, st); break;
+            case FTS_F: visitor.file(ent->fts_path, st); break;
+            case FTS_SL: visitor.symlink(ent->fts_path, st); break;
+            case FTS_SLNONE: visitor.broken_symlink(ent->fts_path, st); break;
 
             case FTS_DNR:
             case FTS_ERR:
             case FTS_NS:
-                throw Exception(
-                        format("fts_read: {0}: {1}", path, posix_strerror(ent->fts_errno)));
+                throw std::runtime_error(
+                        pn::format("fts_read: {0}: {1}", ent->fts_path, posix_strerror()).c_str());
 
             case FTS_DOT:
             case FTS_NSOK:
-            default: throw Exception(format("walk: got invalid type {0}", ent->fts_info));
+            default:
+                throw std::runtime_error(
+                        pn::format("walk: got invalid type {0}", ent->fts_info).c_str());
         }
     }
 }

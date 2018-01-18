@@ -5,6 +5,13 @@ config("libsfz_private") {
     "include/posix",
     "src/posix",
   ]
+  cflags = [
+    "-Wall",
+    "-Wextra",
+    "-Wsign-compare",
+    "-Wnarrowing",
+    "-Werror",
+  ]
 }
 
 config("libsfz_public") {
@@ -16,52 +23,31 @@ config("libsfz_public") {
 
 static_library("libsfz") {
   sources = [
+    "include/all/sfz/args.hpp",
+    "include/all/sfz/digest.hpp",
+    "include/all/sfz/encoding.hpp",
+    "include/all/sfz/os.hpp",
+    "include/posix/sfz/file.hpp",
     "src/all/sfz/args.cpp",
-    "src/all/sfz/bytes.cpp",
     "src/all/sfz/digest.cpp",
     "src/all/sfz/encoding.cpp",
-    "src/all/sfz/endian.cpp",
-    "src/all/sfz/exception.cpp",
     "src/all/sfz/format.cpp",
-    "src/all/sfz/json.cpp",
-    "src/all/sfz/print.cpp",
-    "src/all/sfz/read.cpp",
     "src/all/sfz/string-utils.cpp",
-    "src/all/sfz/string.cpp",
-    "src/all/sfz/write.cpp",
+    "src/posix/sfz/error.cpp",
+    "src/posix/sfz/error.hpp",
     "src/posix/sfz/file.cpp",
-    "src/posix/sfz/io.cpp",
     "src/posix/sfz/os.cpp",
-    "src/posix/sfz/posix-format.cpp",
-    "src/posix/sfz/posix-format.hpp",
+  ]
+  public_deps = [
+    "//ext/procyon:procyon-cpp",
   ]
   configs += [ ":libsfz_private" ]
   public_configs = [ ":libsfz_public" ]
 }
 
-executable("algorithm-test") {
-  sources = [
-    "src/all/sfz/algorithm.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
 executable("args-test") {
   sources = [
-    "src/all/sfz/algorithm.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("bytes-test") {
-  sources = [
-    "src/all/sfz/bytes.test.cpp",
+    "src/all/sfz/args.test.cpp",
   ]
   deps = [
     ":libsfz",
@@ -99,26 +85,6 @@ executable("format-test") {
   ]
 }
 
-executable("io-test") {
-  sources = [
-    "src/all/sfz/io.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("json-test") {
-  sources = [
-    "src/all/sfz/json.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
 executable("optional-test") {
   sources = [
     "src/all/sfz/optional.test.cpp",
@@ -139,19 +105,9 @@ executable("os-test") {
   ]
 }
 
-executable("print-test") {
+executable("string-map-test") {
   sources = [
-    "src/all/sfz/print.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("read-test") {
-  sources = [
-    "src/all/sfz/read.test.cpp",
+    "src/all/sfz/string-map.test.cpp",
   ]
   deps = [
     ":libsfz",
@@ -162,26 +118,6 @@ executable("read-test") {
 executable("string-utils-test") {
   sources = [
     "src/all/sfz/string-utils.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("string-test") {
-  sources = [
-    "src/all/sfz/string.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("write-test") {
-  sources = [
-    "src/all/sfz/write.test.cpp",
   ]
   deps = [
     ":libsfz",

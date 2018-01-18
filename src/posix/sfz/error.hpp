@@ -6,20 +6,13 @@
 #ifndef SFZ_POSIX_FORMAT_HPP_
 #define SFZ_POSIX_FORMAT_HPP_
 
-#include <sfz/print.hpp>
+#include <pn/string>
 
 namespace sfz {
 
-int posix_errno();
-
-struct PosixStrerror;
-PosixStrerror posix_strerror(int error = 0);
-
-struct PosixStrerror {
-    int errno;
-};
-void print_to(PrintTarget out, const PosixStrerror& error);
+int        posix_errno();
+pn::string posix_strerror(int error = 0);
 
 }  // namespace sfz
 
-#endif // SFZ_POSIX_FORMAT_HPP_
+#endif  // SFZ_POSIX_FORMAT_HPP_
