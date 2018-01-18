@@ -4,3 +4,6 @@
 [submodule "build/lib"]
 	path = build/lib
 	url = https://github.com/sfiera/gn-tools.git
+[submodule "ext/procyon"]
+	path = ext/procyon
+	url = https://github.com/arescentral/procyon.git
