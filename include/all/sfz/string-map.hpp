@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <map>
+#include <memory>
 #include <pn/string>
 #include <utility>
 

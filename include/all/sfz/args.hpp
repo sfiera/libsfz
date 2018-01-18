@@ -6,8 +6,10 @@
 #ifndef SFZ_ARGS_HPP_
 #define SFZ_ARGS_HPP_
 
+#include <functional>
 #include <limits>
 #include <map>
+#include <memory>
 #include <pn/file>
 #include <pn/string>
 #include <sfz/optional.hpp>
