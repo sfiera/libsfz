@@ -38,7 +38,7 @@ void parse(size_t argc, char* const* argv, const callbacks& callbacks) {
                 if (eq == opt.npos) {  // --option; --option value
                     bool used_value = false;
                     if (callbacks.long_option) {
-                        handled = callbacks.long_option(opt, [&i, argc, argv, &used_value, opt] {
+                        handled = callbacks.long_option(opt, [&i, argc, argv, &used_value] {
                             if (!used_value) {
                                 used_value = true;
                                 if (++i >= argc) {
