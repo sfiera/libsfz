@@ -12,11 +12,16 @@
 
 namespace sfz {
 
+struct _nullopt_t {};
+
+constexpr _nullopt_t nullopt;
+
 template <typename T>
 class optional {
   public:
-    optional();
+    optional(_nullopt_t = nullopt);
     optional(const optional& other);
+    optional& operator=(_nullopt_t);
     optional& operator=(const optional& other);
     ~optional();
 
@@ -30,6 +35,10 @@ class optional {
 
     T&       value() { return *exception_or(data()); }
     const T& value() const { return *exception_or(data()); }
+    template <typename U>
+    T value_or(U&& u) const& { return has_value() ? *data() : u; }
+    template <typename U>
+    T value_or(U&& u) && { return has_value() ? *data() : u; }
 
     void swap(optional& other);
     void reset();
@@ -48,7 +57,7 @@ class optional {
 };
 
 template <typename T>
-optional<T>::optional() : _has_value(false) {}
+optional<T>::optional(_nullopt_t) : _has_value(false) {}
 
 template <typename T>
 optional<T>::optional(const optional& other) : _has_value(false) {
@@ -62,6 +71,12 @@ optional<T> make_optional(T&& value) {
     optional<T> o;
     o.emplace(std::forward<T&&>(value));
     return o;
+}
+
+template <typename T>
+optional<T>& optional<T>::operator=(_nullopt_t) {
+    reset();
+    return *this;
 }
 
 template <typename T>

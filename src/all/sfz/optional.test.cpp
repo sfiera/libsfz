@@ -32,11 +32,22 @@ TEST_F(OptionalTest, Int) {
     EXPECT_THAT(o.has_value(), Eq(false));
     EXPECT_THROW(o.value(), std::runtime_error);
     EXPECT_THROW(const_(o).value(), std::runtime_error);
+    EXPECT_THAT(o.value_or(1), Eq(1));
+    EXPECT_THAT(const_(o).value_or(1), Eq(1));
+
+    o = nullopt;
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
+    EXPECT_THAT(o.value_or(1), Eq(1));
+    EXPECT_THAT(const_(o).value_or(1), Eq(1));
 
     o.reset();
     EXPECT_THAT(o.has_value(), Eq(false));
     EXPECT_THROW(o.value(), std::runtime_error);
     EXPECT_THROW(const_(o).value(), std::runtime_error);
+    EXPECT_THAT(o.value_or(1), Eq(1));
+    EXPECT_THAT(const_(o).value_or(1), Eq(1));
 
     o.emplace();
     EXPECT_THAT(o.has_value(), Eq(true));
@@ -44,6 +55,8 @@ TEST_F(OptionalTest, Int) {
     EXPECT_THAT(const_(o).value(), Eq(0));
     EXPECT_THAT(*o, Eq(0));
     EXPECT_THAT(*const_(o), Eq(0));
+    EXPECT_THAT(o.value_or(1), Eq(0));
+    EXPECT_THAT(const_(o).value_or(1), Eq(0));
 
     o.emplace(123);
     EXPECT_THAT(o.has_value(), Eq(true));
@@ -51,15 +64,24 @@ TEST_F(OptionalTest, Int) {
     EXPECT_THAT(const_(o).value(), Eq(123));
     EXPECT_THAT(*o, Eq(123));
     EXPECT_THAT(*const_(o), Eq(123));
+    EXPECT_THAT(o.value_or(1), Eq(123));
+    EXPECT_THAT(const_(o).value_or(1), Eq(123));
 
     o.reset();
     EXPECT_THAT(o.has_value(), Eq(false));
     EXPECT_THROW(o.value(), std::runtime_error);
     EXPECT_THROW(const_(o).value(), std::runtime_error);
+    EXPECT_THAT(o.value_or(1), Eq(1));
+    EXPECT_THAT(const_(o).value_or(1), Eq(1));
 }
 
 TEST_F(OptionalTest, String) {
     optional<pn::string> o;
+    EXPECT_THAT(o.has_value(), Eq(false));
+    EXPECT_THROW(o.value(), std::runtime_error);
+    EXPECT_THROW(const_(o).value(), std::runtime_error);
+
+    o = nullopt;
     EXPECT_THAT(o.has_value(), Eq(false));
     EXPECT_THROW(o.value(), std::runtime_error);
     EXPECT_THROW(const_(o).value(), std::runtime_error);
