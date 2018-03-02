@@ -21,8 +21,10 @@ class optional {
   public:
     optional(_nullopt_t = nullopt);
     optional(const optional& other);
+    optional(optional&& other);
     optional& operator=(_nullopt_t);
     optional& operator=(const optional& other);
+    optional& operator=(optional&& other);
     ~optional();
 
     constexpr operator bool() const { return has_value(); }
@@ -67,6 +69,13 @@ optional<T>::optional(const optional& other) : _has_value(false) {
 }
 
 template <typename T>
+optional<T>::optional(optional&& other) : _has_value(false) {
+    if (other.has_value()) {
+        emplace(std::move(*other));
+    }
+}
+
+template <typename T>
 optional<T> make_optional(T&& value) {
     optional<T> o;
     o.emplace(std::forward<T&&>(value));
@@ -86,6 +95,20 @@ optional<T>& optional<T>::operator=(const optional& other) {
             **this = *other;
         } else {
             emplace(*other);
+        }
+    } else {
+        reset();
+    }
+    return *this;
+}
+
+template <typename T>
+optional<T>& optional<T>::operator=(optional&& other) {
+    if (other.has_value()) {
+        if (has_value()) {
+            **this = std::move(*other);
+        } else {
+            emplace(std::move(*other));
         }
     } else {
         reset();
