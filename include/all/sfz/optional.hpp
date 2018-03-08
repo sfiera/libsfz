@@ -40,7 +40,7 @@ class optional {
     template <typename U>
     T value_or(U&& u) const& { return has_value() ? *data() : u; }
     template <typename U>
-    T value_or(U&& u) && { return has_value() ? *data() : u; }
+    T value_or(U&& u) && { return std::move(has_value() ? *data() : u); }
 
     void swap(optional& other);
     void reset();
