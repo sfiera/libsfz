@@ -14,7 +14,7 @@ namespace sfz {
 
 struct _nullopt_t {};
 
-constexpr _nullopt_t nullopt;
+constexpr _nullopt_t nullopt{};
 
 template <typename T>
 class optional {
