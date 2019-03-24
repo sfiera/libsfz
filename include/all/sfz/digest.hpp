@@ -50,10 +50,7 @@ class sha1 {
     template <typename... arguments>
     void write(const arguments&... args) {
         pn::data d;
-        {
-            pn::file f = d.open("w");
-            f.write(args...);
-        }
+        d.output().write(args...).check();
         write(pn::data_view{d});
     }
 

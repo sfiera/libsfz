@@ -64,7 +64,7 @@ void sha1::finish() {
     }
     memset(_message_block + _message_block_index, '\0', 56 - _message_block_index);
     pn::data size_bytes;
-    size_bytes.open("w").write(_size);
+    size_bytes.output().write(_size);
     memcpy(_message_block + 56, size_bytes.data(), 8);
     process_message_block();
 }
@@ -94,8 +94,8 @@ void sha1::process_message_block() {
             0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6,
     };
 
-    uint32_t w[80];
-    pn::file block = pn::data_view{_message_block, 64}.open();
+    uint32_t  w[80];
+    pn::input block = pn::data_view{_message_block, 64}.input();
     for (int i = 0; i < 16; ++i) {
         block.read(&w[i]);
     }
@@ -148,8 +148,8 @@ sha1::digest::digest(pn::data_view data) {
 }
 
 pn::data sha1::digest::data() const {
-    pn::data out;
-    pn::file f = out.open("w");
+    pn::data   out;
+    pn::output f = out.output();
     for (int i = 0; i < 5; ++i) {
         f.write(d[i]);
     }
@@ -157,12 +157,13 @@ pn::data sha1::digest::data() const {
 }
 
 pn::string sha1::digest::hex() const {
-    pn::string out;
-    pn::file   f = out.open("w");
+    char  buf[41];
+    char* ptr = buf;
     for (int i = 0; i < 5; ++i) {
-        fprintf(f.c_obj(), "%08x", d[i]);
+        sprintf(ptr, "%08x", d[i]);
+        ptr += 8;
     }
-    return out;
+    return pn::string_view{buf, 40}.copy();
 }
 
 sha1::digest file_digest(pn::string_view path) {

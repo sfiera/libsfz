@@ -196,16 +196,13 @@ TEST_F(Sha1Test, IncrementalDigest) {
 }
 
 TEST_F(Sha1Test, ReadWrite) {
-    const uint8_t bytes[20] = {0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d, 0x32, 0x55,
+    const uint8_t       bytes[20] = {0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d, 0x32, 0x55,
                                0xbf, 0xef, 0x95, 0x60, 0x18, 0x90, 0xaf, 0xd8, 0x07, 0x09};
     const pn::data_view written(bytes, 20);
 
     sha1::digest digest{written};
     EXPECT_THAT(digest, Eq(kEmptyDigest));
-
-    pn::data out;
-    out.open("w").write(kEmptyDigest.data());
-    EXPECT_THAT(out, Eq(written));
+    EXPECT_THAT(kEmptyDigest.data(), Eq(written));
 }
 
 TEST_F(Sha1Test, Print) {
@@ -267,9 +264,9 @@ TEST_F(Sha1Test, TreeDigest) {
 
         makedirs(path::dirname(path), 0700);
         {
-            pn::file file = pn::open(path, "w");
-            ASSERT_THAT(file.c_obj(), NotNull());
-            ASSERT_THAT(file.write(data), Eq(true));
+            pn::output out = pn::open_w(path);
+            ASSERT_THAT(out.c_obj(), NotNull());
+            ASSERT_THAT(out.write(data), Eq(true));
         }
 
         EXPECT_THAT(file_digest(path), Eq(tree_data.digest));
