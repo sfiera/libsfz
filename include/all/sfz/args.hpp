@@ -74,6 +74,9 @@ void float_option(pn::string_view value, T* out) {
     *out = d;
 }
 
+template <>
+void float_option(pn::string_view value, double* out);
+
 template <typename T>
 void float_option(pn::string_view value, ::sfz::optional<T>* out) {
     T d;
