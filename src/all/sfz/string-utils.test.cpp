@@ -40,8 +40,8 @@ using StringUtilitiesTest = ::testing::Test;
 
 TEST_F(StringUtilitiesTest, Upper) {
     std::pair<pn::string_view, pn::string_view> inputs[] = {
-            {"", ""},         {"a", "A"},         {"Na", "NA"},         {"WTF", "WTF"},
-            {"w00t", "W00T"}, {"Ελένη", "Ελένη"}, {"林さん", "林さん"},
+            {"", ""},       {"a", "A"},       {"Na", "NA"},
+            {"WTF", "WTF"}, {"w00t", "W00T"}, {"林さん", "林さん"},
     };
     for (const auto& input : inputs) {
         pn::string      actual   = upper(input.first);
@@ -53,8 +53,8 @@ TEST_F(StringUtilitiesTest, Upper) {
 
 TEST_F(StringUtilitiesTest, Lower) {
     std::pair<pn::string_view, pn::string_view> inputs[] = {
-            {"", ""},         {"A", "a"},         {"Na", "na"},         {"ill", "ill"},
-            {"HNO2", "hno2"}, {"Ελένη", "Ελένη"}, {"林さん", "林さん"},
+            {"", ""},       {"A", "a"},       {"Na", "na"},
+            {"ill", "ill"}, {"HNO2", "hno2"}, {"林さん", "林さん"},
     };
     for (const auto& input : inputs) {
         pn::string      actual   = lower(input.first);
