@@ -1,6 +1,6 @@
-# Copyright 2019 The libsfz Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
+# Copyright (c) 2019 The libsfz Authors
+# This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
+# under the terms of the MIT License.
 
 declare_args() {
   # Compilation mode, one of ["opt", "dev", "dbg"].
