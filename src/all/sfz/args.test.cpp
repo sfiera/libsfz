@@ -126,19 +126,19 @@ struct ShortOptions {
         args::callbacks callbacks;
         callbacks.short_option = [this](pn::rune opt, args::callbacks::get_value_f get_value) {
             switch (opt.value()) {
-                case 'n': commit      = false; return true;
-                case L'æ': aesc       = true; return true;
-                case L'秋': aki       = true; return true;
-                case 'k': units       = 1000; return true;
-                case 'm': units       = 1000000; return true;
-                case 'g': units       = 1000000000; return true;
+                case 'n': commit = false; return true;
+                case L'æ': aesc = true; return true;
+                case L'秋': aki = true; return true;
+                case 'k': units = 1000; return true;
+                case 'm': units = 1000000; return true;
+                case 'g': units = 1000000000; return true;
                 case '?': punctuation = pn::rune{'?'}; return true;
                 case '!': punctuation = pn::rune{'!'}; return true;
                 case 'v': args::increment_option(&verbosity, 1); return true;
                 case 'x': extension = get_value().copy(); return true;
-                case 'i': input     = get_value().copy(); return true;
-                case 'o': output    = get_value().copy(); return true;
-                case 't': type      = get_value().copy(); return true;
+                case 'i': input = get_value().copy(); return true;
+                case 'o': output = get_value().copy(); return true;
+                case 't': type = get_value().copy(); return true;
                 case 'q': args::integer_option(get_value(), &quality); return true;
                 default: return false;
             }
@@ -230,8 +230,8 @@ struct Greeter {
 
     args::callbacks callbacks() {
         args::callbacks callbacks;
-        callbacks.long_option = [this](
-                pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+        callbacks.long_option = [this](pn::string_view                     opt,
+                                       const args::callbacks::get_value_f& get_value) {
             if (opt == "normal") {
                 _exclamation_point = false;
             } else if (opt == "exclamation-point") {
@@ -256,11 +256,11 @@ struct Greeter {
 
     pn::string make_greeting() {
         pn::string      result;
-        pn::file        f      = result.open("w");
+        pn::output      f      = result.output();
         pn::string_view suffix = _exclamation_point ? "!" : ".";
         for (int i : range(_times)) {
             static_cast<void>(i);
-            pn::format(f, "{0}, {1}{2}\n", _greeting, _name, suffix);
+            f.format("{0}, {1}{2}\n", _greeting, _name, suffix);
         }
         return result;
     }
@@ -389,8 +389,8 @@ class CutTool {
 
     args::callbacks callbacks() {
         args::callbacks callbacks;
-        callbacks.short_option = [this](
-                pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        callbacks.short_option = [this](pn::rune                            opt,
+                                        const args::callbacks::get_value_f& get_value) {
             switch (opt.value()) {
                 case 'l': args::integer_option(get_value(), &_limit); return true;
                 case 'd': _delimiter = get_value().copy(); return true;
@@ -398,7 +398,8 @@ class CutTool {
             }
         };
         callbacks.long_option = [this, callbacks](
-                pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                                        pn::string_view                     opt,
+                                        const args::callbacks::get_value_f& get_value) {
             if (opt == "limit") {
                 return callbacks.short_option(pn::rune{'d'}, get_value);
             } else if (opt == "delimiter") {
@@ -424,7 +425,7 @@ class CutTool {
         int             splits    = 1;
         while (next) {
             pn::string_view token;
-            next = pn::partition(token, _delimiter, remainder);
+            next = pn::partition(&token, _delimiter, &remainder);
             _result.push_back(token);
             ++splits;
             if (splits >= _limit) {
@@ -476,8 +477,8 @@ struct Calculator {
 
     args::callbacks callbacks() {
         args::callbacks callbacks;
-        callbacks.long_option = [this](
-                pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+        callbacks.long_option = [this](pn::string_view                     opt,
+                                       const args::callbacks::get_value_f& get_value) {
             switch (_op) {
                 case 'a': return false;
                 case '+': return false;

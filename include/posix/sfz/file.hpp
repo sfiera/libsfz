@@ -35,8 +35,14 @@ class mapped_file {
     pn::string_view string() const { return data().as_string(); }
 
   private:
+    struct fd {
+        int no;
+        fd(const pn::string& path);
+        ~fd();
+    };
+
     const pn::string _path;
-    pn::file         _file;
+    fd               _fd;
     uint8_t*         _data;
     size_t           _size;
 };

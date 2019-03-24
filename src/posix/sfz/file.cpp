@@ -16,26 +16,33 @@
 
 namespace sfz {
 
-mapped_file::mapped_file(pn::string_view path)
-        : _path(path.copy()), _file(pn::open(_path.c_str(), "r")) {
-    if (!_file) {
-        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
-    }
+mapped_file::mapped_file(pn::string_view path) : _path(path.copy()), _fd(_path) {
     struct stat st;
-    if (fstat(fileno(_file.c_obj()), &st) < 0) {
+    if (fstat(_fd.no, &st) < 0) {
         throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
     }
     if (S_ISDIR(st.st_mode)) {
         throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror(EISDIR)).c_str());
     }
     _size = st.st_size;
-    _data = reinterpret_cast<uint8_t*>(
-            mmap(NULL, _size, PROT_READ, MAP_PRIVATE, fileno(_file.c_obj()), 0));
+    _data = reinterpret_cast<uint8_t*>(mmap(NULL, _size, PROT_READ, MAP_PRIVATE, _fd.no, 0));
     if (_data == MAP_FAILED) {
         throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
 mapped_file::~mapped_file() { munmap(_data, _size); }
+
+mapped_file::fd::fd(const pn::string& path) : no{::open(path.c_str(), O_RDONLY)} {
+    if (no < 0) {
+        throw std::runtime_error(pn::format("{0}: {1}", path, posix_strerror()).c_str());
+    }
+}
+
+mapped_file::fd::~fd() {
+    if (no >= 0) {
+        close(no);
+    }
+}
 
 }  // namespace sfz
