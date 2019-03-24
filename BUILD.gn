@@ -6,9 +6,14 @@ config("libsfz_private") {
   include_dirs = [
     "include/all",
     "src/all",
-    "include/posix",
-    "src/posix",
   ]
+  if (target_os == "win") {
+  } else {
+    include_dirs += [
+      "include/posix",
+      "src/posix",
+    ]
+  }
   cflags = [
     "-Wall",
     "-Wextra",
@@ -19,29 +24,35 @@ config("libsfz_private") {
 }
 
 config("libsfz_public") {
-  include_dirs = [
-    "include/all",
-    "include/posix",
-  ]
+  include_dirs = [ "include/all" ]
+  if (target_os == "win") {
+  } else {
+    include_dirs += [ "include/posix" ]
+  }
 }
 
 static_library("libsfz") {
   sources = [
     "include/all/sfz/args.hpp",
-    "include/all/sfz/digest.hpp",
     "include/all/sfz/encoding.hpp",
     "include/all/sfz/os.hpp",
-    "include/posix/sfz/file.hpp",
     "src/all/sfz/args.cpp",
-    "src/all/sfz/digest.cpp",
     "src/all/sfz/encoding.cpp",
     "src/all/sfz/format.cpp",
     "src/all/sfz/string-utils.cpp",
-    "src/posix/sfz/error.cpp",
-    "src/posix/sfz/error.hpp",
-    "src/posix/sfz/file.cpp",
-    "src/posix/sfz/os.cpp",
   ]
+  if (target_os == "win") {
+  } else {
+    sources += [
+      "include/all/sfz/digest.hpp",
+      "include/posix/sfz/file.hpp",
+      "src/all/sfz/digest.cpp",
+      "src/posix/sfz/error.cpp",
+      "src/posix/sfz/error.hpp",
+      "src/posix/sfz/file.cpp",
+      "src/posix/sfz/os.cpp",
+    ]
+  }
   public_deps = [
     "//ext/procyon:procyon-cpp",
   ]
@@ -53,26 +64,37 @@ executable("args-test") {
   sources = [
     "src/all/sfz/args.test.cpp",
   ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   deps = [
     ":libsfz",
     "//ext/gmock:gmock_main",
   ]
 }
 
-executable("digest-test") {
-  sources = [
-    "src/all/sfz/digest.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
+if (target_os != "win") {
+  executable("digest-test") {
+    sources = [
+      "src/all/sfz/digest.test.cpp",
+    ]
+    if (target_os == "win") {
+      output_extension = "exe"
+    }
+    deps = [
+      ":libsfz",
+      "//ext/gmock:gmock_main",
+    ]
+  }
 }
 
 executable("encoding-test") {
   sources = [
     "src/all/sfz/encoding.test.cpp",
   ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   deps = [
     ":libsfz",
     "//ext/gmock:gmock_main",
@@ -83,6 +105,9 @@ executable("format-test") {
   sources = [
     "src/all/sfz/format.test.cpp",
   ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   deps = [
     ":libsfz",
     "//ext/gmock:gmock_main",
@@ -93,26 +118,37 @@ executable("optional-test") {
   sources = [
     "src/all/sfz/optional.test.cpp",
   ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   deps = [
     ":libsfz",
     "//ext/gmock:gmock_main",
   ]
 }
 
-executable("os-test") {
-  sources = [
-    "src/all/sfz/os.test.cpp",
-  ]
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
+if (target_os != "win") {
+  executable("os-test") {
+    sources = [
+      "src/all/sfz/os.test.cpp",
+    ]
+    if (target_os == "win") {
+      output_extension = "exe"
+    }
+    deps = [
+      ":libsfz",
+      "//ext/gmock:gmock_main",
+    ]
+  }
 }
 
 executable("string-map-test") {
   sources = [
     "src/all/sfz/string-map.test.cpp",
   ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   deps = [
     ":libsfz",
     "//ext/gmock:gmock_main",
@@ -123,6 +159,9 @@ executable("string-utils-test") {
   sources = [
     "src/all/sfz/string-utils.test.cpp",
   ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   deps = [
     ":libsfz",
     "//ext/gmock:gmock_main",
