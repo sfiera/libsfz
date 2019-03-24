@@ -16,6 +16,15 @@ test: all
 	out/cur/string-map-test
 	out/cur/string-utils-test
 
+test-wine: all
+	wine out/cur/args-test.exe
+	# wine out/cur/digest-test.exe
+	wine out/cur/encoding-test.exe
+	wine out/cur/optional-test.exe
+	# wine out/cur/os-test.exe
+	wine out/cur/string-map-test.exe
+	wine out/cur/string-utils-test.exe
+
 clean:
 	@$(NINJA) -t clean
 
