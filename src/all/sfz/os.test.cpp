@@ -57,6 +57,8 @@ TEST_F(OsTest, Dirname) {
     EXPECT_THAT(path::dirname("aesc/wynn/.."), Eq("aesc/wynn"));
 }
 
+#ifndef _WIN32
+
 class MockTreeWalker : public TreeWalker {
   public:
     MOCK_CONST_METHOD2(pre_directory, void(pn::string_view name, const Stat& st));
@@ -220,6 +222,8 @@ TEST_F(OsTest, WalkOther) {
     EXPECT_CALL(walker, post_directory(pn::string_view("."), IsDirStat()));
     walk(".", WALK_LOGICAL, walker);
 }
+
+#endif
 
 }  // namespace
 }  // namespace sfz

@@ -8,6 +8,10 @@ config("libsfz_private") {
     "src/all",
   ]
   if (target_os == "win") {
+    include_dirs += [
+      "include/win",
+      "src/win",
+    ]
   } else {
     include_dirs += [
       "include/posix",
@@ -26,6 +30,7 @@ config("libsfz_private") {
 config("libsfz_public") {
   include_dirs = [ "include/all" ]
   if (target_os == "win") {
+    include_dirs += [ "include/win" ]
   } else {
     include_dirs += [ "include/posix" ]
   }
@@ -34,19 +39,26 @@ config("libsfz_public") {
 static_library("libsfz") {
   sources = [
     "include/all/sfz/args.hpp",
+    "include/all/sfz/digest.hpp",
     "include/all/sfz/encoding.hpp",
     "include/all/sfz/os.hpp",
     "src/all/sfz/args.cpp",
+    "src/all/sfz/digest.cpp",
     "src/all/sfz/encoding.cpp",
     "src/all/sfz/format.cpp",
     "src/all/sfz/string-utils.cpp",
   ]
   if (target_os == "win") {
+    sources += [
+      "include/win/sfz/file.hpp",
+      "src/win/sfz/error.cpp",
+      "src/win/sfz/error.hpp",
+      "src/win/sfz/file.cpp",
+      "src/win/sfz/os.cpp",
+    ]
   } else {
     sources += [
-      "include/all/sfz/digest.hpp",
       "include/posix/sfz/file.hpp",
-      "src/all/sfz/digest.cpp",
       "src/posix/sfz/error.cpp",
       "src/posix/sfz/error.hpp",
       "src/posix/sfz/file.cpp",
@@ -73,19 +85,17 @@ executable("args-test") {
   ]
 }
 
-if (target_os != "win") {
-  executable("digest-test") {
-    sources = [
-      "src/all/sfz/digest.test.cpp",
-    ]
-    if (target_os == "win") {
-      output_extension = "exe"
-    }
-    deps = [
-      ":libsfz",
-      "//ext/gmock:gmock_main",
-    ]
+executable("digest-test") {
+  sources = [
+    "src/all/sfz/digest.test.cpp",
+  ]
+  if (target_os == "win") {
+    output_extension = "exe"
   }
+  deps = [
+    ":libsfz",
+    "//ext/gmock:gmock_main",
+  ]
 }
 
 executable("encoding-test") {
@@ -127,19 +137,17 @@ executable("optional-test") {
   ]
 }
 
-if (target_os != "win") {
-  executable("os-test") {
-    sources = [
-      "src/all/sfz/os.test.cpp",
-    ]
-    if (target_os == "win") {
-      output_extension = "exe"
-    }
-    deps = [
-      ":libsfz",
-      "//ext/gmock:gmock_main",
-    ]
+executable("os-test") {
+  sources = [
+    "src/all/sfz/os.test.cpp",
+  ]
+  if (target_os == "win") {
+    output_extension = "exe"
   }
+  deps = [
+    ":libsfz",
+    "//ext/gmock:gmock_main",
+  ]
 }
 
 executable("string-map-test") {
