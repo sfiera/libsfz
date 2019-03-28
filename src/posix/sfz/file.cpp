@@ -11,6 +11,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <pn/output>
 #include <sfz/error.hpp>
 #include <stdexcept>
 

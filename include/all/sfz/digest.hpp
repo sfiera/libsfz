@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <pn/data>
-#include <pn/file>
+#include <pn/output>
 #include <pn/string>
 
 namespace sfz {

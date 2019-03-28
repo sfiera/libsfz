@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <limits>
+#include <pn/input>
 #include <sfz/encoding.hpp>
 #include <sfz/file.hpp>
 #include <sfz/os.hpp>
