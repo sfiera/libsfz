@@ -7,7 +7,6 @@
 #define SFZ_FILE_HPP_
 
 #include <pn/data>
-#include <pn/file>
 #include <pn/string>
 
 namespace sfz {

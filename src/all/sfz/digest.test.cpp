@@ -264,7 +264,7 @@ TEST_F(Sha1Test, TreeDigest) {
 
         makedirs(path::dirname(path), 0700);
         {
-            pn::output out = pn::open_w(path);
+            pn::output out = pn::output{path, pn::binary};
             ASSERT_THAT(out.c_obj(), NotNull());
             ASSERT_THAT(out.write(data), Eq(true));
         }

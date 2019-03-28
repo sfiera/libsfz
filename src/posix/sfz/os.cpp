@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/encoding.hpp>
 #include <sfz/error.hpp>
 #include <stdexcept>

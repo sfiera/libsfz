@@ -10,7 +10,7 @@
 #include <limits>
 #include <map>
 #include <memory>
-#include <pn/file>
+#include <pn/output>
 #include <pn/string>
 #include <sfz/optional.hpp>
 #include <stdexcept>
