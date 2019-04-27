@@ -8,56 +8,222 @@
 #include <fcntl.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <pn/output>
 
 using testing::_;
 using testing::Eq;
+using testing::Expectation;
 using testing::InSequence;
+using testing::Ne;
+using testing::StrictMock;
 using testing::Test;
+
+namespace pn {
+std::ostream& operator<<(std::ostream& ostr, const pn::string& s) {
+    pn::string q = pn::dump(s, pn::dump_short);
+    return ostr << std::string(q.data(), q.size());
+}
+}  // namespace pn
+
+namespace pn {
+std::ostream& operator<<(std::ostream& ostr, pn::string_view s) {
+    pn::string q = pn::dump(s, pn::dump_short);
+    return ostr << std::string(q.data(), q.size());
+}
+}  // namespace pn
 
 namespace sfz {
 namespace {
 
 typedef Test OsTest;
 
-// Test path::basename() with many different inputs.
-TEST_F(OsTest, Basename) {
-    EXPECT_THAT(path::basename("/"), Eq("/"));
-    EXPECT_THAT(path::basename("/aesc"), Eq("aesc"));
-    EXPECT_THAT(path::basename("/aesc/"), Eq("aesc"));
-    EXPECT_THAT(path::basename("/aesc/wynn"), Eq("wynn"));
-    EXPECT_THAT(path::basename("/aesc/wynn/"), Eq("wynn"));
-    EXPECT_THAT(path::basename("/aesc/wynn/."), Eq("."));
-    EXPECT_THAT(path::basename("/aesc/wynn/.."), Eq(".."));
-
-    EXPECT_THAT(path::basename(""), Eq(""));
-    EXPECT_THAT(path::basename("aesc"), Eq("aesc"));
-    EXPECT_THAT(path::basename("aesc/"), Eq("aesc"));
-    EXPECT_THAT(path::basename("aesc/wynn"), Eq("wynn"));
-    EXPECT_THAT(path::basename("aesc/wynn/"), Eq("wynn"));
-    EXPECT_THAT(path::basename("aesc/wynn/."), Eq("."));
-    EXPECT_THAT(path::basename("aesc/wynn/.."), Eq(".."));
+std::pair<pn::string_view, pn::string_view> strings(
+        pn::string_view first, pn::string_view second) {
+    return {first, second};
 }
 
-// Test path::basename() with many different inputs.
-TEST_F(OsTest, Dirname) {
-    EXPECT_THAT(path::dirname("/"), Eq("/"));
-    EXPECT_THAT(path::dirname("/aesc"), Eq("/"));
-    EXPECT_THAT(path::dirname("/aesc/"), Eq("/"));
-    EXPECT_THAT(path::dirname("/aesc/wynn"), Eq("/aesc"));
-    EXPECT_THAT(path::dirname("/aesc/wynn/"), Eq("/aesc"));
-    EXPECT_THAT(path::dirname("/aesc/wynn/."), Eq("/aesc/wynn"));
-    EXPECT_THAT(path::dirname("/aesc/wynn/.."), Eq("/aesc/wynn"));
+// Test path::splitdrive() with many different inputs.
+TEST_F(OsTest, SplitDrive) {
+    const struct {
+        pn::string_view path;
+        pn::string_view drive, local;
+    } cases[] = {
+            {"", "", ""},
+            {".", "", "."},
+            {"/", "", "/"},
+            {"\\", "", "\\"},
+            {"C", "", "C"},
 
-    EXPECT_THAT(path::dirname(""), Eq("."));
-    EXPECT_THAT(path::dirname("aesc"), Eq("."));
-    EXPECT_THAT(path::dirname("aesc/"), Eq("."));
-    EXPECT_THAT(path::dirname("aesc/wynn"), Eq("aesc"));
-    EXPECT_THAT(path::dirname("aesc/wynn/"), Eq("aesc"));
-    EXPECT_THAT(path::dirname("aesc/wynn/."), Eq("aesc/wynn"));
-    EXPECT_THAT(path::dirname("aesc/wynn/.."), Eq("aesc/wynn"));
+            {"path-to-file", "", "path-to-file"},
+            {"path/to/file", "", "path/to/file"},
+            {"path\\to\\file", "", "path\\to\\file"},
+
+            {"C:", "C:", ""},
+            {"C:\\", "C:", "\\"},
+            {"C:/", "C:", "/"},
+            {"C:path", "C:", "path"},
+            {"C:\\path", "C:", "\\path"},
+            {"C:/path", "C:", "/path"},
+
+            {"\\", "", "\\"},
+            {"\\\\", "", "\\\\"},
+            {"\\\\\\", "", "\\\\\\"},
+            {"\\\\\\\\", "", "\\\\\\\\"},
+
+            {"\\\\machine", "", "\\\\machine"},
+            {"\\\\machine\\", "", "\\\\machine\\"},
+            {"\\\\\\mount", "", "\\\\\\mount"},
+            {"\\\\\\mount\\", "", "\\\\\\mount\\"},
+
+            {"\\\\machine\\mount", "\\\\machine\\mount", ""},
+            {"\\\\machine\\mount\\", "\\\\machine\\mount", "\\"},
+            {"\\\\machine\\mount\\file", "\\\\machine\\mount", "\\file"},
+            {"\\\\machine\\mount\\dir\\", "\\\\machine\\mount", "\\dir\\"},
+            {"\\\\machine\\mount\\dir\\file", "\\\\machine\\mount", "\\dir\\file"},
+    };
+    for (auto c : cases) {
+        auto drive_local = path::splitdrive(c.path);
+        auto drive       = drive_local.first;
+        auto local       = drive_local.second;
+#ifdef _WIN32
+        EXPECT_THAT(drive, Eq(c.drive));
+        EXPECT_THAT(local, Eq(c.local));
+#else
+        EXPECT_THAT(drive, Eq(""));
+        EXPECT_THAT(local, Eq(c.path));
+#endif
+    }
 }
 
-#ifndef _WIN32
+// Test path::{split,dirname,basename}() with many different inputs.
+TEST_F(OsTest, Split) {
+    enum class on {
+        this_platform,
+        not_this_platform,
+        neither = not_this_platform,
+        both    = this_platform,
+#ifdef _WIN32
+        windows = this_platform,
+        posix   = not_this_platform,
+#else
+        posix   = this_platform,
+        windows = not_this_platform,
+#endif
+    };
+    const struct {
+        pn::string_view path;
+        pn::string_view dir, base;
+        on              canonical;
+    } cases[] = {
+            {"/", "/", "/", on::both},
+            {"/aesc", "/", "aesc", on::both},
+            {"/aesc/", "/", "aesc", on::neither},
+            {"/aesc/wynn", "/aesc", "wynn", on::posix},
+            {"/aesc/wynn/", "/aesc", "wynn", on::neither},
+            {"/aesc/wynn/.", "/aesc/wynn", ".", on::posix},
+            {"/aesc/wynn/..", "/aesc/wynn", "..", on::posix},
+
+            {"", ".", "", on::neither},
+            {"aesc", ".", "aesc", on::neither},
+            {"aesc/", ".", "aesc", on::neither},
+            {"aesc/wynn", "aesc", "wynn", on::posix},
+            {"aesc/wynn/", "aesc", "wynn", on::neither},
+            {"aesc/wynn/.", "aesc/wynn", ".", on::posix},
+            {"aesc/wynn/..", "aesc/wynn", "..", on::posix},
+
+#ifdef _WIN32
+            {"\\", "\\", "\\", on::windows},
+            {"\\aesc", "\\", "aesc", on::windows},
+            {"\\aesc\\", "\\", "aesc", on::neither},
+            {"\\aesc\\wynn", "\\aesc", "wynn", on::windows},
+            {"\\aesc\\wynn\\", "\\aesc", "wynn", on::neither},
+            {"\\aesc\\wynn\\.", "\\aesc\\wynn", ".", on::windows},
+            {"\\aesc\\wynn\\..", "\\aesc\\wynn", "..", on::windows},
+
+            {"", ".", "", on::neither},
+            {"aesc", ".", "aesc", on::neither},
+            {"aesc\\", ".", "aesc", on::neither},
+            {"aesc\\wynn", "aesc", "wynn", on::windows},
+            {"aesc\\wynn\\", "aesc", "wynn", on::neither},
+            {"aesc\\wynn\\.", "aesc\\wynn", ".", on::windows},
+            {"aesc\\wynn\\..", "aesc\\wynn", "..", on::windows},
+
+            {"C:", "C:", "", on::windows},
+            {"C:aesc", "C:", "aesc", on::windows},
+            {"C:aesc\\", "C:", "aesc", on::neither},
+            {"C:aesc\\wynn", "C:aesc", "wynn", on::windows},
+            {"C:aesc\\wynn\\", "C:aesc", "wynn", on::neither},
+            {"C:aesc\\wynn\\.", "C:aesc\\wynn", ".", on::windows},
+            {"C:aesc\\wynn\\..", "C:aesc\\wynn", "..", on::windows},
+
+            {"C:\\", "C:\\", "\\", on::windows},
+            {"C:\\aesc", "C:\\", "aesc", on::windows},
+            {"C:\\aesc\\", "C:\\", "aesc", on::neither},
+            {"C:\\aesc\\wynn", "C:\\aesc", "wynn", on::windows},
+            {"C:\\aesc\\wynn\\", "C:\\aesc", "wynn", on::neither},
+            {"C:\\aesc\\wynn\\.", "C:\\aesc\\wynn", ".", on::windows},
+            {"C:\\aesc\\wynn\\..", "C:\\aesc\\wynn", "..", on::windows},
+
+            {"\\\\", "\\", "\\", on::neither},
+            {"\\\\\\", "\\", "\\", on::neither},
+            {"\\\\\\\\", "\\", "\\", on::neither},
+            {"\\\\aesc", "\\\\", "aesc", on::windows},
+            {"\\\\aesc\\", "\\\\", "aesc", on::neither},
+            {"\\\\aesc\\wynn", "\\\\aesc\\wynn", "", on::windows},
+            {"\\\\aesc\\wynn\\", "\\\\aesc\\wynn\\", "\\", on::windows},
+            {"\\\\aesc\\wynn\\eth", "\\\\aesc\\wynn\\", "eth", on::windows},
+            {"\\\\aesc\\wynn\\eth\\", "\\\\aesc\\wynn\\", "eth", on::neither},
+#endif
+    };
+    for (auto c : cases) {
+        EXPECT_THAT(path::dirname(c.path), Eq(c.dir)) << c.path;
+        EXPECT_THAT(path::basename(c.path), Eq(c.base)) << c.path;
+        EXPECT_THAT(path::split(c.path), Eq(std::make_pair(c.dir, c.base))) << c.path;
+
+        pn::string joined = path::join(path::dirname(c.path), path::basename(c.path));
+        if (c.canonical == on::this_platform) {
+            EXPECT_THAT(joined, Eq(c.path));
+        } else {
+            EXPECT_THAT(joined, Ne(c.path));
+        }
+    }
+}
+
+TEST_F(OsTest, Join) {
+#ifdef _WIN32
+    EXPECT_THAT(path::join("a"), Eq("a"));
+    EXPECT_THAT(path::join("a", "b"), Eq("a\\b"));
+    EXPECT_THAT(path::join("a", "b", "c"), Eq("a\\b\\c"));
+    EXPECT_THAT(path::join("a", "b", "c", "d"), Eq("a\\b\\c\\d"));
+
+    EXPECT_THAT(path::join("a", "/b", "c"), Eq("/b\\c"));
+    EXPECT_THAT(path::join("a", "\\b", "c"), Eq("\\b\\c"));
+    EXPECT_THAT(path::join("a", "b", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "b", "\\c"), Eq("\\c"));
+    EXPECT_THAT(path::join("a", "/b", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "\\b", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "/b", "\\c"), Eq("\\c"));
+
+    EXPECT_THAT(path::join("a", "B:", "/c"), Eq("B:/c"));
+    EXPECT_THAT(path::join("a", "/b", "C:"), Eq("C:"));
+#else
+    EXPECT_THAT(path::join("a"), Eq("a"));
+    EXPECT_THAT(path::join("a", "b"), Eq("a/b"));
+    EXPECT_THAT(path::join("a", "b", "c"), Eq("a/b/c"));
+    EXPECT_THAT(path::join("a", "b", "c", "d"), Eq("a/b/c/d"));
+
+    EXPECT_THAT(path::join("a", "/b", "c"), Eq("/b/c"));
+    EXPECT_THAT(path::join("a", "/b", "c"), Eq("/b/c"));
+    EXPECT_THAT(path::join("a", "b", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "b", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "/b", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "/b", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "/b", "/c"), Eq("/c"));
+
+    EXPECT_THAT(path::join("a", "B:", "/c"), Eq("/c"));
+    EXPECT_THAT(path::join("a", "/b", "C:"), Eq("/b/C:"));
+#endif
+}
 
 class MockTreeWalker : public TreeWalker {
   public:
@@ -72,8 +238,27 @@ class MockTreeWalker : public TreeWalker {
 
 MATCHER(IsDirStat, "") { return (arg.st_mode & S_IFMT) == S_IFDIR; }
 MATCHER(IsFileStat, "") { return (arg.st_mode & S_IFMT) == S_IFREG; }
-MATCHER(IsLinkStat, "") { return (arg.st_mode & S_IFMT) == S_IFLNK; }
+MATCHER(IsLinkStat, "") {
+#ifdef _WIN32
+    return false;
+#else
+    return (arg.st_mode & S_IFMT) == S_IFLNK;
+#endif
+}
 MATCHER(IsFifoStat, "") { return (arg.st_mode & S_IFMT) == S_IFIFO; }
+
+namespace {
+
+class scoped_chdir {
+  public:
+    scoped_chdir(pn::string_view to) : _origin{getcwd()} { chdir(to); }
+    ~scoped_chdir() { chdir(_origin); }
+
+  private:
+    pn::string _origin;
+};
+
+}  // namespace
 
 // Create a temporary directory with TemporaryDirectory, then fill it with several directories,
 // files, and symlinks.  Try walking the directory with a few different options; then, delete some
@@ -88,7 +273,7 @@ TEST_F(OsTest, Hierarchy) {
     ASSERT_THAT(path::isdir(dir.path()), Eq(true));
     ASSERT_THAT(path::isfile(dir.path()), Eq(false));
 
-    chdir(dir.path());
+    scoped_chdir d{dir.path()};
     makedirs("./roman/upper", 0700);
     close(open("./roman/upper/A", O_WRONLY | O_CREAT | O_EXCL, 0600));
     close(open("./roman/upper/B", O_WRONLY | O_CREAT | O_EXCL, 0600));
@@ -96,10 +281,13 @@ TEST_F(OsTest, Hierarchy) {
     makedirs("./roman/lower", 0700);
     close(open("./roman/README", O_WRONLY | O_CREAT | O_EXCL, 0600));
     makedirs("./cyrillic/upper", 0700);
-    symlink("../../roman/upper/A", "./cyrillic/upper/A");
     makedirs("./cyrillic/lower", 0700);
-    symlink("../../roman/lower/a", "./cyrillic/lower/a");
     close(open("./cyrillic/README", O_WRONLY | O_CREAT | O_EXCL, 0600));
+
+#ifndef _WIN32
+    symlink("../../roman/upper/A", "./cyrillic/upper/A");
+    symlink("../../roman/lower/a", "./cyrillic/lower/a");
+#endif  // _WIN32
 
     EXPECT_THAT(path::exists("./roman/upper"), Eq(true));
     EXPECT_THAT(path::isdir("./roman/upper"), Eq(true));
@@ -111,6 +299,7 @@ TEST_F(OsTest, Hierarchy) {
     EXPECT_THAT(path::isfile("./roman/upper/A"), Eq(true));
     EXPECT_THAT(path::islink("./roman/upper/A"), Eq(false));
 
+#ifndef _WIN32
     EXPECT_THAT(path::exists("./cyrillic/upper/A"), Eq(true));
     EXPECT_THAT(path::isdir("./cyrillic/upper/A"), Eq(false));
     EXPECT_THAT(path::isfile("./cyrillic/upper/A"), Eq(true));
@@ -120,15 +309,57 @@ TEST_F(OsTest, Hierarchy) {
     EXPECT_THAT(path::isdir("./cyrillic/lower/a"), Eq(false));
     EXPECT_THAT(path::isfile("./cyrillic/lower/a"), Eq(false));
     EXPECT_THAT(path::islink("./cyrillic/lower/a"), Eq(true));
+#endif  // _WIN32
 
     EXPECT_THAT(path::exists("./cyrillic/lower/Z"), Eq(false));
     EXPECT_THAT(path::isdir("./cyrillic/lower/Z"), Eq(false));
     EXPECT_THAT(path::isfile("./cyrillic/lower/Z"), Eq(false));
     EXPECT_THAT(path::islink("./cyrillic/lower/Z"), Eq(false));
 
+#ifdef _WIN32
     {
-        MockTreeWalker walker;
-        InSequence     s;
+        StrictMock<MockTreeWalker> walker;
+        Expectation                pre_roman =
+                EXPECT_CALL(walker, pre_directory(pn::string_view("roman"), IsDirStat()));
+
+        Expectation pre_upper =
+                EXPECT_CALL(walker, pre_directory(pn::string_view("roman\\upper"), IsDirStat()))
+                        .After(pre_roman);
+        Expectation upper_a =
+                EXPECT_CALL(walker, file(pn::string_view("roman\\upper\\A"), IsFileStat()))
+                        .After(pre_upper);
+        Expectation upper_b =
+                EXPECT_CALL(walker, file(pn::string_view("roman\\upper\\B"), IsFileStat()))
+                        .After(pre_upper);
+        Expectation upper_z =
+                EXPECT_CALL(walker, file(pn::string_view("roman\\upper\\Z"), IsFileStat()))
+                        .After(pre_upper);
+        Expectation post_upper =
+                EXPECT_CALL(walker, post_directory(pn::string_view("roman\\upper"), IsDirStat()))
+                        .After(upper_a, upper_b, upper_z);
+
+        Expectation pre_lower =
+                EXPECT_CALL(walker, pre_directory(pn::string_view("roman\\lower"), IsDirStat()))
+                        .After(pre_roman);
+        Expectation post_lower =
+                EXPECT_CALL(walker, post_directory(pn::string_view("roman\\lower"), IsDirStat()))
+                        .After(pre_lower);
+
+        Expectation readme =
+                EXPECT_CALL(walker, file(pn::string_view("roman\\README"), IsFileStat()))
+                        .After(pre_roman);
+
+        Expectation post_roman =
+                EXPECT_CALL(walker, post_directory(pn::string_view("roman"), IsDirStat()))
+                        .After(post_upper, post_lower, readme);
+
+        walk("roman", WALK_PHYSICAL, walker);
+    }
+
+#else
+    {
+        StrictMock<MockTreeWalker> walker;
+        InSequence s;
         EXPECT_CALL(walker, pre_directory(pn::string_view("roman"), IsDirStat()));
         EXPECT_CALL(walker, file(pn::string_view("roman/README"), IsFileStat()));
         EXPECT_CALL(walker, pre_directory(pn::string_view("roman/lower"), IsDirStat()));
@@ -144,7 +375,7 @@ TEST_F(OsTest, Hierarchy) {
 
     {
         MockTreeWalker walker;
-        InSequence     s;
+        InSequence s;
         EXPECT_CALL(walker, pre_directory(pn::string_view("cyrillic"), IsDirStat()));
         EXPECT_CALL(walker, file(pn::string_view("cyrillic/README"), IsFileStat()));
         EXPECT_CALL(walker, pre_directory(pn::string_view("cyrillic/lower"), IsDirStat()));
@@ -159,7 +390,7 @@ TEST_F(OsTest, Hierarchy) {
 
     {
         MockTreeWalker walker;
-        InSequence     s;
+        InSequence s;
         EXPECT_CALL(walker, pre_directory(pn::string_view("cyrillic"), IsDirStat()));
         EXPECT_CALL(walker, file(pn::string_view("cyrillic/README"), IsFileStat()));
         EXPECT_CALL(walker, pre_directory(pn::string_view("cyrillic/lower"), IsDirStat()));
@@ -180,7 +411,7 @@ TEST_F(OsTest, Hierarchy) {
 
     {
         MockTreeWalker walker;
-        InSequence     s;
+        InSequence s;
         EXPECT_CALL(walker, pre_directory(pn::string_view("."), IsDirStat()));
         EXPECT_CALL(walker, pre_directory(pn::string_view("./cyrillic"), IsDirStat()));
         EXPECT_CALL(walker, pre_directory(pn::string_view("./cyrillic/upper"), IsDirStat()));
@@ -194,6 +425,7 @@ TEST_F(OsTest, Hierarchy) {
         EXPECT_CALL(walker, post_directory(pn::string_view("."), IsDirStat()));
         walk(".", WALK_LOGICAL, walker);
     }
+#endif  // _WIN32
 }
 
 // Exercise the remaining bits of os.hpp: mkfifo, as well as walk() calls which include files of
@@ -205,13 +437,24 @@ TEST_F(OsTest, WalkOther) {
     ASSERT_THAT(path::isdir(dir.path()), Eq(true));
     ASSERT_THAT(path::isfile(dir.path()), Eq(false));
 
-    chdir(dir.path());
+    scoped_chdir d{dir.path()};
     makedirs("./aesc/wynn", 0700);
+#ifndef _WIN32
     symlink("../..", "./aesc/wynn/eth");
     mkfifo("./aesc/thorn", 0600);
+#endif
 
     MockTreeWalker walker;
-    InSequence     s;
+
+    InSequence s;
+#ifdef _WIN32
+    EXPECT_CALL(walker, pre_directory(pn::string_view("."), IsDirStat()));
+    EXPECT_CALL(walker, pre_directory(pn::string_view(".\\aesc"), IsDirStat()));
+    EXPECT_CALL(walker, pre_directory(pn::string_view(".\\aesc\\wynn"), IsDirStat()));
+    EXPECT_CALL(walker, post_directory(pn::string_view(".\\aesc\\wynn"), IsDirStat()));
+    EXPECT_CALL(walker, post_directory(pn::string_view(".\\aesc"), IsDirStat()));
+    EXPECT_CALL(walker, post_directory(pn::string_view("."), IsDirStat()));
+#else
     EXPECT_CALL(walker, pre_directory(pn::string_view("."), IsDirStat()));
     EXPECT_CALL(walker, pre_directory(pn::string_view("./aesc"), IsDirStat()));
     EXPECT_CALL(walker, other(pn::string_view("./aesc/thorn"), IsFifoStat()));
@@ -220,10 +463,10 @@ TEST_F(OsTest, WalkOther) {
     EXPECT_CALL(walker, post_directory(pn::string_view("./aesc/wynn"), IsDirStat()));
     EXPECT_CALL(walker, post_directory(pn::string_view("./aesc"), IsDirStat()));
     EXPECT_CALL(walker, post_directory(pn::string_view("."), IsDirStat()));
+#endif
+
     walk(".", WALK_LOGICAL, walker);
 }
-
-#endif
 
 }  // namespace
 }  // namespace sfz

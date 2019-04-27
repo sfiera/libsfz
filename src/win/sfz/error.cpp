@@ -3,9 +3,9 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include <sfz/error.hpp>
+#include "win.hpp"
 
-#include <windows.h>
+#include <sfz/error.hpp>
 
 namespace sfz {
 
@@ -13,7 +13,7 @@ int win_last_error() { return GetLastError(); }
 
 pn::string win_strerror(int error) {
     if (error == 0) {
-        error = errno;
+        error = win_last_error();
     }
     LPVOID buf;
     int    length;

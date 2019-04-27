@@ -9,6 +9,7 @@
 #include <fts.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 #include <unistd.h>
 #include <pn/output>
 #include <sfz/encoding.hpp>
@@ -18,6 +19,8 @@
 namespace sfz {
 
 namespace path {
+
+const static pn::rune sep{'/'};
 
 bool exists(pn::string_view path) {
     Stat st;
@@ -39,11 +42,19 @@ bool islink(pn::string_view path) {
     return (lstat(path.copy().c_str(), &st) == 0) && ((st.st_mode & S_IFMT) == S_IFLNK);
 }
 
+std::pair<pn::string_view, pn::string_view> splitdrive(pn::string_view path) {
+    return {pn::string_view{}, path};
+}
+
+std::pair<pn::string_view, pn::string_view> split(pn::string_view path) {
+    return {dirname(path), basename(path)};
+}
+
 pn::string_view basename(pn::string_view path) {
-    if (path == "/") {
+    if (path == sep) {
         return path;
     }
-    int pos = path.rfind(pn::rune{'/'});
+    int pos = path.rfind(sep);
     if (pos == path.npos) {
         return path;
     } else if (pos == path.size() - 1) {
@@ -54,9 +65,9 @@ pn::string_view basename(pn::string_view path) {
 }
 
 pn::string_view dirname(pn::string_view path) {
-    int pos = path.rfind(pn::rune{'/'});
+    int pos = path.rfind(sep);
     if (pos == 0) {
-        return "/";
+        return sep;
     } else if (pos == path.npos) {
         return ".";
     } else if (pos == path.size() - 1) {
@@ -66,12 +77,45 @@ pn::string_view dirname(pn::string_view path) {
     }
 }
 
+pn::string joinv(pn::string_view root, std::initializer_list<pn::string_view> segments) {
+    auto from_segment = segments.end();
+    for (auto it = segments.begin(); it != segments.end(); ++it) {
+        if (it->empty()) {
+            continue;
+        } else if (*it->begin() == sep) {
+            root         = *it;
+            from_segment = it;
+        }
+    }
+    pn::string result = root.copy();
+    if (from_segment == segments.end()) {
+        from_segment = segments.begin();
+    } else {
+        ++from_segment;
+    }
+    for (auto it = from_segment; it != segments.end(); ++it) {
+        if (!result.empty()) {
+            auto jt = result.end();
+            if (*--jt != sep) {
+                result += sep;
+            }
+        }
+        result += *it;
+    }
+    return result;
+}
+
 }  // namespace path
 
 void chdir(pn::string_view path) {
     if (::chdir(path.copy().c_str()) < 0) {
         throw std::runtime_error(pn::format("chdir: {0}: {1}", path, posix_strerror()).c_str());
     }
+}
+
+pn::string getcwd() {
+    char path[PATH_MAX];
+    return pn::string{::getcwd(path, PATH_MAX)};
 }
 
 void symlink(pn::string_view content, pn::string_view container) {

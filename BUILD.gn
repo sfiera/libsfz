@@ -55,6 +55,7 @@ static_library("libsfz") {
       "src/win/sfz/error.hpp",
       "src/win/sfz/file.cpp",
       "src/win/sfz/os.cpp",
+      "src/win/sfz/win.hpp",
     ]
   } else {
     sources += [

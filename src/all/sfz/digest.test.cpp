@@ -209,7 +209,6 @@ TEST_F(Sha1Test, Print) {
     EXPECT_THAT(kEmptyDigest.hex(), Eq("da39a3ee5e6b4b0d3255bfef95601890afd80709"));
 }
 
-#ifndef _WIN32
 struct TreeData {
     const char*  path;
     const char*  data;
@@ -272,9 +271,10 @@ TEST_F(Sha1Test, TreeDigest) {
 
         EXPECT_THAT(file_digest(path), Eq(tree_data.digest));
     }
+#ifndef _WIN32
     EXPECT_THAT(tree_digest(dir.path()), Eq(kTreeDigest));
-}
 #endif
+}
 
 }  // namespace
 }  // namespace sfz

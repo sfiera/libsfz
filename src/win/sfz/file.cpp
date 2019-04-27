@@ -3,6 +3,8 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
+#include "win.hpp"
+
 #include <sfz/file.hpp>
 
 #include <errno.h>
@@ -10,8 +12,6 @@
 #include <memoryapi.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <windef.h>
-#include <windows.h>
 #include <pn/output>
 #include <sfz/error.hpp>
 #include <stdexcept>

@@ -20,13 +20,23 @@ bool isdir(pn::string_view path);
 bool isfile(pn::string_view path);
 bool islink(pn::string_view path);
 
-pn::string_view basename(pn::string_view path);
-pn::string_view dirname(pn::string_view path);
+std::pair<pn::string_view, pn::string_view> splitdrive(pn::string_view path);
+std::pair<pn::string_view, pn::string_view> split(pn::string_view path);
+pn::string_view                             dirname(pn::string_view path);
+pn::string_view                             basename(pn::string_view path);
+
+pn::string joinv(pn::string_view root, std::initializer_list<pn::string_view> segments);
+
+template <typename... string_views>
+pn::string join(pn::string_view root, string_views... segments) {
+    return joinv(root, {segments...});
+}
 
 }  // namespace path
 
-void chdir(pn::string_view path);
-void symlink(pn::string_view content, pn::string_view container);
+void       chdir(pn::string_view path);
+pn::string getcwd();
+void       symlink(pn::string_view content, pn::string_view container);
 
 void mkdir(pn::string_view path, mode_t mode);
 void mkfifo(pn::string_view path, mode_t mode);
