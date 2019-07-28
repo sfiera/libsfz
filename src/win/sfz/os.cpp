@@ -290,6 +290,59 @@ TemporaryDirectory::~TemporaryDirectory() { rmtree(_path); }
 
 const pn::string& TemporaryDirectory::path() const { return _path; }
 
+static void scandir_end(void* ptr) {
+    if (ptr) {
+        HANDLE dir = reinterpret_cast<HANDLE>(ptr);
+        CloseHandle(dir);
+    }
+}
+
+scandir_container::iterator::iterator() : _state{nullptr, scandir_end} {}
+
+scandir_container::iterator::iterator(pn::string dir)
+        : _dir{std::move(dir)}, _state{nullptr, scandir_end} {
+    WIN32_FIND_DATAA file_data;
+    _state.reset(FindFirstFileA(pn::format("{}\\*", _dir).c_str(), &file_data));
+    if (_state.get() == INVALID_HANDLE_VALUE) {
+        throw std::runtime_error(pn::format("scandir: {0}: {1}", _dir, win_strerror()).c_str());
+    }
+    pn::string_view name{file_data.cFileName};
+    if ((name == ".") || (name == "..")) {
+        ++*this;
+        return;
+    }
+    _entry.name = name.copy();
+    if (stat(path::join(_dir, name).c_str(), &_entry.st) != 0) {
+        throw std::runtime_error(pn::format("scandir: {0}: {1}", name, posix_strerror()).c_str());
+    }
+}
+
+scandir_container::iterator::iterator(iterator&&) = default;
+
+scandir_container::iterator::~iterator() = default;
+
+scandir_container::iterator& scandir_container::iterator::operator++() {
+    WIN32_FIND_DATAA file_data;
+    if (!FindNextFileA(reinterpret_cast<HANDLE>(_state.get()), &file_data)) {
+        if (win_last_error() == ERROR_NO_MORE_FILES) {
+            _state.reset();
+            return *this;
+        } else {
+            throw std::runtime_error(
+                    pn::format("scandir: {0}: {1}", _dir, win_strerror()).c_str());
+        }
+    }
+    pn::string_view name = file_data.cFileName;
+    if ((name == ".") || (name == "..")) {
+        return ++*this;
+    }
+    _entry.name = name.copy();
+    if (stat(path::join(_dir, name).c_str(), &_entry.st) != 0) {
+        throw std::runtime_error(pn::format("scandir: {0}: {1}", name, posix_strerror()).c_str());
+    }
+    return *this;
+}
+
 static void visit_file(
         pn::string_view path, const WIN32_FIND_DATAA* file_data, const TreeWalker& visitor);
 
