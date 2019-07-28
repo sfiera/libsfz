@@ -7,6 +7,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include <pn/output>
 #include <sfz/encoding.hpp>
 
 namespace sfz {
@@ -19,8 +20,7 @@ pn::string posix_strerror(int error) {
     }
     static const int buf_size = 256;
     char             buf[buf_size];
-    strerror_r(error, buf, buf_size);
-    return pn::string_view{buf}.copy();
+    return pn::string_view{strerror_r(error, buf, buf_size)}.copy();
 }
 
 }  // namespace sfz
