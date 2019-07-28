@@ -20,7 +20,14 @@ pn::string posix_strerror(int error) {
     }
     static const int buf_size = 256;
     char             buf[buf_size];
-    return pn::string_view{strerror_r(error, buf, buf_size)}.copy();
+#ifdef _GNU_SOURCE
+    const char* msg = strerror_r(error, buf, buf_size);
+    return pn::string_view{msg}.copy();
+#else
+    int result = strerror_r(error, buf, buf_size);
+    static_cast<void>(result);
+    return pn::string_view{buf}.copy();
+#endif
 }
 
 }  // namespace sfz
