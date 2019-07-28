@@ -7,6 +7,7 @@
 #define SFZ_OS_HPP_
 
 #include <sys/stat.h>
+#include <memory>
 #include <pn/string>
 
 namespace sfz {
@@ -59,6 +60,40 @@ class TemporaryDirectory {
   private:
     pn::string _path;
 };
+
+class scandir_container {
+  public:
+    struct entry {
+        pn::string name;
+        Stat       st;
+    };
+    class iterator {
+      public:
+        iterator();
+        iterator(pn::string dir);
+        iterator(iterator&&);
+        ~iterator();
+
+        const entry& operator*() const { return _entry; }
+        const entry* operator->() const { return &_entry; }
+        bool         operator==(const iterator& other) const { return _state == other._state; }
+        bool         operator!=(const iterator& other) const { return _state != other._state; }
+        iterator&    operator++();
+
+      private:
+        pn::string                             _dir;
+        std::unique_ptr<void, void (*)(void*)> _state;
+        entry                                  _entry;
+    };
+
+    scandir_container(pn::string_view path) : _it{path.copy()} {}
+    iterator begin() { return std::move(_it); }
+    iterator end() { return iterator{}; }
+
+  private:
+    iterator _it;
+};
+inline scandir_container scandir(pn::string_view path) { return scandir_container{path}; }
 
 class TreeWalker;
 enum WalkType { WALK_LOGICAL, WALK_PHYSICAL };

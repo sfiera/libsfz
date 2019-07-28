@@ -316,6 +316,29 @@ TEST_F(OsTest, Hierarchy) {
     EXPECT_THAT(path::isfile("./cyrillic/lower/Z"), Eq(false));
     EXPECT_THAT(path::islink("./cyrillic/lower/Z"), Eq(false));
 
+    {
+        testing::StrictMock<testing::MockFunction<void(pn::string_view)>> f;
+        EXPECT_CALL(f, Call(pn::string_view("roman")));
+        EXPECT_CALL(f, Call(pn::string_view("cyrillic")));
+
+        for (const auto& ent : scandir(".")) {
+            f.Call(ent.name);
+        }
+    }
+
+    {
+        testing::StrictMock<testing::MockFunction<void(pn::string_view)>> f;
+        EXPECT_CALL(f, Call(pn::string_view("A")));
+        EXPECT_CALL(f, Call(pn::string_view("B")));
+        EXPECT_CALL(f, Call(pn::string_view("Z")));
+
+        for (const auto& ent : scandir("roman/upper")) {
+            f.Call(ent.name);
+        }
+    }
+
+    EXPECT_THROW(scandir("arabic"), std::runtime_error);
+
 #ifdef _WIN32
     {
         StrictMock<MockTreeWalker> walker;

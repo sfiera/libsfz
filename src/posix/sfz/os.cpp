@@ -5,6 +5,7 @@
 
 #include <sfz/os.hpp>
 
+#include <dirent.h>
 #include <fcntl.h>
 #include <fts.h>
 #include <stdlib.h>
@@ -192,6 +193,44 @@ TemporaryDirectory::TemporaryDirectory(pn::string_view prefix) {
 TemporaryDirectory::~TemporaryDirectory() { rmtree(_path); }
 
 const pn::string& TemporaryDirectory::path() const { return _path; }
+
+static void scandir_end(void* ptr) {
+    if (ptr) {
+        DIR* dir = reinterpret_cast<DIR*>(ptr);
+        closedir(dir);
+    }
+}
+
+scandir_container::iterator::iterator() : _state{nullptr, scandir_end} {}
+
+scandir_container::iterator::iterator(pn::string dir)
+        : _dir{std::move(dir)}, _state{opendir(_dir.c_str()), scandir_end} {
+    if (!_state.get()) {
+        throw std::runtime_error(pn::format("scandir: {0}: {1}", _dir, posix_strerror()).c_str());
+    }
+    ++*this;
+}
+
+scandir_container::iterator::iterator(iterator&&) = default;
+
+scandir_container::iterator::~iterator() = default;
+
+scandir_container::iterator& scandir_container::iterator::operator++() {
+    dirent* ent;
+    if (!(ent = readdir(reinterpret_cast<DIR*>(_state.get())))) {
+        _state.reset();
+        return *this;
+    }
+    pn::string_view name{ent->d_name};
+    if ((name == ".") || (name == "..")) {
+        return ++*this;
+    }
+    _entry.name = name.copy();
+    if (stat(path::join(_dir, name).c_str(), &_entry.st) != 0) {
+        throw std::runtime_error(pn::format("scandir: {0}: {1}", name, posix_strerror()).c_str());
+    }
+    return *this;
+}
 
 namespace {
 
