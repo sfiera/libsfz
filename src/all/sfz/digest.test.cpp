@@ -3,12 +3,12 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include <sfz/digest.hpp>
-
 #include <fcntl.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
 #include <cstring>
+#include <sfz/digest.hpp>
 #include <sfz/file.hpp>
 #include <sfz/os.hpp>
 #include <sfz/range.hpp>
@@ -215,6 +215,7 @@ struct TreeData {
     sha1::digest digest;
 };
 
+#ifndef _WIN32
 const TreeData kTreeData[] = {
         {
                 "beowulf",
@@ -271,10 +272,9 @@ TEST_F(Sha1Test, TreeDigest) {
 
         EXPECT_THAT(file_digest(path), Eq(tree_data.digest));
     }
-#ifndef _WIN32
     EXPECT_THAT(tree_digest(dir.path()), Eq(kTreeDigest));
-#endif
 }
+#endif
 
 }  // namespace
 }  // namespace sfz
