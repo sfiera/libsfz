@@ -25,7 +25,7 @@ matrix:
         - docker ps
       install:
         - $SH apt-get update
-        - $SH apt-get install -y --no-install-recommends build-essential clang make python
+        - $SH apt-get install -y --no-install-recommends build-essential clang make python3
       env:
         - TARGET=linux TEST=test SH="docker exec focal"
 
@@ -37,7 +37,7 @@ matrix:
         - docker ps
       install:
         - $SH apt-get update
-        - $SH apt-get install -y --no-install-recommends build-essential clang make python
+        - $SH apt-get install -y --no-install-recommends build-essential clang make python3
         - $SH apt-get install -y --no-install-recommends mingw-w64 xvfb wine
       env:
         - TARGET=win TEST=test-wine SH="docker exec -e DEBIAN_FRONTEND=noninteractive focal"
