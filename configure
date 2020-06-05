@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (c) 2009-2019 The libsfz Authors
 #
 # This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
@@ -128,9 +128,27 @@ def check_mac(args):
         sys.exit(1)
 
 
+def linux_distribution():
+    """Replacement for deprecated platform.linux_distribution()
+
+    Only tested on Ubuntu so far.
+    """
+    try:
+        with open("/etc/lsb-release") as f:
+            lines = f.readlines()
+    except (OSError, IOError):
+        return ("", "", "")
+    distrib = dict(line.split("=", 1) for line in lines)
+    return (
+        distrib.get("DISTRIB_ID", "").strip(),
+        distrib.get("DISTRIB_RELEASE", "").strip(),
+        distrib.get("DISTRIB_CODENAME", "").strip(),
+    )
+
+
 def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = platform.linux_distribution()
+        distro = linux_distribution()
         if distro[0] == "Ubuntu":
             msg(" ".join(distro), color="green")
         else:
@@ -168,8 +186,8 @@ def check_mac_on_linux(args):
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = platform.linux_distribution()
-        if distro == ("Ubuntu", "18.10", "focal"):
+        distro = linux_distribution()
+        if distro == ("Ubuntu", "20.04", "focal"):
             msg(" ".join(distro), color="green")
         else:
             msg(" ".join(distro), color="red")
