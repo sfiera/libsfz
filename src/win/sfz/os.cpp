@@ -3,19 +3,19 @@
 // This file is part of libsfz, a free software project.  You can redistribute it and/or modify it
 // under the terms of the MIT License.
 
-#include "win.hpp"
-
-#include <sfz/os.hpp>
-
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include <pn/output>
 #include <sfz/encoding.hpp>
-#include <sfz/error.hpp>
 #include <sfz/optional.hpp>
+#include <sfz/os.hpp>
 #include <stdexcept>
+
+#include "error.hpp"
+#include "win.hpp"
 
 namespace sfz {
 

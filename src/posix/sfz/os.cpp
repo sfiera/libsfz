@@ -14,8 +14,9 @@
 #include <unistd.h>
 #include <pn/output>
 #include <sfz/encoding.hpp>
-#include <sfz/error.hpp>
 #include <stdexcept>
+
+#include "error.hpp"
 
 namespace sfz {
 

@@ -5,7 +5,7 @@
 
 #include "win.hpp"
 
-#include <sfz/error.hpp>
+#include "error.hpp"
 
 namespace sfz {
 
