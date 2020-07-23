@@ -8,7 +8,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+
 #include <stdexcept>
+#include <type_traits>
 
 namespace sfz {
 
@@ -27,20 +29,24 @@ class optional {
     optional& operator=(optional&& other);
     ~optional();
 
-    constexpr operator bool() const { return has_value(); }
+    constexpr      operator bool() const { return has_value(); }
     constexpr bool has_value() const { return _has_value; }
 
-    T* operator->() { return data(); }
+    T*       operator->() { return data(); }
     const T* operator->() const { return data(); }
-    T& operator*() { return *data(); }
+    T&       operator*() { return *data(); }
     const T& operator*() const { return *data(); }
 
     T&       value() { return *exception_or(data()); }
     const T& value() const { return *exception_or(data()); }
     template <typename U>
-    T value_or(U&& u) const& { return has_value() ? *data() : u; }
+    T value_or(U&& u) const& {
+        return has_value() ? *data() : u;
+    }
     template <typename U>
-    T value_or(U&& u) && { return std::move(has_value() ? *data() : u); }
+    T value_or(U&& u) && {
+        return std::move(has_value() ? *data() : u);
+    }
 
     void swap(optional& other);
     void reset();
@@ -54,8 +60,8 @@ class optional {
     template <typename U>
     U exception_or(U u) const;
 
-    bool    _has_value;
-    uint8_t _data[sizeof(T)];
+    typename std::aligned_storage<sizeof(T), alignof(T)>::type _data;
+    bool                                                       _has_value;
 };
 
 template <typename T>
@@ -139,12 +145,12 @@ void optional<T>::emplace(Args&&... args) {
 
 template <typename T>
 T* optional<T>::data() {
-    return reinterpret_cast<T*>(_data);
+    return reinterpret_cast<T*>(&_data);
 }
 
 template <typename T>
 const T* optional<T>::data() const {
-    return reinterpret_cast<const T*>(_data);
+    return reinterpret_cast<const T*>(&_data);
 }
 
 template <typename T>
