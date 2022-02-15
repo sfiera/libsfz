@@ -39,9 +39,15 @@ void       chdir(pn::string_view path);
 pn::string getcwd();
 void       symlink(pn::string_view content, pn::string_view container);
 
-void mkdir(pn::string_view path, mode_t mode);
-void mkfifo(pn::string_view path, mode_t mode);
-void makedirs(pn::string_view path, mode_t mode);
+#ifdef _MSC_VER
+typedef int mkdir_mode_t;
+#else
+typedef mode_t mkdir_mode_t;
+#endif
+
+void mkdir(pn::string_view path, mkdir_mode_t mode);
+void mkfifo(pn::string_view path, mkdir_mode_t mode);
+void makedirs(pn::string_view path, mkdir_mode_t mode);
 
 void unlink(pn::string_view path);
 void rmdir(pn::string_view path);
