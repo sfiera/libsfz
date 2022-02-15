@@ -6,7 +6,17 @@
 #ifndef SFZ_FILE_HPP_
 #define SFZ_FILE_HPP_
 
-#include <fileapi.h>
+#pragma push_macro("WIN32_LEAN_AND_MEAN")
+#pragma push_macro("NOMINMAX")
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+
+#pragma pop_macro("WIN32_LEAN_AND_MEAN")
+#pragma pop_macro("NOMINMAX")
+
+
 #include <pn/data>
 #include <pn/string>
 

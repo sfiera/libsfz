@@ -11,7 +11,6 @@
 #include <fcntl.h>
 #include <memoryapi.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <pn/output>
 #include <sfz/error.hpp>
 #include <stdexcept>

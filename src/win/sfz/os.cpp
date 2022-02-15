@@ -7,26 +7,26 @@
 
 #include <sfz/os.hpp>
 
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <pn/output>
 #include <sfz/encoding.hpp>
 #include <sfz/error.hpp>
 #include <sfz/optional.hpp>
 #include <stdexcept>
 
+#include <direct.h>
+
 namespace sfz {
 
 namespace {
 
-struct handle {
-    HANDLE h = nullptr;
-    handle(HANDLE handle) : h{handle} {}
-    ~handle() {
-        if (h) {
-            CloseHandle(h);
+struct find_handle {
+    HANDLE h = INVALID_HANDLE_VALUE;
+    find_handle(HANDLE find_handle) : h{find_handle} {}
+    ~find_handle() {
+        if (h != INVALID_HANDLE_VALUE) {
+            FindClose(h);
         }
     }
 };
@@ -63,7 +63,7 @@ bool isfile(pn::string_view path) {
 
 bool islink(pn::string_view path) {
     WIN32_FIND_DATAA file_data;
-    return (handle{FindFirstFile(path.copy().c_str(), &file_data)}.h != INVALID_HANDLE_VALUE) &&
+    return (find_handle{FindFirstFile(path.copy().c_str(), &file_data)}.h != INVALID_HANDLE_VALUE) &&
            (file_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) &&
            (file_data.dwReserved0 == IO_REPARSE_TAG_SYMLINK);
 }
@@ -202,8 +202,8 @@ void chdir(pn::string_view path) {
 }
 
 pn::string getcwd() {
-    char path[PATH_MAX];
-    return pn::string{::getcwd(path, PATH_MAX)};
+    char path[MAX_PATH];
+    return pn::string{::getcwd(path, MAX_PATH)};
 }
 
 void symlink(pn::string_view content, pn::string_view container) {
@@ -214,19 +214,19 @@ void symlink(pn::string_view content, pn::string_view container) {
     }
 }
 
-void mkdir(pn::string_view path, mode_t mode) {
+void mkdir(pn::string_view path, mkdir_mode_t mode) {
     static_cast<void>(mode);
     if (!CreateDirectoryA(path.copy().c_str(), nullptr)) {
         throw std::runtime_error(pn::format("mkdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
 
-void mkfifo(pn::string_view path, mode_t mode) {
+void mkfifo(pn::string_view path, mkdir_mode_t mode) {
     static_cast<void>(mode);
     throw std::runtime_error(pn::format("mkfifo: {0}: not supported", path).c_str());
 }
 
-void makedirs(pn::string_view path, mode_t mode) {
+void makedirs(pn::string_view path, mkdir_mode_t mode) {
     if (!path::isdir(path)) {
         makedirs(path::dirname(path), mode);
         mkdir(path, mode);
@@ -293,14 +293,14 @@ const pn::string& TemporaryDirectory::path() const { return _path; }
 static void scandir_end(void* ptr) {
     if (ptr) {
         HANDLE dir = reinterpret_cast<HANDLE>(ptr);
-        CloseHandle(dir);
+        FindClose(dir);
     }
 }
 
-scandir_container::iterator::iterator() : _state{nullptr, scandir_end} {}
+scandir_container::iterator::iterator() : _state{reinterpret_cast<void*>(INVALID_HANDLE_VALUE), scandir_end} {}
 
 scandir_container::iterator::iterator(pn::string dir)
-        : _dir{std::move(dir)}, _state{nullptr, scandir_end} {
+        : _dir{std::move(dir)}, _state{reinterpret_cast<void*>(INVALID_HANDLE_VALUE), scandir_end} {
     WIN32_FIND_DATAA file_data;
     _state.reset(FindFirstFileA(pn::format("{}\\*", _dir).c_str(), &file_data));
     if (_state.get() == INVALID_HANDLE_VALUE) {
@@ -348,7 +348,7 @@ static void visit_file(
 
 static void walk_dir(pn::string_view root, const TreeWalker& visitor) {
     WIN32_FIND_DATAA file_data;
-    handle           list{FindFirstFileA(pn::format("{}\\*", root).c_str(), &file_data)};
+    find_handle      list{FindFirstFileA(pn::format("{}\\*", root).c_str(), &file_data)};
     if (!list.h) {
         throw std::runtime_error(pn::format("walk: {0}: {1}", root, win_strerror()).c_str());
     }
@@ -387,7 +387,7 @@ static void visit_file(
 void walk(pn::string_view root, WalkType type, const TreeWalker& visitor) {
     static_cast<void>(type);
     WIN32_FIND_DATAA file_data;
-    handle           list{FindFirstFileA(root.copy().c_str(), &file_data)};
+    find_handle      list{FindFirstFileA(root.copy().c_str(), &file_data)};
     if (list.h == INVALID_HANDLE_VALUE) {
         throw std::runtime_error(pn::format("walk: {}: {}", root, win_strerror()).c_str());
     }
