@@ -220,7 +220,7 @@ sha1::digest tree_digest(pn::string_view path) {
         }
 
         // Can't happen during WALK_LOGICAL.
-        void symlink(pn::string_view path, const Stat&) const {
+        void symlink(pn::string_view path, const Stat& stat) const {
             static_cast<void>(path);
             static_cast<void>(stat);
         }
