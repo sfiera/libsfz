@@ -24,7 +24,9 @@ str = type("")  # For Python2
 
 
 def main():
-    os.chdir(os.path.dirname(sys.argv[0]))
+    config_dir = os.path.dirname(sys.argv[0])
+    if config_dir != "":
+        os.chdir(config_dir)
     progname = sys.argv[0]
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-m",
@@ -88,11 +90,11 @@ def check_submodules():
 
 def check_host():
     with cfg.step("checking host os") as msg:
-        if cfg.host_os() in ["mac", "linux"]:
+        if cfg.host_os() in ["mac", "linux", "win"]:
             msg(cfg.host_os(), color="green")
         else:
             msg(cfg.host_os(), color="red")
-            print("\nSorry! libsfz requires Mac OS X or Linux")
+            print("\nSorry! libsfz requires Mac OS X, Linux, or Windows")
             sys.exit(1)
 
 
@@ -105,6 +107,7 @@ def check_target(args):
             ("linux", "linux"): check_linux_native,
             ("linux", "mac"): check_mac_on_linux,
             ("linux", "win"): check_win_on_linux,
+            ("win", "win"): check_win,
         }.get((cfg.host_os(), args.target_os))
         if checker is None:
             msg(args.target_os, color="red")
@@ -225,6 +228,10 @@ def check_win_on_linux(args):
             print("\nYou can install them with:\n")
         print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
         sys.exit(1)
+
+
+def check_win(args):
+    pass
 
 
 if __name__ == "__main__":
