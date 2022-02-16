@@ -18,13 +18,15 @@ config("libsfz_private") {
       "src/posix",
     ]
   }
-  cflags = [
-    "-Wall",
-    "-Wextra",
-    "-Wsign-compare",
-    "-Wnarrowing",
-    "-Werror",
-  ]
+  if (current_toolchain != "//build/lib/win:msvc") {
+    cflags = [
+      "-Wall",
+      "-Wextra",
+      "-Wsign-compare",
+      "-Wnarrowing",
+      "-Werror",
+    ]
+  }
 }
 
 config("libsfz_public") {
