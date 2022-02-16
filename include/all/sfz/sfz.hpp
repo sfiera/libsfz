@@ -14,7 +14,6 @@
 #include <sfz/optional.hpp>
 #include <sfz/os.hpp>
 #include <sfz/range.hpp>
-#include <sfz/string-map.hpp>
 #include <sfz/string-utils.hpp>
 
 #endif  // SFZ_SFZ_HPP_

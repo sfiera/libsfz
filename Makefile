@@ -13,7 +13,6 @@ test: all
 	out/cur/encoding-test
 	out/cur/optional-test
 	out/cur/os-test
-	out/cur/string-map-test
 	out/cur/string-utils-test
 
 test-wine: all
@@ -22,7 +21,6 @@ test-wine: all
 	wine out/cur/encoding-test.exe
 	wine out/cur/optional-test.exe
 	wine out/cur/os-test.exe
-	wine out/cur/string-map-test.exe
 	wine out/cur/string-utils-test.exe
 
 clean:
