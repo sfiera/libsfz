@@ -48,7 +48,7 @@ class ArgsTest : public Test {
   public:
     template <typename... arguments>
     void pass(const args::callbacks& callbacks, const arguments&... args) {
-        char* const argv[] = {strdup(args)...};
+        char* const argv[] = {strdup(args)..., 0};
         int         argc   = sizeof...(args);
         pn::string  error;
         try {
