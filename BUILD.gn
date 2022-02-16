@@ -68,17 +68,13 @@ static_library("libsfz") {
       "src/posix/sfz/os.cpp",
     ]
   }
-  public_deps = [
-    "//ext/procyon:procyon-cpp",
-  ]
+  public_deps = [ "//ext/procyon:procyon-cpp" ]
   configs += [ ":libsfz_private" ]
   public_configs = [ ":libsfz_public" ]
 }
 
 executable("args-test") {
-  sources = [
-    "src/all/sfz/args.test.cpp",
-  ]
+  sources = [ "src/all/sfz/args.test.cpp" ]
   if (target_os == "win") {
     output_extension = "exe"
   }
@@ -89,9 +85,7 @@ executable("args-test") {
 }
 
 executable("digest-test") {
-  sources = [
-    "src/all/sfz/digest.test.cpp",
-  ]
+  sources = [ "src/all/sfz/digest.test.cpp" ]
   if (target_os == "win") {
     output_extension = "exe"
   }
@@ -102,9 +96,7 @@ executable("digest-test") {
 }
 
 executable("encoding-test") {
-  sources = [
-    "src/all/sfz/encoding.test.cpp",
-  ]
+  sources = [ "src/all/sfz/encoding.test.cpp" ]
   if (target_os == "win") {
     output_extension = "exe"
   }
@@ -115,9 +107,7 @@ executable("encoding-test") {
 }
 
 executable("format-test") {
-  sources = [
-    "src/all/sfz/format.test.cpp",
-  ]
+  sources = [ "src/all/sfz/format.test.cpp" ]
   if (target_os == "win") {
     output_extension = "exe"
   }
@@ -128,9 +118,7 @@ executable("format-test") {
 }
 
 executable("optional-test") {
-  sources = [
-    "src/all/sfz/optional.test.cpp",
-  ]
+  sources = [ "src/all/sfz/optional.test.cpp" ]
   if (target_os == "win") {
     output_extension = "exe"
   }
@@ -141,22 +129,7 @@ executable("optional-test") {
 }
 
 executable("os-test") {
-  sources = [
-    "src/all/sfz/os.test.cpp",
-  ]
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
-  deps = [
-    ":libsfz",
-    "//ext/gmock:gmock_main",
-  ]
-}
-
-executable("string-map-test") {
-  sources = [
-    "src/all/sfz/string-map.test.cpp",
-  ]
+  sources = [ "src/all/sfz/os.test.cpp" ]
   if (target_os == "win") {
     output_extension = "exe"
   }
@@ -167,9 +140,7 @@ executable("string-map-test") {
 }
 
 executable("string-utils-test") {
-  sources = [
-    "src/all/sfz/string-utils.test.cpp",
-  ]
+  sources = [ "src/all/sfz/string-utils.test.cpp" ]
   if (target_os == "win") {
     output_extension = "exe"
   }
