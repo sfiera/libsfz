@@ -245,7 +245,13 @@ MATCHER(IsLinkStat, "") {
     return (arg.st_mode & S_IFMT) == S_IFLNK;
 #endif
 }
-MATCHER(IsFifoStat, "") { return (arg.st_mode & S_IFMT) == S_IFIFO; }
+MATCHER(IsFifoStat, "") {
+#ifdef _WIN32
+    return false;
+#else
+    return (arg.st_mode & S_IFMT) == S_IFIFO;
+#endif
+}
 
 namespace {
 
