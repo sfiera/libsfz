@@ -46,29 +46,24 @@ static bool is_sep(const pn::rune& r) {
 }
 
 bool exists(pn::string_view path) {
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    return GetFileAttributesW(path.copy().cpp_wstr().c_str()) != INVALID_FILE_ATTRIBUTES;
+    return GetFileAttributesW(path.cpp_wstr().c_str()) != INVALID_FILE_ATTRIBUTES;
 }
 
 bool isdir(pn::string_view path) {
     DWORD attrs;
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    return ((attrs = GetFileAttributesW(path.copy().cpp_wstr().c_str())) !=
-            INVALID_FILE_ATTRIBUTES) &&
+    return ((attrs = GetFileAttributesW(path.cpp_wstr().c_str())) != INVALID_FILE_ATTRIBUTES) &&
            (attrs & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 bool isfile(pn::string_view path) {
     DWORD attrs;
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    return ((attrs = GetFileAttributesW(path.copy().cpp_wstr().c_str())) != INVALID_FILE_ATTRIBUTES) &&
+    return ((attrs = GetFileAttributesW(path.cpp_wstr().c_str())) != INVALID_FILE_ATTRIBUTES) &&
            !(attrs & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT));
 }
 
 bool islink(pn::string_view path) {
     WIN32_FIND_DATAW file_data;
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    return (find_handle{FindFirstFileW(path.copy().cpp_wstr().c_str(), &file_data)}.h !=
+    return (find_handle{FindFirstFileW(path.cpp_wstr().c_str(), &file_data)}.h !=
             INVALID_HANDLE_VALUE) &&
            (file_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) &&
            (file_data.dwReserved0 == IO_REPARSE_TAG_SYMLINK);
@@ -202,8 +197,7 @@ pn::string joinv(pn::string_view root, std::initializer_list<pn::string_view> se
 }  // namespace path
 
 void chdir(pn::string_view path) {
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    if (!SetCurrentDirectoryW(path.copy().cpp_wstr().c_str())) {
+    if (!SetCurrentDirectoryW(path.cpp_wstr().c_str())) {
         throw std::runtime_error(pn::format("chdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
@@ -216,8 +210,7 @@ pn::string getcwd() {
 
 void symlink(pn::string_view content, pn::string_view container) {
     int flags = path::isdir(content) ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0x0;
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    if (!CreateSymbolicLinkW(container.copy().cpp_wstr().c_str(), content.copy().cpp_wstr().c_str(), flags)) {
+    if (!CreateSymbolicLinkW(container.cpp_wstr().c_str(), content.cpp_wstr().c_str(), flags)) {
         throw std::runtime_error(
                 pn::format("symlink: {0}: {1}", container, posix_strerror()).c_str());
     }
@@ -225,8 +218,7 @@ void symlink(pn::string_view content, pn::string_view container) {
 
 void mkdir(pn::string_view path, mkdir_mode_t mode) {
     static_cast<void>(mode);
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    if (!CreateDirectoryW(path.copy().cpp_wstr().c_str(), nullptr)) {
+    if (!CreateDirectoryW(path.cpp_wstr().c_str(), nullptr)) {
         throw std::runtime_error(pn::format("mkdir: {0}: {1}", path, posix_strerror()).c_str());
     }
 }
@@ -244,15 +236,13 @@ void makedirs(pn::string_view path, mkdir_mode_t mode) {
 }
 
 void unlink(pn::string_view path) {
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    if (!DeleteFileW(path.copy().cpp_wstr().c_str())) {
+    if (!DeleteFileW(path.cpp_wstr().c_str())) {
         throw std::runtime_error(pn::format("unlink: {0}: {1}", path, win_strerror()).c_str());
     }
 }
 
 void rmdir(pn::string_view path) {
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    if (!RemoveDirectoryW(path.copy().cpp_wstr().c_str())) {
+    if (!RemoveDirectoryW(path.cpp_wstr().c_str())) {
         throw std::runtime_error(pn::format("rmdir: {0}: {1}", path, win_strerror()).c_str());
     }
 }
@@ -289,7 +279,8 @@ TemporaryDirectory::TemporaryDirectory(pn::string_view prefix) {
     }
     wchar_t temp_file_buf[MAX_PATH + 1];
     if (GetTempFileNameW(
-                temp_path_buf, pn::format("{}XXXXXX", prefix).cpp_wstr().c_str(), 0, temp_file_buf) == 0) {
+                temp_path_buf, pn::format("{}XXXXXX", prefix).cpp_wstr().c_str(), 0,
+                temp_file_buf) == 0) {
         throw std::runtime_error(pn::format("GetTempFileName: {0}", win_strerror()).c_str());
     }
     pn::string temp_file(temp_file_buf);
@@ -309,10 +300,12 @@ static void scandir_end(void* ptr) {
     }
 }
 
-scandir_container::iterator::iterator() : _state{reinterpret_cast<void*>(INVALID_HANDLE_VALUE), scandir_end} {}
+scandir_container::iterator::iterator()
+        : _state{reinterpret_cast<void*>(INVALID_HANDLE_VALUE), scandir_end} {}
 
 scandir_container::iterator::iterator(pn::string dir)
-        : _dir{std::move(dir)}, _state{reinterpret_cast<void*>(INVALID_HANDLE_VALUE), scandir_end} {
+        : _dir{std::move(dir)},
+          _state{reinterpret_cast<void*>(INVALID_HANDLE_VALUE), scandir_end} {
     WIN32_FIND_DATAW file_data;
     _state.reset(FindFirstFileW(pn::format("{}\\*", _dir).cpp_wstr().c_str(), &file_data));
     if (_state.get() == INVALID_HANDLE_VALUE) {
@@ -360,7 +353,7 @@ static void visit_file(
 
 static void walk_dir(pn::string_view root, const TreeWalker& visitor) {
     WIN32_FIND_DATAW file_data;
-    find_handle      list{FindFirstFileW(pn::format("{}\\*", root).cpp_wstr().c_str(), &file_data)};
+    find_handle list{FindFirstFileW(pn::format("{}\\*", root).cpp_wstr().c_str(), &file_data)};
     if (!list.h) {
         throw std::runtime_error(pn::format("walk: {0}: {1}", root, win_strerror()).c_str());
     }
@@ -379,8 +372,7 @@ static void walk_dir(pn::string_view root, const TreeWalker& visitor) {
 static void visit_file(
         pn::string_view path, const WIN32_FIND_DATAW* file_data, const TreeWalker& visitor) {
     Stat st;
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    if (_wstat(path.copy().cpp_wstr().c_str(), &st) < 0) {
+    if (_wstat(path.cpp_wstr().c_str(), &st) < 0) {
         throw std::runtime_error(pn::format("stat: {0}: {1}", path, posix_strerror()).c_str());
     }
 
@@ -400,8 +392,7 @@ static void visit_file(
 void walk(pn::string_view root, WalkType type, const TreeWalker& visitor) {
     static_cast<void>(type);
     WIN32_FIND_DATAW file_data;
-    // TODO(sfiera): add cpp_wstr() et. al. to other string classes
-    find_handle      list{FindFirstFileW(root.copy().cpp_wstr().c_str(), &file_data)};
+    find_handle      list{FindFirstFileW(root.cpp_wstr().c_str(), &file_data)};
     if (list.h == INVALID_HANDLE_VALUE) {
         throw std::runtime_error(pn::format("walk: {}: {}", root, win_strerror()).c_str());
     }

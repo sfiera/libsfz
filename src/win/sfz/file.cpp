@@ -27,10 +27,8 @@ static LONGLONG file_size(pn::string_view path, HANDLE h) {
 
 mapped_file::mapped_file(pn::string_view path)
         : _path{path.copy()},
-          // TODO(sfiera): add cpp_wstr() et. al. to other string classes
           _file{_path, CreateFileW(
-                               _path.copy().cpp_wstr().c_str(), GENERIC_READ, FILE_SHARE_READ,
-                               nullptr,
+                               _path.cpp_wstr().c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
                                OPEN_EXISTING, 0, nullptr)},
           _size{file_size(_path, _file.h)},
           _file_mapping{_path, CreateFileMappingW(_file.h, NULL, PAGE_READONLY, 0, _size, NULL)},
@@ -39,8 +37,8 @@ mapped_file::mapped_file(pn::string_view path)
 mapped_file::~mapped_file() {}
 
 pn::data_view mapped_file::data() const {
-    return pn::data_view{reinterpret_cast<const uint8_t*>(_view_of_file.ptr),
-                         static_cast<int>(_size)};
+    return pn::data_view{
+            reinterpret_cast<const uint8_t*>(_view_of_file.ptr), static_cast<int>(_size)};
 }
 
 mapped_file::handle::handle(pn::string_view path, HANDLE handle) : h{handle} {
