@@ -27,6 +27,7 @@ static LONGLONG file_size(pn::string_view path, HANDLE h) {
 
 mapped_file::mapped_file(pn::string_view path)
         : _path{path.copy()},
+          // TODO(sfiera): add cpp_wstr() et. al. to other string classes
           _file{_path, CreateFileW(
                                _path.copy().cpp_wstr().c_str(), GENERIC_READ, FILE_SHARE_READ,
                                nullptr,
