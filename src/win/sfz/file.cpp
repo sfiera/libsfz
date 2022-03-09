@@ -27,11 +27,12 @@ static LONGLONG file_size(pn::string_view path, HANDLE h) {
 
 mapped_file::mapped_file(pn::string_view path)
         : _path{path.copy()},
-          _file{_path, CreateFileA(
-                               _path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+          _file{_path, CreateFileW(
+                               _path.copy().cpp_wstr().c_str(), GENERIC_READ, FILE_SHARE_READ,
+                               nullptr,
                                OPEN_EXISTING, 0, nullptr)},
           _size{file_size(_path, _file.h)},
-          _file_mapping{_path, CreateFileMappingA(_file.h, NULL, PAGE_READONLY, 0, _size, NULL)},
+          _file_mapping{_path, CreateFileMappingW(_file.h, NULL, PAGE_READONLY, 0, _size, NULL)},
           _view_of_file{_path, MapViewOfFile(_file_mapping.h, FILE_MAP_READ, 0, 0, _size)} {}
 
 mapped_file::~mapped_file() {}
