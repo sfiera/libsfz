@@ -12,7 +12,11 @@
 
 namespace sfz {
 
+#ifdef _WIN32
+typedef struct _stat Stat;
+#else
 typedef struct stat Stat;
+#endif
 
 namespace path {
 
