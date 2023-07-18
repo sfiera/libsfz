@@ -92,7 +92,10 @@ inline void permute(
 
 void sha1::process_message_block() {
     static const uint32_t k[] = {
-            0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6,
+            0x5a827999,
+            0x6ed9eba1,
+            0x8f1bbcdc,
+            0xca62c1d6,
     };
 
     uint32_t  w[80];
@@ -161,7 +164,7 @@ pn::string sha1::digest::hex() const {
     char  buf[41];
     char* ptr = buf;
     for (int i = 0; i < 5; ++i) {
-        sprintf(ptr, "%08x", d[i]);
+        snprintf(ptr, 9, "%08x", d[i]);
         ptr += 8;
     }
     return pn::string_view{buf, 40}.copy();
@@ -183,8 +186,9 @@ sha1::digest tree_digest(pn::string_view path) {
         // bytes of the file content.  We don't worry about the mode or owner of the file, just as
         // we wouldn't if taking the digest of a file.
         void file(pn::string_view path, const Stat&) const {
-            pn::data_view path_bytes{reinterpret_cast<const uint8_t*>(path.data() + prefix_size),
-                                     path.size() - prefix_size};
+            pn::data_view path_bytes{
+                    reinterpret_cast<const uint8_t*>(path.data() + prefix_size),
+                    path.size() - prefix_size};
             sha.write<uint64_t>(path_bytes.size());
             sha.write(path_bytes);
 
