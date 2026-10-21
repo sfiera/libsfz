@@ -19,7 +19,7 @@ namespace sfz {
 
 sha1::sha1() { reset(); }
 
-sha1::sha1(const sha1& other) { memcpy(this, &other, sizeof(sha1)); }
+sha1::sha1(const sha1& other) = default;
 
 void sha1::reset() {
     _size                = 0;
