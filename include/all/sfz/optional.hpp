@@ -6,8 +6,8 @@
 #ifndef SFZ_OPTIONAL_HPP_
 #define SFZ_OPTIONAL_HPP_
 
-#include <stdint.h>
 #include <stdlib.h>
+#include <utility>
 
 #include <stdexcept>
 #include <type_traits>
